@@ -217,6 +217,65 @@ button:focus-visible {
   font-size: 0.9rem;
 }
 
+.touch-controls {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: none;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 18px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.touch-stick,
+.touch-actions button {
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+.touch-stick {
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  background: rgba(13, 79, 56, 0.48);
+  color: #fff;
+}
+
+.touch-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.touch-actions button {
+  min-width: 92px;
+  min-height: 52px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 6px 16px 6px 16px;
+  background: rgba(13, 79, 56, 0.86);
+  color: #fff;
+  font-weight: 800;
+}
+
+.touch-left-handed {
+  flex-direction: row-reverse;
+}
+
+@media (pointer: coarse) {
+  .touch-controls {
+    display: flex;
+  }
+
+  .game-hint {
+    display: none;
+  }
+}
+
 .base-header,
 .workbench-header {
   width: min(1120px, 100%);
