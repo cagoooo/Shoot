@@ -35,3 +35,21 @@ test('試玩區可建立 Babylon 3D 畫面', async ({ page }) => {
   ).toBeVisible()
   expect(pageErrors).toEqual([])
 })
+
+test('試玩區可使用能量工具並更新能量表', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('button', { name: '開始任務' }).click()
+  await page.getByRole('button', { name: /試玩區/ }).click()
+
+  const canvas = page.getByLabel('地球守護隊 3D 任務畫面')
+  await expect(canvas).toBeVisible()
+  const box = await canvas.boundingBox()
+  if (!box) throw new Error('找不到 3D 畫面範圍')
+
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.waitForTimeout(120)
+  await page.mouse.up()
+
+  await expect(page.getByLabel('能量 92%')).toBeVisible()
+})

@@ -7,6 +7,8 @@ import {
   type ComfortSettings,
 } from '../../domain/settings/accessibility'
 import { SettingsScreen } from './SettingsScreen'
+import { createWeaponState } from '../../domain/combat/weaponState'
+import { GameHud } from '../components/GameHud'
 
 interface RangeScreenProps {
   onBack: () => void
@@ -18,6 +20,7 @@ export function RangeScreen({ onBack }: RangeScreenProps) {
     DEFAULT_COMFORT_SETTINGS,
   )
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [weaponState, setWeaponState] = useState(() => createWeaponState())
 
   return (
     <main className="range-screen">
@@ -41,7 +44,9 @@ export function RangeScreen({ onBack }: RangeScreenProps) {
         <GameCanvas
           inputManager={inputManager}
           comfortSettings={comfortSettings}
+          onWeaponStateChange={setWeaponState}
         />
+        <GameHud toolName="小光能量槍" weaponState={weaponState} />
         <TouchControls
           onInputChange={(state) => inputManager.updateSource('touch', state)}
         />

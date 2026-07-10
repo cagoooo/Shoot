@@ -13,11 +13,20 @@ import {
 } from '../../domain/settings/accessibility'
 import { InputManager } from '../../input/InputManager'
 import { stepPlayerCamera } from '../player/PlayerController'
+import {
+  coolWeapon,
+  createWeaponState,
+  fireWeapon,
+  type WeaponState,
+} from '../../domain/combat/weaponState'
+import { selectAimTarget } from '../combat/AimAssist'
+import { RaycastTool } from '../combat/RaycastTool'
 
 export function createGameScene(
   engine: AbstractEngine,
   inputManager = new InputManager(),
   comfortInput: Partial<ComfortSettings> = DEFAULT_COMFORT_SETTINGS,
+  onWeaponStateChange?: (state: WeaponState) => void,
 ): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.85, 0.93, 0.9, 1)
@@ -75,6 +84,78 @@ export function createGameScene(
   coreMaterial.diffuseColor = new Color3(0.95, 0.68, 0.16)
   coreMaterial.emissiveColor = new Color3(0.25, 0.12, 0.01)
   energyCore.material = coreMaterial
+  energyCore.metadata = { targetKind: 'protected' }
+
+  const targetPositions = [
+    new Vector3(-3, 1.5, 4),
+    new Vector3(0, 1.3, 6),
+    new Vector3(3, 1.7, 5),
+  ]
+  for (const [index, position] of targetPositions.entries()) {
+    const target = MeshBuilder.CreateSphere(
+      `trouble-core-${index + 1}`,
+      { diameter: 0.9, segments: 12 },
+      scene,
+    )
+    target.position = position
+    target.metadata = { targetKind: 'trouble-core' }
+    const targetMaterial = new StandardMaterial(
+      `trouble-core-material-${index + 1}`,
+      scene,
+    )
+    targetMaterial.diffuseColor = new Color3(0.64, 0.28, 0.75)
+    targetMaterial.emissiveColor = new Color3(0.15, 0.03, 0.2)
+    target.material = targetMaterial
+  }
+
+  const raycastTool = new RaycastTool(scene)
+  let weaponState = createWeaponState()
+  let previousPrimaryUse = false
+  let hudUpdateWait = 0
+  onWeaponStateChange?.({ ...weaponState })
+
+  scene.onBeforeRenderObservable.add(() => {
+    const input = inputManager.snapshot()
+    const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
+    const cooled = coolWeapon(weaponState, 14 * deltaSeconds)
+    if (cooled.heat !== weaponState.heat) {
+      weaponState = cooled
+      hudUpdateWait += deltaSeconds
+      if (hudUpdateWait >= 0.1 || weaponState.heat === 0) {
+        onWeaponStateChange?.({ ...weaponState })
+        hudUpdateWait = 0
+      }
+    }
+
+    if (input.primaryUse && !previousPrimaryUse) {
+      const fired = fireWeapon(weaponState, { energyCost: 8, heat: 22 })
+      if (fired !== weaponState) {
+        weaponState = fired
+        const forward = camera.getForwardRay().direction
+        const candidates = scene.meshes
+          .filter((mesh) => mesh.metadata?.targetKind)
+          .map((mesh) => ({
+            id: mesh.name,
+            kind: mesh.metadata.targetKind as 'trouble-core' | 'protected',
+            direction: mesh.getAbsolutePosition().subtract(camera.globalPosition),
+            distance: Vector3.Distance(
+              mesh.getAbsolutePosition(),
+              camera.globalPosition,
+            ),
+          }))
+        const assisted = selectAimTarget(forward, candidates, 8)
+        const direction = assisted
+          ? scene.getMeshByName(assisted.id)!
+              .getAbsolutePosition()
+              .subtract(camera.globalPosition)
+          : forward
+        const hit = raycastTool.fire(camera.globalPosition, direction)
+        if (hit) hit.mesh.scaling.scaleInPlace(0.92)
+        onWeaponStateChange?.({ ...weaponState })
+      }
+    }
+    previousPrimaryUse = input.primaryUse
+  })
 
   return scene
 }

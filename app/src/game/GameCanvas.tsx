@@ -5,6 +5,7 @@ import { createGameScene } from './engine/createScene'
 import type { ComfortSettings } from '../domain/settings/accessibility'
 import { InputManager } from '../input/InputManager'
 import { bindKeyboardMouseInput } from '../input/bindKeyboardMouseInput'
+import type { WeaponState } from '../domain/combat/weaponState'
 
 export interface RuntimeEngine {
   runRenderLoop(callback: () => void): void
@@ -23,17 +24,29 @@ type SceneFactory = (
   engine: RuntimeEngine,
   inputManager?: InputManager,
   comfortSettings?: Partial<ComfortSettings>,
+  onWeaponStateChange?: (state: WeaponState) => void,
 ) => RuntimeScene
 
 const defaultEngineFactory: EngineFactory = createGameEngine
-const defaultSceneFactory: SceneFactory = (engine, inputManager, comfortSettings) =>
-  createGameScene(engine as AbstractEngine, inputManager, comfortSettings)
+const defaultSceneFactory: SceneFactory = (
+  engine,
+  inputManager,
+  comfortSettings,
+  onWeaponStateChange,
+) =>
+  createGameScene(
+    engine as AbstractEngine,
+    inputManager,
+    comfortSettings,
+    onWeaponStateChange,
+  )
 
 interface GameCanvasProps {
   engineFactory?: EngineFactory
   sceneFactory?: SceneFactory
   inputManager?: InputManager
   comfortSettings?: Partial<ComfortSettings>
+  onWeaponStateChange?: (state: WeaponState) => void
 }
 
 export function GameCanvas({
@@ -41,6 +54,7 @@ export function GameCanvas({
   sceneFactory = defaultSceneFactory,
   inputManager,
   comfortSettings,
+  onWeaponStateChange,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -64,7 +78,12 @@ export function GameCanvas({
       }
 
       engine = createdEngine
-      scene = sceneFactory(createdEngine, inputManager, comfortSettings)
+      scene = sceneFactory(
+        createdEngine,
+        inputManager,
+        comfortSettings,
+        onWeaponStateChange,
+      )
       engine.runRenderLoop(() => scene?.render())
       window.addEventListener('resize', handleResize)
     })
@@ -77,7 +96,13 @@ export function GameCanvas({
       scene?.dispose()
       engine?.dispose()
     }
-  }, [comfortSettings, engineFactory, inputManager, sceneFactory])
+  }, [
+    comfortSettings,
+    engineFactory,
+    inputManager,
+    onWeaponStateChange,
+    sceneFactory,
+  ])
 
   return (
     <canvas
