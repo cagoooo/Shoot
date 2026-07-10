@@ -1,0 +1,185 @@
+import { UniversalCamera } from '@babylonjs/core/Cameras/universalCamera'
+import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
+import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight'
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import { Color3, Color4 } from '@babylonjs/core/Maths/math.color'
+import { Vector3 } from '@babylonjs/core/Maths/math.vector'
+import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
+import { Scene } from '@babylonjs/core/scene'
+import type { InputManager } from '../../../input/InputManager'
+import { integrateMovement } from '../../player/PlayerController'
+import {
+  recyclingStormZones,
+  zoneConnections,
+  zonePositions,
+  type RecyclingStormZone,
+  type RouteKind,
+} from './zones'
+
+export interface RecyclingStationAssetProvider {
+  load(scene: Scene): Promise<boolean>
+}
+
+const routeColors: Record<RouteKind, Color3> = {
+  'main-route': Color3.FromHexString('#ebc95d'),
+  'maintenance-route': Color3.FromHexString('#77a9d7'),
+  shared: Color3.FromHexString('#84caa4'),
+}
+
+function createRouteSegment(
+  scene: Scene,
+  from: RecyclingStormZone,
+  to: RecyclingStormZone,
+  route: RouteKind,
+) {
+  const start = zonePositions[from]
+  const end = zonePositions[to]
+  const deltaX = end.x - start.x
+  const deltaZ = end.z - start.z
+  const length = Math.hypot(deltaX, deltaZ)
+  const path = MeshBuilder.CreateBox(
+    `route-${from}-${to}`,
+    { width: 2.2, height: 0.08, depth: length },
+    scene,
+  )
+  path.position = new Vector3(
+    (start.x + end.x) / 2,
+    0.06,
+    (start.z + end.z) / 2,
+  )
+  path.rotation.y = Math.atan2(deltaX, deltaZ)
+  path.metadata = { route, from, to }
+  const material = new StandardMaterial(`route-material-${from}-${to}`, scene)
+  material.diffuseColor = routeColors[route]
+  path.material = material
+  return path
+}
+
+export function buildRecyclingStormScene(
+  engine: AbstractEngine,
+  inputManager: InputManager,
+  assetProvider?: RecyclingStationAssetProvider,
+): Scene {
+  const scene = new Scene(engine)
+  scene.clearColor = new Color4(0.78, 0.9, 0.94, 1)
+  scene.collisionsEnabled = true
+
+  const camera = new UniversalCamera(
+    'mission-player-camera',
+    new Vector3(0, 1.7, -19),
+    scene,
+  )
+  camera.setTarget(new Vector3(0, 1.4, -11))
+  camera.minZ = 0.1
+  camera.fov = (70 * Math.PI) / 180
+  camera.keysUp = []
+  camera.keysDown = []
+  camera.keysLeft = []
+  camera.keysRight = []
+  camera.checkCollisions = true
+  camera.ellipsoid = new Vector3(0.45, 0.85, 0.45)
+  scene.activeCamera = camera
+
+  const canvas = engine.getRenderingCanvas()
+  if (canvas) camera.attachControl(canvas, true)
+
+  const light = new HemisphericLight(
+    'mission-daylight',
+    new Vector3(0.3, 1, 0.15),
+    scene,
+  )
+  light.intensity = 0.95
+
+  const ground = MeshBuilder.CreateGround(
+    'recycling-station-ground',
+    { width: 34, height: 52 },
+    scene,
+  )
+  ground.checkCollisions = true
+  const groundMaterial = new StandardMaterial('mission-ground-material', scene)
+  groundMaterial.diffuseColor = Color3.FromHexString('#7eaa7c')
+  ground.material = groundMaterial
+
+  for (const zoneId of recyclingStormZones) {
+    const zone = zonePositions[zoneId]
+    const platform = MeshBuilder.CreateBox(
+      `zone-${zoneId}`,
+      { width: 5, height: 0.18, depth: 4 },
+      scene,
+    )
+    platform.position = new Vector3(zone.x, 0.1, zone.z)
+    platform.checkCollisions = true
+    platform.metadata = { zoneId, interactionPoint: true }
+    const material = new StandardMaterial(`zone-material-${zoneId}`, scene)
+    material.diffuseColor = Color3.FromHexString(zone.color)
+    platform.material = material
+
+    const beacon = MeshBuilder.CreateCylinder(
+      `beacon-${zoneId}`,
+      { height: 2.2, diameter: 0.28 },
+      scene,
+    )
+    beacon.position = new Vector3(zone.x - 1.8, 1.2, zone.z)
+    beacon.metadata = { zoneId, guideBeacon: true }
+    beacon.material = material
+  }
+
+  for (const connection of zoneConnections) {
+    createRouteSegment(scene, connection.from, connection.to, connection.route)
+  }
+
+  const protectedSeedling = MeshBuilder.CreateCylinder(
+    'protected-seedling',
+    { height: 1.4, diameterTop: 0.2, diameterBottom: 0.7 },
+    scene,
+  )
+  protectedSeedling.position = new Vector3(-7.5, 0.7, -5)
+  protectedSeedling.metadata = { targetKind: 'protected' }
+  const seedlingMaterial = new StandardMaterial('seedling-material', scene)
+  seedlingMaterial.diffuseColor = Color3.FromHexString('#2c8b57')
+  protectedSeedling.material = seedlingMaterial
+
+  for (const [index, position] of [
+    new Vector3(-4.5, 0.3, -3.5),
+    new Vector3(5, 0.3, -3),
+    new Vector3(-3, 0.3, 13),
+  ].entries()) {
+    const marker = MeshBuilder.CreateSphere(
+      `troublemaker-spawn-${index + 1}`,
+      { diameter: 0.35, segments: 8 },
+      scene,
+    )
+    marker.position = position
+    marker.metadata = { spawnKind: 'troublemaker' }
+    marker.isVisible = false
+  }
+
+  const evacuation = MeshBuilder.CreateCylinder(
+    'rooftop-evacuation-point',
+    { height: 0.12, diameter: 3.2 },
+    scene,
+  )
+  evacuation.position = new Vector3(0, 0.18, 21)
+  evacuation.metadata = { interaction: 'evacuate', protected: true }
+  const evacuationMaterial = new StandardMaterial('evacuation-material', scene)
+  evacuationMaterial.diffuseColor = Color3.FromHexString('#50c7d4')
+  evacuationMaterial.emissiveColor = Color3.FromHexString('#0d5660')
+  evacuation.material = evacuationMaterial
+
+  scene.onBeforeRenderObservable.add(() => {
+    const input = inputManager.snapshot()
+    const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
+    const next = integrateMovement(
+      { x: camera.position.x, z: camera.position.z },
+      input,
+      deltaSeconds,
+      4,
+      camera.rotation.y,
+    )
+    camera.position.x = Math.max(-16, Math.min(16, next.x))
+    camera.position.z = Math.max(-21, Math.min(24, next.z))
+  })
+
+  if (assetProvider) void assetProvider.load(scene)
+  return scene
+}

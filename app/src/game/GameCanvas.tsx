@@ -20,7 +20,7 @@ export interface RuntimeScene {
 }
 
 type EngineFactory = (canvas: HTMLCanvasElement) => Promise<RuntimeEngine>
-type SceneFactory = (
+export type SceneFactory = (
   engine: RuntimeEngine,
   inputManager?: InputManager,
   comfortSettings?: Partial<ComfortSettings>,

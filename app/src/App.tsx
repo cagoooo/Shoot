@@ -12,6 +12,11 @@ const RangeScreen = lazy(async () => {
   return { default: module.RangeScreen }
 })
 
+const MissionScreen = lazy(async () => {
+  const module = await import('./ui/screens/MissionScreen')
+  return { default: module.MissionScreen }
+})
+
 function App() {
   const { screen, mode, setMode, setScreen } = useGameStore()
   const [parts, setParts] = useState<PartContent[]>([])
@@ -61,6 +66,14 @@ function App() {
     return (
       <Suspense fallback={<main className="loading-screen">正在準備 3D 試玩區…</main>}>
         <RangeScreen onBack={() => setScreen('base')} />
+      </Suspense>
+    )
+  }
+
+  if (screen === 'mission') {
+    return (
+      <Suspense fallback={<main className="loading-screen">正在打開垃圾風暴任務…</main>}>
+        <MissionScreen onBack={() => setScreen('base')} />
       </Suspense>
     )
   }
