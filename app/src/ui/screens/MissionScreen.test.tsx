@@ -9,9 +9,12 @@ const checkpoint = {
 
 describe('MissionScreen', () => {
   it('可從任務說明完成分類、撤離並到達行動回顧', async () => {
+    const onMissionComplete = vi.fn()
+    const onBack = vi.fn()
     render(
       <MissionScreen
-        onBack={vi.fn()}
+        onBack={onBack}
+        onMissionComplete={onMissionComplete}
         checkpoint={checkpoint}
         mapSlot={<div>3D 地圖替身</div>}
       />,
@@ -47,6 +50,15 @@ describe('MissionScreen', () => {
       screen.getByRole('heading', { name: '垃圾風暴救援完成' }),
     ).toBeInTheDocument()
     expect(screen.getByText(/分區供電兼顧速度與節能/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '查看完整永續行動紀錄' }))
+    expect(onMissionComplete).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'energy-used', amount: 72 }),
+        expect.objectContaining({ type: 'machine-repaired', id: 'storm-machine' }),
+        expect.objectContaining({ type: 'protected-target' }),
+      ]),
+    )
+    expect(onBack).not.toHaveBeenCalled()
     expect(checkpoint.save).toHaveBeenCalled()
   })
 

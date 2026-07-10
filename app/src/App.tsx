@@ -5,6 +5,8 @@ import type { PartContent } from './content/schema'
 import { BaseScreen } from './ui/screens/BaseScreen'
 import { StartScreen } from './ui/screens/StartScreen'
 import { WorkbenchScreen } from './ui/screens/WorkbenchScreen'
+import { ReportScreen } from './ui/screens/ReportScreen'
+import { reduceLearningEvents } from './learning/reducer'
 import './App.css'
 
 const RangeScreen = lazy(async () => {
@@ -18,7 +20,14 @@ const MissionScreen = lazy(async () => {
 })
 
 function App() {
-  const { screen, mode, setMode, setScreen } = useGameStore()
+  const {
+    screen,
+    mode,
+    learningEvents,
+    setMode,
+    setScreen,
+    recordLearningEvents,
+  } = useGameStore()
   const [parts, setParts] = useState<PartContent[]>([])
   const [contentLoadFailed, setContentLoadFailed] = useState(false)
 
@@ -76,8 +85,24 @@ function App() {
         <MissionScreen
           learningMode={mode}
           onBack={() => setScreen('base')}
+          onMissionComplete={(events) => {
+            recordLearningEvents(events)
+            setScreen('report')
+          }}
         />
       </Suspense>
+    )
+  }
+
+  if (screen === 'report') {
+    return (
+      <ReportScreen
+        report={reduceLearningEvents(learningEvents)}
+        onBack={() => setScreen('base')}
+        onReflection={(choice) =>
+          recordLearningEvents([{ type: 'reflection-chosen', choice }])
+        }
+      />
     )
   }
 

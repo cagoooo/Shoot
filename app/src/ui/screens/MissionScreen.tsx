@@ -30,6 +30,7 @@ import {
 } from '../../domain/boss/stormMachine'
 import { SortingPanel } from '../components/SortingPanel'
 import { EnergyChoicePanel } from '../components/EnergyChoicePanel'
+import type { LearningEvent } from '../../learning/events'
 
 interface MissionCheckpoint {
   load(): Promise<(MissionState & { safeSpawnId: string }) | null>
@@ -41,6 +42,7 @@ interface MissionScreenProps {
   checkpoint?: MissionCheckpoint
   mapSlot?: ReactNode
   learningMode?: LearningMode
+  onMissionComplete?: (events: LearningEvent[]) => void
 }
 
 const phaseNames: Record<MissionState['phase'], string> = {
@@ -96,6 +98,7 @@ export function MissionScreen({
   checkpoint: checkpointInput,
   mapSlot,
   learningMode = 'middle-assist',
+  onMissionComplete,
 }: MissionScreenProps) {
   const defaultCheckpoint = useMemo(() => new CheckpointService(), [])
   const checkpoint = checkpointInput ?? defaultCheckpoint
@@ -170,6 +173,28 @@ export function MissionScreen({
     const result = evaluateEvacuationBag(bag)
     setHint(result.reason)
     if (result.ready) advance('team-evacuated', 'finish-evacuation')
+  }
+
+  const finishLearningReport = () => {
+    if (!boss.result || !boss.energyMode) return
+    const events: LearningEvent[] = [
+      { type: 'part-selected', partId: 'light-rifle' },
+      { type: 'energy-used', amount: boss.result.energyUsed },
+      { type: 'material-recycled', category: 'plastic', amount: 1 },
+      { type: 'material-recycled', category: 'paper', amount: 1 },
+      { type: 'material-recycled', category: 'metal', amount: 1 },
+      { type: 'material-recycled', category: 'general', amount: 1 },
+      { type: 'machine-repaired', id: 'sorting-machine' },
+      { type: 'machine-repaired', id: 'storm-machine' },
+      { type: 'protected-target', id: 'green-energy-panel' },
+      { type: 'enemy-cleansed', amount: 3 },
+      { type: 'energy-mode', mode: boss.energyMode },
+      {
+        type: 'route-chosen',
+        route: route === '維修小路' ? 'maintenance-route' : 'main-route',
+      },
+    ]
+    onMissionComplete?.(events)
   }
 
   if (loading) {
@@ -372,8 +397,12 @@ export function MissionScreen({
                 <span>SDG 12 責任消費與生產</span>
                 <span>SDG 13 氣候行動</span>
               </div>
-              <button className="primary-button" type="button" onClick={onBack}>
-                帶著行動紀錄回基地
+              <button
+                className="primary-button"
+                type="button"
+                onClick={finishLearningReport}
+              >
+                查看完整永續行動紀錄
               </button>
             </>
           )}

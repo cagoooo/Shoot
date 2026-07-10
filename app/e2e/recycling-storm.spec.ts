@@ -38,6 +38,18 @@ async function finishRecyclingStorm(
     page.getByRole('heading', { name: '垃圾風暴救援完成' }),
   ).toBeVisible()
   await expect(page.getByText(`你走了${route}`)).toBeVisible()
+  await page
+    .getByRole('button', { name: '查看完整永續行動紀錄' })
+    .click()
+  await expect(
+    page.getByRole('heading', { name: '我的永續行動紀錄' }),
+  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: '我做了什麼' })).toBeVisible()
+  await expect(page.getByText('省電高手')).toBeVisible()
+  await page
+    .getByRole('button', { name: '下次使用更省電的方案' })
+    .click()
+  await expect(page.getByText('改良小博士')).toBeVisible()
 }
 
 test('垃圾風暴主路可從基地完成分類並撤離', async ({ page }) => {
