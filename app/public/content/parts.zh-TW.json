@@ -1,0 +1,128 @@
+[
+  {
+    "id": "solar-box",
+    "name": "陽光能源盒",
+    "shortDescription": "晴天補充較快，暴雨時速度較慢",
+    "slot": "energy",
+    "stats": { "power": 2, "saving": 4, "range": 3, "aim": 3, "cooling": 3, "lightness": 3, "earthCare": 5 },
+    "sdgs": [7, 12],
+    "why": "太陽能會受到日照強弱影響"
+  },
+  {
+    "id": "wind-box",
+    "name": "風力能源盒",
+    "shortDescription": "風大時補充較快，強風時會暫停",
+    "slot": "energy",
+    "stats": { "power": 3, "saving": 4, "range": 3, "aim": 3, "cooling": 3, "lightness": 2, "earthCare": 5 },
+    "sdgs": [7, 13],
+    "why": "風力會隨天氣改變，太強時也要注意安全"
+  },
+  {
+    "id": "recycled-battery",
+    "name": "回收電池盒",
+    "shortDescription": "供電穩定，但可以使用的時間較短",
+    "slot": "energy",
+    "stats": { "power": 3, "saving": 3, "range": 3, "aim": 3, "cooling": 3, "lightness": 4, "earthCare": 5 },
+    "sdgs": [7, 12],
+    "why": "整理舊電池能延長材料的使用時間"
+  },
+  {
+    "id": "steady-emitter",
+    "name": "平衡發射頭",
+    "shortDescription": "力量和速度平均，容易控制",
+    "slot": "emitter",
+    "stats": { "power": 3, "saving": 3, "range": 3, "aim": 4, "cooling": 3, "lightness": 4, "earthCare": 3 },
+    "sdgs": [9],
+    "why": "平均的設計能在多種任務中保持穩定"
+  },
+  {
+    "id": "power-emitter",
+    "name": "強力發射頭",
+    "shortDescription": "一次力量很大，但耗電也較多",
+    "slot": "emitter",
+    "stats": { "power": 5, "saving": 1, "range": 3, "aim": 2, "cooling": 1, "lightness": 2, "earthCare": 2 },
+    "sdgs": [7, 9],
+    "why": "提高一次輸出通常會增加耗電和熱量"
+  },
+  {
+    "id": "prism-emitter",
+    "name": "彩光發射頭",
+    "shortDescription": "能量分成多道光，近距離較有效",
+    "slot": "emitter",
+    "stats": { "power": 4, "saving": 2, "range": 1, "aim": 3, "cooling": 2, "lightness": 3, "earthCare": 3 },
+    "sdgs": [9, 12],
+    "why": "光束分散後能照顧較大範圍，但距離會縮短"
+  },
+  {
+    "id": "balanced-aim-tube",
+    "name": "平衡瞄準管",
+    "shortDescription": "距離和準確度都很平均",
+    "slot": "aimTube",
+    "stats": { "power": 3, "saving": 3, "range": 3, "aim": 4, "cooling": 3, "lightness": 4, "earthCare": 3 },
+    "sdgs": [9],
+    "why": "適中的長度能兼顧距離和移動方便"
+  },
+  {
+    "id": "long-aim-tube",
+    "name": "遠距瞄準管",
+    "shortDescription": "看得更遠也更準，但重量較高",
+    "slot": "aimTube",
+    "stats": { "power": 3, "saving": 3, "range": 5, "aim": 5, "cooling": 3, "lightness": 1, "earthCare": 3 },
+    "sdgs": [9],
+    "why": "較長的工具容易對準遠方，也會增加重量"
+  },
+  {
+    "id": "stable-grip",
+    "name": "穩定握把",
+    "shortDescription": "比較好瞄，但拿著移動會稍慢",
+    "slot": "grip",
+    "stats": { "power": 3, "saving": 3, "range": 3, "aim": 5, "cooling": 3, "lightness": 2, "earthCare": 4 },
+    "sdgs": [9, 12],
+    "why": "增加支撐能讓工具更穩，也會增加一些重量"
+  },
+  {
+    "id": "light-grip",
+    "name": "輕巧握把",
+    "shortDescription": "移動比較方便，但瞄準會稍微晃動",
+    "slot": "grip",
+    "stats": { "power": 2, "saving": 3, "range": 3, "aim": 2, "cooling": 3, "lightness": 5, "earthCare": 4 },
+    "sdgs": [9, 12],
+    "why": "減少材料能降低重量，但支撐也會減少"
+  },
+  {
+    "id": "fast-cooler",
+    "name": "快速降溫盒",
+    "shortDescription": "降溫很快，但本身較重",
+    "slot": "cooler",
+    "stats": { "power": 3, "saving": 2, "range": 3, "aim": 3, "cooling": 5, "lightness": 1, "earthCare": 3 },
+    "sdgs": [7, 9],
+    "why": "較大的散熱面積能加快降溫，也會增加重量"
+  },
+  {
+    "id": "energy-recovery-cooler",
+    "name": "能量回收盒",
+    "shortDescription": "降溫較慢，可以收回部分能量",
+    "slot": "cooler",
+    "stats": { "power": 2, "saving": 5, "range": 3, "aim": 3, "cooling": 3, "lightness": 3, "earthCare": 5 },
+    "sdgs": [7, 12],
+    "why": "重新利用部分能量能減少浪費"
+  },
+  {
+    "id": "aim-helper",
+    "name": "瞄準小幫手",
+    "shortDescription": "協助找到搗蛋核心，不會指向生物",
+    "slot": "helper",
+    "stats": { "power": 3, "saving": 3, "range": 4, "aim": 5, "cooling": 3, "lightness": 3, "earthCare": 4 },
+    "sdgs": [4, 15],
+    "why": "感測器可以協助判斷目標，也要避開需保護的生物"
+  },
+  {
+    "id": "eco-helper",
+    "name": "生態小幫手",
+    "shortDescription": "提醒附近需要保護的植物和動物",
+    "slot": "helper",
+    "stats": { "power": 2, "saving": 4, "range": 3, "aim": 3, "cooling": 3, "lightness": 4, "earthCare": 5 },
+    "sdgs": [4, 15],
+    "why": "先辨認生態目標，才能選擇合適的行動"
+  }
+]

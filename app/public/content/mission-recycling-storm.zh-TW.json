@@ -1,0 +1,22 @@
+{
+  "id": "recycling-storm",
+  "name": "垃圾風暴救援",
+  "shortDescription": "修好綠環回收站並安全撤離",
+  "sdgs": [7, 12, 13],
+  "phases": [
+    { "id": "briefing", "name": "接收任務", "instruction": "先查看天氣和回收站狀況" },
+    { "id": "loadout", "name": "組裝工具", "instruction": "選擇能源盒和適合的零件" },
+    { "id": "entrance", "name": "回收站入口", "instruction": "救援小機器人並回收材料" },
+    { "id": "sorting-hall", "name": "分類大廳", "instruction": "找出走錯方向的回收物" },
+    { "id": "storm-machine", "name": "垃圾風暴機", "instruction": "修好設備並清除搗蛋核心" },
+    { "id": "evacuation", "name": "安全撤離", "instruction": "選擇重要物品並前往屋頂" },
+    { "id": "report", "name": "行動回顧", "instruction": "看看結果並想想下次怎麼改" }
+  ],
+  "badges": [
+    { "id": "energy-saver", "name": "省電高手", "reason": "用較少能源完成任務" },
+    { "id": "recycling-expert", "name": "回收達人", "reason": "正確分類並重新使用材料" },
+    { "id": "repair-helper", "name": "修理能手", "reason": "找出問題並修好設備" },
+    { "id": "safety-guardian", "name": "安全守護者", "reason": "保護機器人和重要設施" },
+    { "id": "design-improver", "name": "改良小博士", "reason": "根據結果提出新的改法" }
+  ]
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "light-rifle",
+    "name": "小光能量槍",
+    "shortDescription": "力量、距離和省電都很平均",
+    "platform": "light-rifle",
+    "defaultParts": {
+      "energy": "solar-box",
+      "emitter": "steady-emitter",
+      "aimTube": "balanced-aim-tube",
+      "grip": "stable-grip",
+      "cooler": "energy-recovery-cooler",
+      "helper": "aim-helper"
+    },
+    "sdgs": [7, 12]
+  },
+  {
+    "id": "hand-cannon",
+    "name": "強力手炮",
+    "shortDescription": "一次力量很大，但容易變熱和耗電",
+    "platform": "hand-cannon",
+    "defaultParts": {
+      "energy": "wind-box",
+      "emitter": "power-emitter",
+      "aimTube": "balanced-aim-tube",
+      "grip": "stable-grip",
+      "cooler": "fast-cooler",
+      "helper": "aim-helper"
+    },
+    "sdgs": [7, 9, 13]
+  },
+  {
+    "id": "prism-scatter",
+    "name": "彩光散射槍",
+    "shortDescription": "近距離能照顧一群搗蛋怪",
+    "platform": "prism-scatter",
+    "defaultParts": {
+      "energy": "recycled-battery",
+      "emitter": "prism-emitter",
+      "aimTube": "balanced-aim-tube",
+      "grip": "light-grip",
+      "cooler": "energy-recovery-cooler",
+      "helper": "eco-helper"
+    },
+    "sdgs": [9, 12, 15]
+  }
+]
