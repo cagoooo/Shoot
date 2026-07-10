@@ -1,0 +1,20 @@
+[
+  {
+    "id": "sticky",
+    "name": "垃圾黏黏怪",
+    "shortDescription": "把沒有分類的垃圾黏成一團，會先亮黃燈再丟出黏黏球。",
+    "learningHint": "先觀察垃圾材質，再用正確的回收能量淨化它。",
+    "warningColor": "yellow",
+    "cleansedResult": "分類好的回收物與亮晶晶粒子",
+    "sdgs": [11, 12]
+  },
+  {
+    "id": "power-thief",
+    "name": "偷電小怪",
+    "shortDescription": "偷偷浪費沒有使用的電力，行動前頭上的燈會閃黃光。",
+    "learningHint": "找出待機中的設備，就能阻止能源被浪費。",
+    "warningColor": "yellow",
+    "cleansedResult": "節能提醒卡與亮晶晶粒子",
+    "sdgs": [7, 13]
+  }
+]

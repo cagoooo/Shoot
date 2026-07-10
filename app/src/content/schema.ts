@@ -69,13 +69,25 @@ export const missionSchema = z.object({
   badges: z.array(badgeSchema).min(1),
 })
 
+export const enemySchema = z.object({
+  id: z.enum(['sticky', 'power-thief']),
+  name: studentNameSchema,
+  shortDescription: z.string().min(4).max(60),
+  learningHint: z.string().min(4).max(60),
+  warningColor: z.literal('yellow'),
+  cleansedResult: z.string().min(4).max(40),
+  sdgs: z.array(sdgSchema).min(1),
+})
+
 export const contentBundleSchema = z.object({
   parts: z.array(partSchema).min(1),
   weapons: z.array(weaponSchema).min(1),
   missions: z.array(missionSchema).min(1),
+  enemies: z.array(enemySchema).min(1),
 })
 
 export type PartContent = z.infer<typeof partSchema>
 export type WeaponContent = z.infer<typeof weaponSchema>
 export type MissionContent = z.infer<typeof missionSchema>
+export type EnemyContent = z.infer<typeof enemySchema>
 export type ContentBundle = z.infer<typeof contentBundleSchema>

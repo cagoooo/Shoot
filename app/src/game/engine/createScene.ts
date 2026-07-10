@@ -21,6 +21,8 @@ import {
 } from '../../domain/combat/weaponState'
 import { selectAimTarget } from '../combat/AimAssist'
 import { RaycastTool } from '../combat/RaycastTool'
+import { cleanseEnemy, updateEnemy } from '../../domain/enemies/enemyState'
+import { EnemyPool } from '../enemies/EnemyPool'
 
 export function createGameScene(
   engine: AbstractEngine,
@@ -91,7 +93,17 @@ export function createGameScene(
     new Vector3(0, 1.3, 6),
     new Vector3(3, 1.7, 5),
   ]
+  const enemyPool = new EnemyPool()
+  const troublemakers = new Map<
+    string,
+    {
+      controller: NonNullable<ReturnType<EnemyPool['acquire']>>
+      material: StandardMaterial
+    }
+  >()
   for (const [index, position] of targetPositions.entries()) {
+    const controller = enemyPool.acquire(index % 2 === 0 ? 'sticky' : 'power-thief')
+    if (!controller) continue
     const target = MeshBuilder.CreateSphere(
       `trouble-core-${index + 1}`,
       { diameter: 0.9, segments: 12 },
@@ -106,7 +118,25 @@ export function createGameScene(
     targetMaterial.diffuseColor = new Color3(0.64, 0.28, 0.75)
     targetMaterial.emissiveColor = new Color3(0.15, 0.03, 0.2)
     target.material = targetMaterial
+    troublemakers.set(target.name, { controller, material: targetMaterial })
   }
+
+  scene.onBeforeRenderObservable.add(() => {
+    const elapsedMs = Math.min(engine.getDeltaTime(), 50)
+    for (const { controller, material } of troublemakers.values()) {
+      if (!controller.active) continue
+      controller.state = updateEnemy(controller.state, {
+        playerVisible: true,
+        elapsedMs,
+      })
+      material.emissiveColor =
+        controller.state.kind === 'telegraph'
+          ? new Color3(0.5, 0.34, 0.02)
+          : controller.state.kind === 'action'
+            ? new Color3(0.38, 0.08, 0.42)
+            : new Color3(0.15, 0.03, 0.2)
+    }
+  })
 
   const raycastTool = new RaycastTool(scene)
   let weaponState = createWeaponState()
@@ -150,7 +180,29 @@ export function createGameScene(
               .subtract(camera.globalPosition)
           : forward
         const hit = raycastTool.fire(camera.globalPosition, direction)
-        if (hit) hit.mesh.scaling.scaleInPlace(0.92)
+        if (hit) {
+          const troublemaker = troublemakers.get(hit.mesh.name)
+          if (troublemaker) {
+            troublemaker.controller.state = cleanseEnemy(
+              troublemaker.controller.state,
+            )
+            const recycledItem = MeshBuilder.CreateBox(
+              `recycled-item-${hit.mesh.name}`,
+              { size: 0.35 },
+              scene,
+            )
+            recycledItem.position.copyFrom(hit.mesh.getAbsolutePosition())
+            const recycledMaterial = new StandardMaterial(
+              `recycled-material-${hit.mesh.name}`,
+              scene,
+            )
+            recycledMaterial.diffuseColor = new Color3(0.2, 0.72, 0.48)
+            recycledMaterial.emissiveColor = new Color3(0.04, 0.2, 0.1)
+            recycledItem.material = recycledMaterial
+            hit.mesh.setEnabled(false)
+            enemyPool.release(troublemaker.controller)
+          }
+        }
         onWeaponStateChange?.({ ...weaponState })
       }
     }

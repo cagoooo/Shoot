@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { missionSchema, partSchema, weaponSchema } from './schema'
+import { enemySchema, missionSchema, partSchema, weaponSchema } from './schema'
 
 function readJson(filename: string): unknown {
   const url = new URL(`../../public/content/${filename}`, import.meta.url)
@@ -15,11 +15,13 @@ describe('正式內容檔', () => {
     const mission = missionSchema.parse(
       readJson('mission-recycling-storm.zh-TW.json'),
     )
+    const enemies = enemySchema.array().parse(readJson('enemies.zh-TW.json'))
 
     expect(parts.length).toBeGreaterThanOrEqual(12)
     expect(weapons).toHaveLength(3)
     expect(mission.phases).toHaveLength(7)
     expect(mission.badges).toHaveLength(5)
+    expect(enemies).toHaveLength(2)
   })
 
   it('武器預設零件都存在且位置相符', () => {

@@ -54,9 +54,21 @@ const missions = [
   },
 ]
 
+const enemies = [
+  {
+    id: 'sticky',
+    name: '垃圾黏黏怪',
+    shortDescription: '把沒有分類的垃圾黏成一團',
+    learningHint: '先觀察垃圾材質，再使用正確能量',
+    warningColor: 'yellow',
+    cleansedResult: '分類好的回收物與亮晶晶粒子',
+    sdgs: [11, 12],
+  },
+]
+
 describe('loadContent', () => {
-  it('從 GitHub Pages 子路徑載入並驗證三類內容', async () => {
-    const responses = [parts, weapons, missions[0]]
+  it('從 GitHub Pages 子路徑載入並驗證四類內容', async () => {
+    const responses = [parts, weapons, missions[0], enemies]
     const fetcher = vi.fn(async (_input: RequestInfo | URL) =>
       new Response(JSON.stringify(responses.shift()), { status: 200 }),
     )
@@ -67,9 +79,11 @@ describe('loadContent', () => {
       '/Shoot/content/parts.zh-TW.json',
       '/Shoot/content/weapons.zh-TW.json',
       '/Shoot/content/mission-recycling-storm.zh-TW.json',
+      '/Shoot/content/enemies.zh-TW.json',
     ])
     expect(result.parts[0].name).toBe('陽光能源盒')
     expect(result.missions[0].sdgs).toEqual([7, 12, 13])
+    expect(result.enemies[0].name).toBe('垃圾黏黏怪')
   })
 
   it('在伺服器錯誤時提供明確檔名', async () => {
