@@ -6,10 +6,22 @@ import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { Scene } from '@babylonjs/core/scene'
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
+import {
+  DEFAULT_COMFORT_SETTINGS,
+  normalizeComfortSettings,
+  type ComfortSettings,
+} from '../../domain/settings/accessibility'
+import { InputManager } from '../../input/InputManager'
+import { stepPlayerCamera } from '../player/PlayerController'
 
-export function createGameScene(engine: AbstractEngine): Scene {
+export function createGameScene(
+  engine: AbstractEngine,
+  inputManager = new InputManager(),
+  comfortInput: Partial<ComfortSettings> = DEFAULT_COMFORT_SETTINGS,
+): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.85, 0.93, 0.9, 1)
+  const comfort = normalizeComfortSettings(comfortInput)
 
   const camera = new UniversalCamera(
     'player-camera',
@@ -18,8 +30,22 @@ export function createGameScene(engine: AbstractEngine): Scene {
   )
   camera.setTarget(new Vector3(0, 1.3, 0))
   camera.minZ = 0.1
-  camera.fov = 1.05
+  camera.fov = (comfort.fieldOfView * Math.PI) / 180
+  camera.angularSensibility = 2000 / comfort.sensitivity
+  camera.keysUp = []
+  camera.keysDown = []
+  camera.keysLeft = []
+  camera.keysRight = []
   scene.activeCamera = camera
+
+  const canvas = engine.getRenderingCanvas()
+  if (canvas) camera.attachControl(canvas, true)
+
+  scene.onBeforeRenderObservable.add(() => {
+    const input = inputManager.snapshot()
+    const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
+    stepPlayerCamera(camera, input, deltaSeconds, 4)
+  })
 
   const light = new HemisphericLight(
     'sky-light',

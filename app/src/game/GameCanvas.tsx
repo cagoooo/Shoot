@@ -2,6 +2,9 @@ import { useEffect, useRef } from 'react'
 import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
 import { createGameEngine } from './engine/createEngine'
 import { createGameScene } from './engine/createScene'
+import type { ComfortSettings } from '../domain/settings/accessibility'
+import { InputManager } from '../input/InputManager'
+import { bindKeyboardMouseInput } from '../input/bindKeyboardMouseInput'
 
 export interface RuntimeEngine {
   runRenderLoop(callback: () => void): void
@@ -16,20 +19,28 @@ export interface RuntimeScene {
 }
 
 type EngineFactory = (canvas: HTMLCanvasElement) => Promise<RuntimeEngine>
-type SceneFactory = (engine: RuntimeEngine) => RuntimeScene
+type SceneFactory = (
+  engine: RuntimeEngine,
+  inputManager?: InputManager,
+  comfortSettings?: Partial<ComfortSettings>,
+) => RuntimeScene
 
 const defaultEngineFactory: EngineFactory = createGameEngine
-const defaultSceneFactory: SceneFactory = (engine) =>
-  createGameScene(engine as AbstractEngine)
+const defaultSceneFactory: SceneFactory = (engine, inputManager, comfortSettings) =>
+  createGameScene(engine as AbstractEngine, inputManager, comfortSettings)
 
 interface GameCanvasProps {
   engineFactory?: EngineFactory
   sceneFactory?: SceneFactory
+  inputManager?: InputManager
+  comfortSettings?: Partial<ComfortSettings>
 }
 
 export function GameCanvas({
   engineFactory = defaultEngineFactory,
   sceneFactory = defaultSceneFactory,
+  inputManager,
+  comfortSettings,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -40,6 +51,9 @@ export function GameCanvas({
     let cancelled = false
     let engine: RuntimeEngine | null = null
     let scene: RuntimeScene | null = null
+    const unbindInput = inputManager
+      ? bindKeyboardMouseInput(window, canvas, inputManager)
+      : undefined
 
     const handleResize = () => engine?.resize()
 
@@ -50,7 +64,7 @@ export function GameCanvas({
       }
 
       engine = createdEngine
-      scene = sceneFactory(createdEngine)
+      scene = sceneFactory(createdEngine, inputManager, comfortSettings)
       engine.runRenderLoop(() => scene?.render())
       window.addEventListener('resize', handleResize)
     })
@@ -58,11 +72,12 @@ export function GameCanvas({
     return () => {
       cancelled = true
       window.removeEventListener('resize', handleResize)
+      unbindInput?.()
       engine?.stopRenderLoop()
       scene?.dispose()
       engine?.dispose()
     }
-  }, [engineFactory, sceneFactory])
+  }, [comfortSettings, engineFactory, inputManager, sceneFactory])
 
   return (
     <canvas

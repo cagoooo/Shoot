@@ -217,6 +217,57 @@ button:focus-visible {
   font-size: 0.9rem;
 }
 
+.comfort-panel {
+  position: absolute;
+  z-index: 5;
+  top: 18px;
+  right: 18px;
+  width: min(330px, calc(100% - 36px));
+  padding: 20px;
+  box-sizing: border-box;
+  display: grid;
+  gap: 16px;
+  border: 2px solid var(--c-ink);
+  border-radius: 6px 20px 6px 20px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-float);
+}
+
+.comfort-panel h2,
+.comfort-panel p {
+  margin: 0;
+}
+
+.comfort-panel label:not(.check-setting) {
+  display: grid;
+  gap: 8px;
+  font-weight: 800;
+}
+
+.comfort-panel input[type='range'] {
+  width: 100%;
+  accent-color: var(--c-brand-deep);
+}
+
+.check-setting {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  font-weight: 700;
+}
+
+.check-setting input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--c-brand-deep);
+}
+
+.panel-note {
+  color: var(--c-muted);
+  line-height: 1.55;
+}
+
 .touch-controls {
   position: absolute;
   inset: 0;
