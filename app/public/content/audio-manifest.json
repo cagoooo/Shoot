@@ -1,0 +1,58 @@
+[
+  {
+    "id": "music-base",
+    "kind": "music",
+    "sources": [],
+    "loop": true,
+    "licenseRecord": "docs/testing/suno-asset-ledger.md#music-base",
+    "deploymentStatus": "awaiting-audited-file"
+  },
+  {
+    "id": "music-exploration",
+    "kind": "music",
+    "sources": [],
+    "loop": true,
+    "licenseRecord": "docs/testing/suno-asset-ledger.md#music-exploration",
+    "deploymentStatus": "awaiting-audited-file"
+  },
+  {
+    "id": "music-tension",
+    "kind": "music",
+    "sources": [],
+    "loop": true,
+    "licenseRecord": "docs/testing/suno-asset-ledger.md#music-tension",
+    "deploymentStatus": "awaiting-audited-file"
+  },
+  {
+    "id": "music-boss",
+    "kind": "music",
+    "sources": [],
+    "loop": true,
+    "licenseRecord": "docs/testing/suno-asset-ledger.md#music-boss",
+    "deploymentStatus": "awaiting-audited-file"
+  },
+  {
+    "id": "music-evacuation",
+    "kind": "music",
+    "sources": [],
+    "loop": true,
+    "licenseRecord": "docs/testing/suno-asset-ledger.md#music-evacuation",
+    "deploymentStatus": "awaiting-audited-file"
+  },
+  {
+    "id": "music-success",
+    "kind": "music",
+    "sources": [],
+    "loop": false,
+    "licenseRecord": "docs/testing/suno-asset-ledger.md#music-success",
+    "deploymentStatus": "awaiting-audited-file"
+  },
+  {
+    "id": "music-report",
+    "kind": "music",
+    "sources": [],
+    "loop": true,
+    "licenseRecord": "docs/testing/suno-asset-ledger.md#music-report",
+    "deploymentStatus": "awaiting-audited-file"
+  }
+]
