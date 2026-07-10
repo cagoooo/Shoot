@@ -74,4 +74,24 @@ describe('recycling storm mission rules', () => {
     scene.dispose()
     engine.dispose()
   })
+
+  it('能源控制區有風暴機、三個核心與不可攻擊的保護面板', () => {
+    const engine = new NullEngine()
+    const scene = buildRecyclingStormScene(engine, new InputManager())
+
+    expect(scene.getMeshByName('storm-machine-body')).not.toBeNull()
+    expect(
+      scene.meshes.filter((mesh) => mesh.metadata?.stormCore === true),
+    ).toHaveLength(3)
+    expect(
+      scene.meshes.some(
+        (mesh) =>
+          mesh.metadata?.machinePart === 'protected-energy-panel' &&
+          mesh.metadata?.targetKind === 'protected',
+      ),
+    ).toBe(true)
+
+    scene.dispose()
+    engine.dispose()
+  })
 })

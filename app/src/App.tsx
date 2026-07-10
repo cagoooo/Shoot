@@ -73,7 +73,10 @@ function App() {
   if (screen === 'mission') {
     return (
       <Suspense fallback={<main className="loading-screen">正在打開垃圾風暴任務…</main>}>
-        <MissionScreen onBack={() => setScreen('base')} />
+        <MissionScreen
+          learningMode={mode}
+          onBack={() => setScreen('base')}
+        />
       </Suspense>
     )
   }

@@ -166,6 +166,49 @@ export function buildRecyclingStormScene(
   evacuationMaterial.emissiveColor = Color3.FromHexString('#0d5660')
   evacuation.material = evacuationMaterial
 
+  const machineBody = MeshBuilder.CreateCylinder(
+    'storm-machine-body',
+    { height: 3.6, diameter: 3.4, tessellation: 12 },
+    scene,
+  )
+  machineBody.position = new Vector3(0, 1.9, 14)
+  machineBody.metadata = { machinePart: 'main-body' }
+  const machineMaterial = new StandardMaterial('storm-machine-material', scene)
+  machineMaterial.diffuseColor = Color3.FromHexString('#596b76')
+  machineBody.material = machineMaterial
+
+  const coreMaterial = new StandardMaterial('storm-core-warning-material', scene)
+  coreMaterial.diffuseColor = Color3.FromHexString('#f1bd3f')
+  coreMaterial.emissiveColor = Color3.FromHexString('#6b4300')
+  for (const [index, offset] of [-1.05, 0, 1.05].entries()) {
+    const core = MeshBuilder.CreateSphere(
+      `storm-core-${index + 1}`,
+      { diameter: 0.62, segments: 10 },
+      scene,
+    )
+    core.position = new Vector3(offset, 2.1, 12.35)
+    core.metadata = {
+      stormCore: true,
+      targetKind: 'trouble-core',
+      warningCue: 'yellow',
+    }
+    core.material = coreMaterial
+  }
+
+  const protectedPanel = MeshBuilder.CreateBox(
+    'protected-energy-panel',
+    { width: 2.2, height: 1.1, depth: 0.25 },
+    scene,
+  )
+  protectedPanel.position = new Vector3(0, 0.9, 12.3)
+  protectedPanel.metadata = {
+    machinePart: 'protected-energy-panel',
+    targetKind: 'protected',
+  }
+  const panelMaterial = new StandardMaterial('protected-panel-material', scene)
+  panelMaterial.diffuseColor = Color3.FromHexString('#48a878')
+  protectedPanel.material = panelMaterial
+
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
     const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)

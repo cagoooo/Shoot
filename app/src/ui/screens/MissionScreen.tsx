@@ -19,6 +19,17 @@ import {
 } from '../../game/missions/recyclingStorm/interactions'
 import { InputManager } from '../../input/InputManager'
 import { TouchControls } from '../components/TouchControls'
+import type { LearningMode } from '../../app/gameStore'
+import {
+  chooseEnergyMode,
+  cleanStormCore,
+  createStormMachine,
+  sortStormItem,
+  type EnergyMode,
+  type StormMachineState,
+} from '../../domain/boss/stormMachine'
+import { SortingPanel } from '../components/SortingPanel'
+import { EnergyChoicePanel } from '../components/EnergyChoicePanel'
 
 interface MissionCheckpoint {
   load(): Promise<(MissionState & { safeSpawnId: string }) | null>
@@ -29,6 +40,7 @@ interface MissionScreenProps {
   onBack: () => void
   checkpoint?: MissionCheckpoint
   mapSlot?: ReactNode
+  learningMode?: LearningMode
 }
 
 const phaseNames: Record<MissionState['phase'], string> = {
@@ -39,13 +51,6 @@ const phaseNames: Record<MissionState['phase'], string> = {
   'storm-machine': '能源控制室',
   evacuation: '安全撤離',
   report: '行動回顧',
-}
-
-const binNames: Record<WasteBin, string> = {
-  paper: '紙類',
-  plastic: '塑膠類',
-  metal: '金屬類',
-  general: '一般垃圾',
 }
 
 const evacuationChoices: Array<{
@@ -78,10 +83,19 @@ function MissionMap() {
   )
 }
 
+function prepareBossAfterSorting(): StormMachineState {
+  let state = createStormMachine()
+  for (const item of ['paper', 'plastic', 'metal', 'general'] as const) {
+    state = sortStormItem(state, { item, bin: item })
+  }
+  return state
+}
+
 export function MissionScreen({
   onBack,
   checkpoint: checkpointInput,
   mapSlot,
+  learningMode = 'middle-assist',
 }: MissionScreenProps) {
   const defaultCheckpoint = useMemo(() => new CheckpointService(), [])
   const checkpoint = checkpointInput ?? defaultCheckpoint
@@ -92,12 +106,18 @@ export function MissionScreen({
   const [sortingIndex, setSortingIndex] = useState(0)
   const [hint, setHint] = useState('')
   const [bag, setBag] = useState<EvacuationItem[]>([])
+  const [boss, setBoss] = useState(() => createStormMachine())
 
   useEffect(() => {
     let active = true
     void checkpoint.load().then((restored) => {
       if (!active) return
-      if (restored) setMission(createMissionState(restored))
+      if (restored) {
+        setMission(createMissionState(restored))
+        if (restored.phase === 'storm-machine') {
+          setBoss(prepareBossAfterSorting())
+        }
+      }
       setLoading(false)
     })
     return () => {
@@ -127,8 +147,16 @@ export function MissionScreen({
     if (!item) return
     const result = classifyWaste(item, bin)
     setHint(result.hint)
+    setBoss((current) =>
+      sortStormItem(current, { item: item.correctBin, bin }),
+    )
     if (result.correct) setSortingIndex((index) => index + 1)
   }
+
+  const cleanCore = () => setBoss((current) => cleanStormCore(current))
+
+  const chooseEnergy = (mode: EnergyMode) =>
+    setBoss((current) => chooseEnergyMode(current, mode))
 
   const toggleBagItem = (item: EvacuationItem) => {
     setBag((current) =>
@@ -218,14 +246,12 @@ export function MissionScreen({
               <h2>修好垃圾分類機</h2>
               {sortingIndex < challenge.length ? (
                 <>
-                  <p className="sorting-item">{challenge[sortingIndex].name}</p>
-                  <div className="sorting-bins">
-                    {(Object.keys(binNames) as WasteBin[]).map((bin) => (
-                      <button type="button" key={bin} onClick={() => sortInto(bin)}>
-                        放入 {binNames[bin]}
-                      </button>
-                    ))}
-                  </div>
+                  <SortingPanel
+                    itemName={challenge[sortingIndex].name}
+                    hint={challenge[sortingIndex].hint}
+                    showHint={learningMode === 'middle-assist' && boss.feedback === 'try-again'}
+                    onSort={sortInto}
+                  />
                 </>
               ) : (
                 <button
@@ -238,24 +264,61 @@ export function MissionScreen({
                   分類完成，前往能源控制室
                 </button>
               )}
-              {hint && <p role="status" className="learning-hint">{hint}</p>}
             </>
           )}
 
           {mission.phase === 'storm-machine' && (
             <>
               <p className="eyebrow">任務 5／7・經由{route}</p>
-              <h2>能源控制室已到達</h2>
-              <p>先關閉風暴機的能源，再保留修理紀錄。頭目挑戰將在下一階段加入。</p>
-              <button
-                className="primary-button"
-                type="button"
-                onClick={() =>
-                  advance('storm-machine-cleansed', 'start-evacuation')
-                }
-              >
-                關閉風暴機，開始撤離
-              </button>
+              {boss.phase === 'clean-cores' && (
+                <>
+                  <h2>找出搗蛋核心</h2>
+                  <p>核心行動前會閃黃色警示。等警示結束，再使用修復能量淨化。</p>
+                  <div className="boss-core-status" role="status">
+                    還有 {boss.coresRemaining} 個搗蛋核心
+                  </div>
+                  <button
+                    className="primary-button"
+                    type="button"
+                    onClick={cleanCore}
+                  >
+                    淨化搗蛋核心
+                  </button>
+                </>
+              )}
+
+              {boss.phase === 'energy-choice' && (
+                <>
+                  <h2>選擇修復能源方案</h2>
+                  <p>
+                    {learningMode === 'middle-assist'
+                      ? '比較能源和時間，每一種選擇都能完成任務。'
+                      : '目前日照中等、備用電池 72%，請根據設備資料判斷。'}
+                  </p>
+                  <EnergyChoicePanel onChoose={chooseEnergy} />
+                </>
+              )}
+
+              {boss.phase === 'restored' && boss.result && (
+                <>
+                  <h2>垃圾風暴機恢復穩定</h2>
+                  <div className="boss-result" role="status">
+                    <span>能源使用：{boss.result.energyUsed}</span>
+                    <span>修復時間：{boss.result.timeSpent}</span>
+                    <span>修復品質：{boss.result.repairScore}／5</span>
+                    <strong>{boss.result.report}</strong>
+                  </div>
+                  <button
+                    className="primary-button"
+                    type="button"
+                    onClick={() =>
+                      advance('storm-machine-cleansed', 'start-evacuation')
+                    }
+                  >
+                    確認修復，開始撤離
+                  </button>
+                </>
+              )}
             </>
           )}
 
@@ -295,6 +358,14 @@ export function MissionScreen({
               <p className="eyebrow">任務 7／7</p>
               <h2>垃圾風暴救援完成</h2>
               <p>你走了{route ?? '安全路線'}，修好分類機，也帶著安全用品成功撤離。</p>
+              {boss.result && (
+                <div className="boss-result" aria-label="能源方案結果">
+                  <span>能源使用：{boss.result.energyUsed}</span>
+                  <span>修復時間：{boss.result.timeSpent}</span>
+                  <span>修復品質：{boss.result.repairScore}／5</span>
+                  <strong>{boss.result.report}</strong>
+                </div>
+              )}
               <div className="sdg-result">
                 <strong>這次守護了</strong>
                 <span>SDG 7 可負擔的潔淨能源</span>

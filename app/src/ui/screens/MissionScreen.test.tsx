@@ -31,9 +31,12 @@ describe('MissionScreen', () => {
     fireEvent.click(
       screen.getByRole('button', { name: '分類完成，前往能源控制室' }),
     )
-    fireEvent.click(
-      screen.getByRole('button', { name: '關閉風暴機，開始撤離' }),
-    )
+    for (let core = 0; core < 3; core += 1) {
+      fireEvent.click(screen.getByRole('button', { name: '淨化搗蛋核心' }))
+    }
+    fireEvent.click(screen.getByRole('button', { name: /分區聰明修/ }))
+    expect(screen.getByText(/兼顧速度與節能/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '確認修復，開始撤離' }))
 
     for (const item of ['安全急救包', '修理紀錄', '飲用水']) {
       fireEvent.click(screen.getByRole('checkbox', { name: item }))
@@ -43,6 +46,29 @@ describe('MissionScreen', () => {
     expect(
       screen.getByRole('heading', { name: '垃圾風暴救援完成' }),
     ).toBeInTheDocument()
+    expect(screen.getByText(/分區供電兼顧速度與節能/)).toBeInTheDocument()
     expect(checkpoint.save).toHaveBeenCalled()
+  })
+
+  it('從能源控制室檢查點恢復時回到可操作的核心階段', async () => {
+    render(
+      <MissionScreen
+        onBack={vi.fn()}
+        checkpoint={{
+          load: vi.fn(async () => ({
+            phase: 'storm-machine' as const,
+            completedObjectives: ['sorting-machine-fixed'],
+            reportAwarded: false,
+            safeSpawnId: 'storm-machine-safe',
+          })),
+          save: vi.fn(async () => undefined),
+        }}
+        mapSlot={<div>3D 地圖替身</div>}
+      />,
+    )
+
+    expect(
+      await screen.findByRole('button', { name: '淨化搗蛋核心' }),
+    ).toBeVisible()
   })
 })

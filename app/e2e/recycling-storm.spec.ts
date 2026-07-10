@@ -1,6 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
 
-async function finishRecyclingStorm(page: Page, route: '主路' | '維修小路') {
+async function finishRecyclingStorm(
+  page: Page,
+  route: '主路' | '維修小路',
+  energyChoice: '分區聰明修' | '省電慢慢修',
+) {
   await page.goto('./')
   await page.getByRole('button', { name: '開始任務' }).click()
   await page.getByRole('button', { name: /今天任務/ }).click()
@@ -18,7 +22,12 @@ async function finishRecyclingStorm(page: Page, route: '主路' | '維修小路'
   await page
     .getByRole('button', { name: '分類完成，前往能源控制室' })
     .click()
-  await page.getByRole('button', { name: '關閉風暴機，開始撤離' }).click()
+  for (let core = 0; core < 3; core += 1) {
+    await page.getByRole('button', { name: '淨化搗蛋核心' }).click()
+  }
+  await page.getByRole('button', { name: new RegExp(energyChoice) }).click()
+  await expect(page.getByText(/能源使用：/)).toBeVisible()
+  await page.getByRole('button', { name: '確認修復，開始撤離' }).click()
 
   for (const item of ['安全急救包', '修理紀錄', '飲用水']) {
     await page.getByRole('checkbox', { name: item }).check()
@@ -32,9 +41,9 @@ async function finishRecyclingStorm(page: Page, route: '主路' | '維修小路'
 }
 
 test('垃圾風暴主路可從基地完成分類並撤離', async ({ page }) => {
-  await finishRecyclingStorm(page, '主路')
+  await finishRecyclingStorm(page, '主路', '分區聰明修')
 })
 
 test('垃圾風暴維修小路可從基地完成分類並撤離', async ({ page }) => {
-  await finishRecyclingStorm(page, '維修小路')
+  await finishRecyclingStorm(page, '維修小路', '省電慢慢修')
 })
