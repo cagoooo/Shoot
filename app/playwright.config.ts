@@ -1,11 +1,14 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const repoName = process.env.VITE_REPO_NAME?.replace(/^\/+|\/+$/g, '')
+const basePath = repoName ? `/${repoName}/` : '/'
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   reporter: 'line',
   use: {
-    baseURL: 'http://127.0.0.1:5180',
+    baseURL: `http://127.0.0.1:5180${basePath}`,
     trace: 'retain-on-failure',
   },
   projects: [
