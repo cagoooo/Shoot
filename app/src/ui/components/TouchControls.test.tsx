@@ -32,4 +32,14 @@ describe('TouchControls', () => {
       expect.objectContaining({ moveX: 0, moveY: 0 }),
     )
   })
+
+  it('左手模式會交換搖桿與操作按鈕位置', () => {
+    render(<TouchControls onInputChange={vi.fn()} leftHanded />)
+
+    expect(screen.getByLabelText('觸控操作')).toHaveClass('touch-left-handed')
+    expect(screen.getByTestId('primary-use')).toHaveAttribute(
+      'aria-label',
+      '使用能量工具',
+    )
+  })
 })

@@ -69,6 +69,7 @@ export function TouchControls({
         <button
           type="button"
           data-testid="primary-use"
+          aria-label="使用能量工具"
           onPointerDown={() => emit({ primaryUse: true })}
           onPointerUp={() => emit({ primaryUse: false })}
           onPointerCancel={() => emit({ primaryUse: false })}
@@ -77,6 +78,7 @@ export function TouchControls({
         </button>
         <button
           type="button"
+          aria-label="與任務物件互動"
           onPointerDown={() => emit({ interact: true })}
           onPointerUp={() => emit({ interact: false })}
           onPointerCancel={() => emit({ interact: false })}

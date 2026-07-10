@@ -3,17 +3,25 @@ import type { WeaponState } from '../../domain/combat/weaponState'
 interface GameHudProps {
   toolName: string
   weaponState: WeaponState
+  compact?: boolean
 }
 
 const percentage = (value: number, maximum: number) =>
   Math.round((value / Math.max(1, maximum)) * 100)
 
-export function GameHud({ toolName, weaponState }: GameHudProps) {
+export function GameHud({ toolName, weaponState, compact = false }: GameHudProps) {
   const energy = percentage(weaponState.energy, weaponState.energyCapacity)
   const heat = percentage(weaponState.heat, weaponState.heatLimit)
 
   return (
-    <div className="game-hud" aria-label="工具狀態">
+    <div
+      className="game-hud"
+      aria-label="工具狀態"
+      data-compact={compact ? 'true' : 'false'}
+    >
+      <p className="sr-only">
+        {toolName}，能量 {energy}%，溫度 {heat}%
+      </p>
       <div className="aim-crosshair" aria-hidden="true">
         <span />
       </div>

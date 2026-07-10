@@ -12,18 +12,32 @@ import { GameHud } from '../components/GameHud'
 
 interface RangeScreenProps {
   onBack: () => void
+  comfortSettings?: ComfortSettings
+  onComfortSettingsChange?: (settings: ComfortSettings) => void
 }
 
-export function RangeScreen({ onBack }: RangeScreenProps) {
+export function RangeScreen({
+  onBack,
+  comfortSettings: comfortSettingsInput,
+  onComfortSettingsChange,
+}: RangeScreenProps) {
   const inputManager = useMemo(() => new InputManager(), [])
-  const [comfortSettings, setComfortSettings] = useState<ComfortSettings>(
+  const [localComfortSettings, setLocalComfortSettings] = useState<ComfortSettings>(
     DEFAULT_COMFORT_SETTINGS,
   )
+  const comfortSettings = comfortSettingsInput ?? localComfortSettings
+  const setComfortSettings =
+    onComfortSettingsChange ?? setLocalComfortSettings
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [weaponState, setWeaponState] = useState(() => createWeaponState())
 
   return (
-    <main className="range-screen">
+    <main
+      className={`range-screen${comfortSettings.largeText ? ' large-text' : ''}${
+        comfortSettings.subtitlesBackground ? ' strong-subtitles' : ''
+      }`}
+      data-reduced-motion={comfortSettings.reducedMotion}
+    >
       <header className="range-header">
         <button className="text-button" type="button" onClick={onBack}>
           ← 回基地
@@ -48,6 +62,7 @@ export function RangeScreen({ onBack }: RangeScreenProps) {
         />
         <GameHud toolName="小光能量槍" weaponState={weaponState} />
         <TouchControls
+          leftHanded={comfortSettings.leftHanded}
           onInputChange={(state) => inputManager.updateSource('touch', state)}
         />
         <p className="game-hint">鍵盤 W A S D 或左側搖桿移動，滑鼠轉動視角。</p>

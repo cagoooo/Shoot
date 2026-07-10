@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useGameStore } from './gameStore'
+import { DEFAULT_COMFORT_SETTINGS } from '../domain/settings/accessibility'
 
 describe('gameStore learning events', () => {
   beforeEach(() => {
@@ -15,5 +16,19 @@ describe('gameStore learning events', () => {
 
     useGameStore.getState().clearLearningEvents()
     expect(useGameStore.getState().learningEvents).toEqual([])
+  })
+
+  it('舒適與觸控偏好可供所有遊戲畫面共用', () => {
+    useGameStore.setState({ comfortSettings: DEFAULT_COMFORT_SETTINGS })
+    useGameStore.getState().setComfortSettings({
+      ...DEFAULT_COMFORT_SETTINGS,
+      leftHanded: true,
+      largeText: true,
+    })
+
+    expect(useGameStore.getState().comfortSettings).toMatchObject({
+      leftHanded: true,
+      largeText: true,
+    })
   })
 })

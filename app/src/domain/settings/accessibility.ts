@@ -7,6 +7,11 @@ export interface ComfortSettings {
   fieldOfView: number
   sensitivity: number
   quickTurn: boolean
+  leftHanded: boolean
+  largeText: boolean
+  subtitlesBackground: boolean
+  reducedMotion: boolean
+  narrationAnnouncements: boolean
 }
 
 export const DEFAULT_COMFORT_SETTINGS: ComfortSettings = {
@@ -16,6 +21,11 @@ export const DEFAULT_COMFORT_SETTINGS: ComfortSettings = {
   fieldOfView: 70,
   sensitivity: 1,
   quickTurn: true,
+  leftHanded: false,
+  largeText: false,
+  subtitlesBackground: true,
+  reducedMotion: false,
+  narrationAnnouncements: true,
 }
 
 function clamp(value: number, minimum: number, maximum: number) {

@@ -26,7 +26,7 @@ describe('MissionScreen', () => {
 
     expect(screen.getByText('飲料塑膠瓶')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '放入 紙類' }))
-    expect(screen.getByRole('status')).toHaveTextContent('瓶身有彈性')
+    expect(screen.getByText(/觀察提示：.*瓶身有彈性/)).toBeVisible()
 
     for (const bin of ['塑膠類', '紙類', '金屬類', '一般垃圾']) {
       fireEvent.click(screen.getByRole('button', { name: `放入 ${bin}` }))

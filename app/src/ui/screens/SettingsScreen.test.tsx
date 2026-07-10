@@ -16,12 +16,19 @@ describe('SettingsScreen', () => {
 
     expect(screen.getByLabelText('鏡頭走路晃動')).not.toBeChecked()
     expect(screen.getByLabelText('動態模糊')).not.toBeChecked()
+    expect(screen.getByLabelText('左手操作模式')).not.toBeChecked()
+    expect(screen.getByLabelText('放大介面文字')).not.toBeChecked()
 
     fireEvent.change(screen.getByLabelText('觀看範圍'), {
       target: { value: '80' },
     })
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({ fieldOfView: 80 }),
+    )
+
+    fireEvent.click(screen.getByLabelText('左手操作模式'))
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ leftHanded: true }),
     )
   })
 })

@@ -24,9 +24,11 @@ function App() {
     screen,
     mode,
     learningEvents,
+    comfortSettings,
     setMode,
     setScreen,
     recordLearningEvents,
+    setComfortSettings,
   } = useGameStore()
   const [parts, setParts] = useState<PartContent[]>([])
   const [contentLoadFailed, setContentLoadFailed] = useState(false)
@@ -74,7 +76,11 @@ function App() {
   if (screen === 'range') {
     return (
       <Suspense fallback={<main className="loading-screen">正在準備 3D 試玩區…</main>}>
-        <RangeScreen onBack={() => setScreen('base')} />
+        <RangeScreen
+          comfortSettings={comfortSettings}
+          onComfortSettingsChange={setComfortSettings}
+          onBack={() => setScreen('base')}
+        />
       </Suspense>
     )
   }
@@ -84,6 +90,8 @@ function App() {
       <Suspense fallback={<main className="loading-screen">正在打開垃圾風暴任務…</main>}>
         <MissionScreen
           learningMode={mode}
+          comfortSettings={comfortSettings}
+          onComfortSettingsChange={setComfortSettings}
           onBack={() => setScreen('base')}
           onMissionComplete={(events) => {
             recordLearningEvents(events)

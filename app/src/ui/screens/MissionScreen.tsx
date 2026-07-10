@@ -31,6 +31,13 @@ import {
 import { SortingPanel } from '../components/SortingPanel'
 import { EnergyChoicePanel } from '../components/EnergyChoicePanel'
 import type { LearningEvent } from '../../learning/events'
+import {
+  DEFAULT_COMFORT_SETTINGS,
+  type ComfortSettings,
+} from '../../domain/settings/accessibility'
+import { SettingsScreen } from './SettingsScreen'
+import { AccessibilityAnnouncer } from '../accessibility/announcer'
+import { useReducedMotion } from '../accessibility/useReducedMotion'
 
 interface MissionCheckpoint {
   load(): Promise<(MissionState & { safeSpawnId: string }) | null>
@@ -43,6 +50,8 @@ interface MissionScreenProps {
   mapSlot?: ReactNode
   learningMode?: LearningMode
   onMissionComplete?: (events: LearningEvent[]) => void
+  comfortSettings?: ComfortSettings
+  onComfortSettingsChange?: (settings: ComfortSettings) => void
 }
 
 const phaseNames: Record<MissionState['phase'], string> = {
@@ -66,7 +75,7 @@ const evacuationChoices: Array<{
   { id: 'heavy-scrap', name: '沉重廢鐵', description: '很重，而且可以稍後再回收' },
 ]
 
-function MissionMap() {
+function MissionMap({ leftHanded }: { leftHanded: boolean }) {
   const inputManager = useMemo(() => new InputManager(), [])
   const sceneFactory = useCallback<SceneFactory>(
     (engine) =>
@@ -78,6 +87,7 @@ function MissionMap() {
     <div className="mission-map-frame">
       <GameCanvas inputManager={inputManager} sceneFactory={sceneFactory} />
       <TouchControls
+        leftHanded={leftHanded}
         onInputChange={(state) => inputManager.updateSource('touch', state)}
       />
       <p className="game-hint">沿著黃色主路或藍色維修小路探索回收站。</p>
@@ -99,6 +109,8 @@ export function MissionScreen({
   mapSlot,
   learningMode = 'middle-assist',
   onMissionComplete,
+  comfortSettings: comfortSettingsInput = DEFAULT_COMFORT_SETTINGS,
+  onComfortSettingsChange,
 }: MissionScreenProps) {
   const defaultCheckpoint = useMemo(() => new CheckpointService(), [])
   const checkpoint = checkpointInput ?? defaultCheckpoint
@@ -110,6 +122,16 @@ export function MissionScreen({
   const [hint, setHint] = useState('')
   const [bag, setBag] = useState<EvacuationItem[]>([])
   const [boss, setBoss] = useState(() => createStormMachine())
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [localComfortSettings, setLocalComfortSettings] = useState(
+    comfortSettingsInput,
+  )
+  const comfortSettings = onComfortSettingsChange
+    ? comfortSettingsInput
+    : localComfortSettings
+  const setComfortSettings =
+    onComfortSettingsChange ?? setLocalComfortSettings
+  const systemReducedMotion = useReducedMotion()
 
   useEffect(() => {
     let active = true
@@ -202,7 +224,19 @@ export function MissionScreen({
   }
 
   return (
-    <main className="mission-screen">
+    <main
+      className={`mission-screen${comfortSettings.largeText ? ' large-text' : ''}${
+        comfortSettings.subtitlesBackground ? ' strong-subtitles' : ''
+      }`}
+      data-reduced-motion={comfortSettings.reducedMotion || systemReducedMotion}
+    >
+      <AccessibilityAnnouncer
+        message={
+          comfortSettings.narrationAnnouncements
+            ? `目前任務階段：${phaseNames[mission.phase]}`
+            : ''
+        }
+      />
       <header className="mission-header">
         <button className="text-button" type="button" onClick={onBack}>
           ← 回基地
@@ -212,10 +246,18 @@ export function MissionScreen({
           <h1>垃圾風暴救援行動</h1>
         </div>
         <span className="mission-phase">{phaseNames[mission.phase]}</span>
+        <button
+          className="secondary-button mission-settings-button"
+          type="button"
+          onClick={() => setSettingsOpen(true)}
+        >
+          操作與閱讀設定
+        </button>
       </header>
 
       <div className="mission-layout">
-        {mission.phase !== 'report' && (mapSlot ?? <MissionMap />)}
+        {mission.phase !== 'report' &&
+          (mapSlot ?? <MissionMap leftHanded={comfortSettings.leftHanded} />)}
 
         <section className="mission-task-card" aria-live="polite">
           {mission.phase === 'briefing' && (
@@ -408,6 +450,13 @@ export function MissionScreen({
           )}
         </section>
       </div>
+      {settingsOpen && (
+        <SettingsScreen
+          settings={comfortSettings}
+          onChange={setComfortSettings}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
     </main>
   )
 }

@@ -1,0 +1,168 @@
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.touch-controls {
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+}
+
+.large-text {
+  font-size: 112.5%;
+}
+
+.large-text button,
+.large-text input,
+.large-text label {
+  font-size: 1rem;
+}
+
+.strong-subtitles .game-hint,
+.strong-subtitles .learning-hint,
+.strong-subtitles .panel-note {
+  border: 2px solid currentColor;
+  background-color: rgba(255, 255, 255, 0.96);
+  color: #123d2e;
+}
+
+[data-reduced-motion='true'] *,
+[data-reduced-motion='true'] *::before,
+[data-reduced-motion='true'] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.comfort-panel {
+  max-height: calc(100% - 36px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mission-header {
+  grid-template-columns: auto 1fr auto auto;
+}
+
+@media (min-width: 1200px) {
+  .base-header,
+  .base-map,
+  .range-header,
+  .game-frame,
+  .workbench-header,
+  .workbench-layout,
+  .report-header,
+  .reflection-grid,
+  .report-privacy,
+  .report-actions {
+    width: min(1360px, 94vw);
+  }
+
+  .base-zone {
+    font-size: 1.05rem;
+  }
+}
+
+@media (pointer: coarse) {
+  button,
+  input[type='checkbox'],
+  input[type='radio'] {
+    min-height: 48px;
+  }
+
+  .touch-actions button {
+    min-width: 92px;
+    min-height: 52px;
+  }
+}
+
+@media (max-width: 820px) {
+  .mission-header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .mission-header > div {
+    min-width: 0;
+  }
+
+  .mission-settings-button {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  .tool-status-card {
+    width: min(220px, 48vw);
+  }
+}
+
+@media (max-width: 640px) {
+  .range-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .range-header .secondary-button {
+    width: 100%;
+  }
+
+  .game-frame,
+  .mission-map-frame {
+    min-height: 400px;
+  }
+
+  .touch-stick {
+    width: 92px;
+    height: 92px;
+  }
+
+  .touch-actions button {
+    min-width: 82px;
+  }
+
+  .tool-status-card {
+    top: 10px;
+    right: 10px;
+    bottom: auto;
+    width: min(190px, 52vw);
+  }
+
+  .tool-status-card p,
+  .tool-status-card > strong {
+    font-size: 0.72rem;
+  }
+
+  .report-actions button {
+    width: 100%;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  .game-frame,
+  .mission-map-frame {
+    height: calc(100svh - 112px);
+    min-height: 300px;
+  }
+
+  .range-screen,
+  .mission-screen {
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+}

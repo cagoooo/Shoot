@@ -27,4 +27,22 @@ describe('GameHud', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('工具正在降溫')
   })
+
+  it('小螢幕模式保留可供讀屏讀取的完整工具狀態', () => {
+    render(
+      <GameHud
+        compact
+        toolName="小光能量槍"
+        weaponState={createWeaponState({ energy: 75, heat: 30 })}
+      />,
+    )
+
+    expect(screen.getByLabelText('工具狀態')).toHaveAttribute(
+      'data-compact',
+      'true',
+    )
+    expect(screen.getByText(/小光能量槍，能量 75%，溫度 30%/)).toHaveClass(
+      'sr-only',
+    )
+  })
 })
