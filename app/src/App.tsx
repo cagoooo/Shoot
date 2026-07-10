@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useGameStore } from './app/gameStore'
 import { loadContent } from './content/loadContent'
 import type { PartContent } from './content/schema'
@@ -6,6 +6,11 @@ import { BaseScreen } from './ui/screens/BaseScreen'
 import { StartScreen } from './ui/screens/StartScreen'
 import { WorkbenchScreen } from './ui/screens/WorkbenchScreen'
 import './App.css'
+
+const RangeScreen = lazy(async () => {
+  const module = await import('./ui/screens/RangeScreen')
+  return { default: module.RangeScreen }
+})
 
 function App() {
   const { screen, mode, setMode, setScreen } = useGameStore()
@@ -50,6 +55,14 @@ function App() {
       return <main className="loading-screen" aria-live="polite">正在準備工具桌…</main>
     }
     return <WorkbenchScreen parts={parts} onBack={() => setScreen('base')} />
+  }
+
+  if (screen === 'range') {
+    return (
+      <Suspense fallback={<main className="loading-screen">正在準備 3D 試玩區…</main>}>
+        <RangeScreen onBack={() => setScreen('base')} />
+      </Suspense>
+    )
   }
 
   return (

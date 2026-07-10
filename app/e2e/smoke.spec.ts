@@ -21,3 +21,17 @@ test('可從基地進入工具桌並載入正式零件', async ({ page }) => {
   ).toBeVisible()
   await expect(page.getByRole('button', { name: /陽光能源盒/ })).toBeVisible()
 })
+
+test('試玩區可建立 Babylon 3D 畫面', async ({ page }) => {
+  const pageErrors: Error[] = []
+  page.on('pageerror', (error) => pageErrors.push(error))
+
+  await page.goto('./')
+  await page.getByRole('button', { name: '開始任務' }).click()
+  await page.getByRole('button', { name: /試玩區/ }).click()
+
+  await expect(
+    page.getByLabel('地球守護隊 3D 任務畫面'),
+  ).toBeVisible()
+  expect(pageErrors).toEqual([])
+})
