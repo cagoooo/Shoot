@@ -1,18 +1,64 @@
+import { useEffect, useState } from 'react'
+import { useGameStore } from './app/gameStore'
+import { loadContent } from './content/loadContent'
+import type { PartContent } from './content/schema'
+import { BaseScreen } from './ui/screens/BaseScreen'
+import { StartScreen } from './ui/screens/StartScreen'
+import { WorkbenchScreen } from './ui/screens/WorkbenchScreen'
 import './App.css'
 
 function App() {
+  const { screen, mode, setMode, setScreen } = useGameStore()
+  const [parts, setParts] = useState<PartContent[]>([])
+  const [contentLoadFailed, setContentLoadFailed] = useState(false)
+
+  useEffect(() => {
+    if (screen !== 'workbench' || parts.length > 0) return
+    setContentLoadFailed(false)
+    void loadContent(import.meta.env.BASE_URL).then(
+      (content) => setParts(content.parts),
+      () => setContentLoadFailed(true),
+    )
+  }, [parts.length, screen])
+
+  if (screen === 'start') {
+    return (
+      <StartScreen
+        mode={mode}
+        onModeChange={setMode}
+        onStart={() => setScreen('base')}
+      />
+    )
+  }
+
+  if (screen === 'base') {
+    return <BaseScreen mode={mode} onNavigate={setScreen} />
+  }
+
+  if (screen === 'workbench') {
+    if (contentLoadFailed) {
+      return (
+        <main className="placeholder-screen">
+          <p role="alert">工具資料暫時無法載入</p>
+          <button className="primary-button" type="button" onClick={() => setScreen('base')}>
+            回基地
+          </button>
+        </main>
+      )
+    }
+    if (parts.length === 0) {
+      return <main className="loading-screen" aria-live="polite">正在準備工具桌…</main>
+    }
+    return <WorkbenchScreen parts={parts} onBack={() => setScreen('base')} />
+  }
+
   return (
-    <main className="start-screen">
-      <section className="start-card" aria-labelledby="game-title">
-        <p className="eyebrow">SDGs 永續行動遊戲</p>
-        <h1 id="game-title">地球守護隊：能量大作戰</h1>
-        <p className="intro">
-          組裝能量工具、找出環境問題，和地球守護隊一起完成任務。
-        </p>
-        <button className="start-button" type="button">
-          開始任務
-        </button>
-      </section>
+    <main className="placeholder-screen">
+      <p className="eyebrow">基地建設中</p>
+      <h1>這個區域即將開放</h1>
+      <button className="primary-button" type="button" onClick={() => setScreen('base')}>
+        回基地
+      </button>
     </main>
   )
 }

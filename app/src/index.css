@@ -1,11 +1,24 @@
 :root {
-  color: #173a32;
-  background: #eefbf4;
+  color: #20352f;
+  background: #edf3ea;
   font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   --default-theme: light;
+  --c-brand: #17694b;
+  --c-brand-deep: #0d4f38;
+  --c-accent: #e7a72d;
+  --c-ink: #20352f;
+  --c-muted: #62766f;
+  --c-line: #bfd0c6;
+  --c-bg: #edf3ea;
+  --c-surface: #fffdf7;
+  --c-sky: #d9ebf0;
+  --font-display: "Noto Serif TC", "PMingLiU", serif;
+  --font-body: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --shadow-rest: 0 2px 0 rgba(32, 53, 47, 0.08);
+  --shadow-float: 0 18px 40px -22px rgba(32, 53, 47, 0.38);
 }
 
 html {
@@ -23,6 +36,10 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+button {
+  color: inherit;
 }
 
 @media (prefers-reduced-motion: reduce) {
