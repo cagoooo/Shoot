@@ -3,6 +3,8 @@ import { ProgressControls } from '../components/ProgressControls'
 
 interface BaseScreenProps {
   mode: LearningMode
+  audioMuted: boolean
+  onAudioMutedChange: (muted: boolean) => void
   onNavigate: (screen: GameScreen) => void
   onExportProgress: () => void
   onImportProgress: (serialized: string) => Promise<void>
@@ -22,6 +24,8 @@ const baseZones: Array<{
 
 export function BaseScreen({
   mode,
+  audioMuted,
+  onAudioMutedChange,
   onNavigate,
   onExportProgress,
   onImportProgress,
@@ -36,6 +40,14 @@ export function BaseScreen({
         <span className="mode-badge">
           {mode === 'middle-assist' ? '中年級輔助' : '高年級標準'}
         </span>
+        <button
+          className="secondary-button"
+          type="button"
+          aria-pressed={audioMuted}
+          onClick={() => onAudioMutedChange(!audioMuted)}
+        >
+          {audioMuted ? '開啟背景音樂' : '關閉背景音樂'}
+        </button>
       </header>
 
       <section className="base-map" aria-label="基地區域">

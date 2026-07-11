@@ -37,6 +37,7 @@ function AppContent() {
   } = useGameStore()
   const [parts, setParts] = useState<PartContent[]>([])
   const [contentLoadFailed, setContentLoadFailed] = useState(false)
+  const [audioMuted, setAudioMuted] = useState(false)
   const saveRepository = useMemo(() => createBrowserSaveRepository(), [])
   const audioAdapter = useMemo(
     () => new BrowserAudioAdapter(import.meta.env.BASE_URL),
@@ -48,6 +49,10 @@ function AppContent() {
   useEffect(() => {
     void audioAdapter.initialize()
   }, [audioAdapter])
+
+  useEffect(() => {
+    audio.setMuted(audioMuted)
+  }, [audio, audioMuted])
 
   useEffect(() => {
     const sceneByScreen: Record<typeof screen, AudioScene> = {
@@ -125,6 +130,8 @@ function AppContent() {
     return (
       <BaseScreen
         mode={mode}
+        audioMuted={audioMuted}
+        onAudioMutedChange={setAudioMuted}
         onNavigate={setScreen}
         onExportProgress={exportProgress}
         onImportProgress={importProgress}
