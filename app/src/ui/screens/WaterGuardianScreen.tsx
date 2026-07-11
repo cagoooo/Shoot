@@ -13,6 +13,9 @@ import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/build
 
 type WaterPhase = 'briefing' | 'collect' | 'filter' | 'distribute' | 'report'
 type FilterPart = 'cloth' | 'sand' | 'charcoal'
+const filterOrder: FilterPart[] = ['cloth', 'sand', 'charcoal']
+const filterLabels: Record<FilterPart, string> = { cloth: '布', sand: '砂子', charcoal: '活性碳' }
+const filterReasons: Record<FilterPart, string> = { cloth: '先攔住落葉等大雜質。', sand: '再擋住較小的顆粒。', charcoal: '最後幫忙改善味道。' }
 
 interface WaterGuardianScreenProps {
   learningMode: LearningMode
@@ -47,6 +50,7 @@ export function WaterGuardianScreen({
   const [phase, setPhase] = useState<WaterPhase>('briefing')
   const [drops, setDrops] = useState(0)
   const [filterParts, setFilterParts] = useState<FilterPart[]>([])
+  const [filterFeedback, setFilterFeedback] = useState('先從最上層開始：選「布」。')
   const [uses, setUses] = useState<string[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [nearObjective, setNearObjective] = useState(false)
@@ -80,12 +84,20 @@ export function WaterGuardianScreen({
     ])
   }
 
-  const toggleFilter = (part: FilterPart) =>
-    setFilterParts((current) =>
-      current.includes(part)
-        ? current.filter((item) => item !== part)
-        : [...current, part],
-    )
+  const chooseFilter = (part: FilterPart) => {
+    const expected = filterOrder[filterParts.length]
+    if (filterParts.includes(part)) {
+      setFilterFeedback(`「${filterLabels[part]}」已是第 ${filterParts.indexOf(part) + 1} 步；請接著選下一層。`)
+      return
+    }
+    if (part !== expected) {
+      setFilterFeedback(`還差一步：先選「${filterLabels[expected]}」。${filterReasons[expected]}`)
+      return
+    }
+    const next = [...filterParts, part]
+    setFilterParts(next)
+    setFilterFeedback(next.length === filterOrder.length ? '全部順序正確！你完成了三層過濾。' : `第 ${next.length} 步正確！${filterReasons[part]} 接著選下一層。`)
+  }
 
   const toggleUse = (use: string) =>
     setUses((current) =>
@@ -154,9 +166,14 @@ export function WaterGuardianScreen({
             <p className="eyebrow">任務 3／4</p>
             <h2>組合過濾材料</h2>
             <p>選擇材料並比較用途：布先擋落葉，砂子擋小顆粒，活性碳改善味道。</p>
+            <div className={`sequence-feedback${filterParts.length === filterOrder.length ? ' is-success' : ''}`} role="status">
+              <strong>過濾順序：{filterParts.length}／3</strong>
+              <span>{filterParts.length ? filterParts.map((part, index) => `${index + 1}. ${filterLabels[part]}`).join(' → ') : '尚未選擇'}</span>
+              <p>{filterFeedback}</p>
+            </div>
             <div className="route-options water-options">
               {(['cloth', 'sand', 'charcoal'] as FilterPart[]).map((part) => (
-                <button key={part} type="button" disabled={!canInteract} aria-pressed={filterParts.includes(part)} onClick={() => toggleFilter(part)}>
+                <button key={part} className={filterParts.includes(part) ? 'is-sequence-selected' : ''} type="button" disabled={!canInteract} aria-pressed={filterParts.includes(part)} onClick={() => chooseFilter(part)}>
                   <strong>{part === 'cloth' ? '布' : part === 'sand' ? '砂子' : '活性碳'}</strong>
                   <span>{part === 'cloth' ? '擋住落葉' : part === 'sand' ? '擋住小顆粒' : '改善味道'}</span>
                 </button>

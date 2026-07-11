@@ -22,9 +22,12 @@ describe('WaterGuardianScreen', () => {
       fireEvent.click(screen.getByRole('button', { name: '收集一滴雨水' }))
     }
     fireEvent.click(screen.getByRole('button', { name: '前往過濾站' }))
+    fireEvent.click(screen.getByRole('button', { name: /砂子/ }))
+    expect(screen.getByText(/還差一步：先選「布」/)).toBeInTheDocument()
     for (const part of ['布', '砂子', '活性碳']) {
       fireEvent.click(screen.getByRole('button', { name: new RegExp(part) }))
     }
+    expect(screen.getByText('全部順序正確！你完成了三層過濾。')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '完成過濾' }))
     fireEvent.click(screen.getByRole('button', { name: /飲水站/ }))
     fireEvent.click(screen.getByRole('button', { name: /菜園澆灌/ }))

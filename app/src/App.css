@@ -533,6 +533,24 @@ button:focus-visible {
 .scene-observe-button { justify-self: start; margin-top: 3px; padding: 7px 11px; border: 0; border-radius: 999px; background: #d9ff4a; color: #123a2e; font: inherit; font-weight: 900; cursor: pointer; }
 .objective-locked { margin: 14px 0; padding: 10px 12px; border-left: 5px solid #e5b74f; border-radius: 4px 12px 4px 12px; background: #fff4c5; color: #624300; font-weight: 800; line-height: 1.45; }
 
+.sequence-feedback {
+  display: grid;
+  gap: 4px;
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 2px solid #8cbcaf;
+  border-radius: 6px 16px 6px 16px;
+  background: #f0f8f3;
+  color: #174d3d;
+  line-height: 1.4;
+}
+
+.sequence-feedback strong { color: #0f6b53; }
+.sequence-feedback p { margin: 3px 0 0; font-weight: 800; }
+.sequence-feedback.is-success { border-color: #5eb987; background: #e6f7eb; }
+.route-options button.is-sequence-selected { border-color: #257b5c; background: #dff5e8; box-shadow: inset 5px 0 #257b5c; }
+.route-options button.is-sequence-selected::after { content: '已放入順序'; display: block; margin-top: 5px; color: #176342; font-size: 0.85rem; font-weight: 900; }
+
 .route-options button:disabled,
 .sorting-bins button:disabled,
 .energy-choice-panel button:disabled { cursor: not-allowed; opacity: 0.52; filter: grayscale(0.25); }
