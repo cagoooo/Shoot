@@ -7,6 +7,9 @@ const previewPort = Number(process.env.PLAYWRIGHT_PORT ?? 5180)
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  // Babylon chunks are intentionally large; serial browser workers keep
+  // classroom-flow checks deterministic on lower-memory CI runners.
+  workers: Number(process.env.PLAYWRIGHT_WORKERS ?? 1),
   reporter: 'line',
   use: {
     baseURL: `http://127.0.0.1:${previewPort}${basePath}`,

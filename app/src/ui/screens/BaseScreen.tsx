@@ -56,7 +56,7 @@ export function BaseScreen({
 
       <section className="base-map" aria-label="基地區域">
         {baseZones.map((zone, index) => zone.screen === 'mission' ? (
-          <div className="base-zone mission-zone-group" key={zone.screen}>
+          <div className="base-zone zone-1 mission-zone-group" key={zone.screen}>
             <span className="zone-symbol" aria-hidden="true">🗺️</span>
             <span className="mission-zone-list">
               <strong>今天任務</strong>
