@@ -13,6 +13,7 @@ import {
   type ComfortSettings,
 } from '../../../domain/settings/accessibility'
 import { integrateMovement } from '../../player/PlayerController'
+import { applyTouchLook } from '../../player/applyTouchLook'
 import {
   recyclingStormZones,
   zoneConnections,
@@ -231,6 +232,7 @@ export function buildRecyclingStormScene(
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
     const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
+    applyTouchLook(camera, input, deltaSeconds)
     const next = integrateMovement(
       { x: camera.position.x, z: camera.position.z },
       input,

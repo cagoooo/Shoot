@@ -692,6 +692,7 @@ button:focus-visible {
 }
 
 .touch-stick,
+.touch-look-pad,
 .touch-actions button {
   pointer-events: auto;
   touch-action: none;
@@ -708,6 +709,26 @@ button:focus-visible {
   background: rgba(13, 79, 56, 0.48);
   color: #fff;
 }
+
+.touch-look-pad {
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  width: 110px;
+  height: 76px;
+  margin-left: auto;
+  margin-right: 12px;
+  border: 2px dashed rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  background: rgba(13, 79, 56, 0.42);
+  color: #fff;
+  text-align: center;
+  touch-action: none;
+  user-select: none;
+}
+
+.touch-look-pad small { font-size: 0.72rem; }
+.touch-left-handed .touch-look-pad { margin-left: 12px; margin-right: auto; }
 
 .touch-actions {
   display: grid;

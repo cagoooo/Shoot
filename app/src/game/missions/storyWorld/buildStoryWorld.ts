@@ -9,6 +9,7 @@ import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import { normalizeComfortSettings, type ComfortSettings } from '../../../domain/settings/accessibility'
 import { InputManager } from '../../../input/InputManager'
 import { integrateMovement } from '../../player/PlayerController'
+import { applyTouchLook } from '../../player/applyTouchLook'
 import type { StoryMissionConfig } from './storyMissionConfig'
 
 export function buildStoryWorldScene(
@@ -71,6 +72,7 @@ export function buildStoryWorldScene(
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
     const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
+    applyTouchLook(camera, input, deltaSeconds)
     const next = integrateMovement({ x: camera.position.x, z: camera.position.z }, input, deltaSeconds, 4, camera.rotation.y)
     camera.position.x = Math.max(-14, Math.min(14, next.x))
     camera.position.z = Math.max(-18, Math.min(21, next.z))

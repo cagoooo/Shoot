@@ -19,6 +19,9 @@ export function TouchControls({
   const stickStart = useRef<{ pointerId: number; x: number; y: number } | null>(
     null,
   )
+  const lookStart = useRef<{ pointerId: number; x: number; y: number } | null>(
+    null,
+  )
 
   const emit = (patch: InputSourceState) => {
     state.current = { ...state.current, ...patch }
@@ -28,6 +31,11 @@ export function TouchControls({
   const releaseStick = () => {
     stickStart.current = null
     emit({ moveX: 0, moveY: 0 })
+  }
+
+  const releaseLook = () => {
+    lookStart.current = null
+    emit({ lookX: 0, lookY: 0 })
   }
 
   return (
@@ -63,6 +71,27 @@ export function TouchControls({
         onPointerCancel={releaseStick}
       >
         <span aria-hidden="true">●</span>
+      </div>
+
+      <div
+        className="touch-look-pad"
+        data-testid="look-pad"
+        aria-label="轉向與視角控制"
+        onPointerDown={(event) => {
+          event.currentTarget.setPointerCapture?.(event.pointerId)
+          lookStart.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY }
+        }}
+        onPointerMove={(event) => {
+          const start = lookStart.current
+          if (!start || start.pointerId !== event.pointerId) return
+          const vector = calculateStickVector(start.x, start.y, event.clientX, event.clientY, 52)
+          emit({ lookX: vector.x, lookY: vector.y })
+        }}
+        onPointerUp={releaseLook}
+        onPointerCancel={releaseLook}
+      >
+        <span aria-hidden="true">視角</span>
+        <small>拖曳轉向</small>
       </div>
 
       <div className="touch-actions">

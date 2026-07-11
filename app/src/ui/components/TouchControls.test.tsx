@@ -42,4 +42,20 @@ describe('TouchControls', () => {
       '使用能量工具',
     )
   })
+
+  it('可用觸控視角板轉向，放開後會停止轉向', () => {
+    const onInputChange = vi.fn()
+    render(<TouchControls onInputChange={onInputChange} />)
+
+    const lookPad = screen.getByTestId('look-pad')
+    fireEvent.pointerDown(lookPad, { pointerId: 3, clientX: 50, clientY: 50 })
+    fireEvent.pointerMove(lookPad, { pointerId: 3, clientX: 90, clientY: 30 })
+    expect(onInputChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ lookX: expect.any(Number), lookY: expect.any(Number) }),
+    )
+    fireEvent.pointerUp(lookPad, { pointerId: 3 })
+    expect(onInputChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ lookX: 0, lookY: 0 }),
+    )
+  })
 })

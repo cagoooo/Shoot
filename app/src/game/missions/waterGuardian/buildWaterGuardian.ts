@@ -9,6 +9,7 @@ import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import { normalizeComfortSettings, type ComfortSettings } from '../../../domain/settings/accessibility'
 import { InputManager } from '../../../input/InputManager'
 import { integrateMovement } from '../../player/PlayerController'
+import { applyTouchLook } from '../../player/applyTouchLook'
 
 export function buildWaterGuardianScene(
   engine: AbstractEngine,
@@ -78,6 +79,7 @@ export function buildWaterGuardianScene(
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
     const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
+    applyTouchLook(camera, input, deltaSeconds)
     const next = integrateMovement(
       { x: camera.position.x, z: camera.position.z },
       input,
