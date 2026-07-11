@@ -678,6 +678,44 @@ button:focus-visible {
   flex-direction: row-reverse;
 }
 
+.reset-touch-button {
+  width: fit-content;
+}
+
+.mission-guide {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 12px;
+  margin: 0 0 18px;
+  padding: 12px;
+  border: 2px solid #b8f94f;
+  border-radius: 14px;
+  background: #effbf0;
+  color: #123d2e;
+}
+
+.mission-guide-icon {
+  grid-row: span 3;
+  align-self: start;
+  font-size: 2rem;
+}
+
+.mission-guide strong,
+.mission-guide p {
+  margin: 0;
+}
+
+.mission-guide p {
+  margin-top: 2px;
+  line-height: 1.45;
+}
+
+.mission-guide-next,
+.mission-guide-learn {
+  padding-top: 7px;
+  border-top: 1px solid #a9d5b4;
+}
+
 @media (pointer: coarse) {
   .touch-controls {
     display: flex;

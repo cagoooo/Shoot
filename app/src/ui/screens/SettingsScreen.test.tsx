@@ -30,5 +30,17 @@ describe('SettingsScreen', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({ leftHanded: true }),
     )
+
+    fireEvent.change(screen.getByLabelText('瞄準速度'), {
+      target: { value: '1.4' },
+    })
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ sensitivity: 1.4 }),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '重設觸控操作' }))
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ sensitivity: 1, leftHanded: false }),
+    )
   })
 })

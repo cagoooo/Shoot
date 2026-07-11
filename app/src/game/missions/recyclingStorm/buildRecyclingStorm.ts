@@ -7,6 +7,11 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { Scene } from '@babylonjs/core/scene'
 import type { InputManager } from '../../../input/InputManager'
+import {
+  DEFAULT_COMFORT_SETTINGS,
+  normalizeComfortSettings,
+  type ComfortSettings,
+} from '../../../domain/settings/accessibility'
 import { integrateMovement } from '../../player/PlayerController'
 import {
   recyclingStormZones,
@@ -59,6 +64,7 @@ export function buildRecyclingStormScene(
   engine: AbstractEngine,
   inputManager: InputManager,
   assetProvider?: RecyclingStationAssetProvider,
+  comfortInput: Partial<ComfortSettings> = DEFAULT_COMFORT_SETTINGS,
 ): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.78, 0.9, 0.94, 1)
@@ -71,7 +77,9 @@ export function buildRecyclingStormScene(
   )
   camera.setTarget(new Vector3(0, 1.4, -11))
   camera.minZ = 0.1
-  camera.fov = (70 * Math.PI) / 180
+  const comfort = normalizeComfortSettings(comfortInput)
+  camera.fov = (comfort.fieldOfView * Math.PI) / 180
+  camera.angularSensibility = 2000 / comfort.sensitivity
   camera.keysUp = []
   camera.keysDown = []
   camera.keysLeft = []

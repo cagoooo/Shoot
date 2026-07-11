@@ -19,6 +19,7 @@ import {
 } from '../../game/missions/recyclingStorm/interactions'
 import { InputManager } from '../../input/InputManager'
 import { TouchControls } from '../components/TouchControls'
+import { MissionGuide } from '../components/MissionGuide'
 import type { LearningMode } from '../../app/gameStore'
 import {
   chooseEnergyMode,
@@ -77,19 +78,28 @@ const evacuationChoices: Array<{
   { id: 'heavy-scrap', name: '沉重廢鐵', description: '很重，而且可以稍後再回收' },
 ]
 
-function MissionMap({ leftHanded }: { leftHanded: boolean }) {
+function MissionMap({ comfortSettings }: { comfortSettings: ComfortSettings }) {
   const inputManager = useMemo(() => new InputManager(), [])
   const sceneFactory = useCallback<SceneFactory>(
-    (engine) =>
-      buildRecyclingStormScene(engine as AbstractEngine, inputManager),
+    (engine, runtimeInput, runtimeComfort) =>
+      buildRecyclingStormScene(
+        engine as AbstractEngine,
+        runtimeInput ?? inputManager,
+        undefined,
+        runtimeComfort,
+      ),
     [inputManager],
   )
 
   return (
     <div className="mission-map-frame">
-      <GameCanvas inputManager={inputManager} sceneFactory={sceneFactory} />
+      <GameCanvas
+        inputManager={inputManager}
+        sceneFactory={sceneFactory}
+        comfortSettings={comfortSettings}
+      />
       <TouchControls
-        leftHanded={leftHanded}
+        leftHanded={comfortSettings.leftHanded}
         onInputChange={(state) => inputManager.updateSource('touch', state)}
       />
       <p className="game-hint">沿著黃色主路或藍色維修小路探索回收站。</p>
@@ -273,9 +283,10 @@ export function MissionScreen({
 
       <div className="mission-layout">
         {mission.phase !== 'report' &&
-          (mapSlot ?? <MissionMap leftHanded={comfortSettings.leftHanded} />)}
+          (mapSlot ?? <MissionMap comfortSettings={comfortSettings} />)}
 
         <section className="mission-task-card" aria-live="polite">
+          <MissionGuide phase={mission.phase} learningMode={learningMode} />
           {mission.phase === 'briefing' && (
             <>
               <p className="eyebrow">任務 1／7</p>

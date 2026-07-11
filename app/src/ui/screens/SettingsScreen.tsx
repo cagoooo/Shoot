@@ -1,4 +1,5 @@
 import {
+  DEFAULT_COMFORT_SETTINGS,
   normalizeComfortSettings,
   type ComfortSettings,
 } from '../../domain/settings/accessibility'
@@ -34,6 +35,21 @@ export function SettingsScreen({
           value={settings.fieldOfView}
           onChange={(event) =>
             update({ fieldOfView: Number(event.currentTarget.value) })
+          }
+        />
+      </label>
+
+      <label>
+        <span>瞄準速度：{Math.round(settings.sensitivity * 100)}%</span>
+        <input
+          aria-label="瞄準速度"
+          type="range"
+          min="0.2"
+          max="2"
+          step="0.1"
+          value={settings.sensitivity}
+          onChange={(event) =>
+            update({ sensitivity: Number(event.currentTarget.value) })
           }
         />
       </label>
@@ -123,6 +139,18 @@ export function SettingsScreen({
       </label>
 
       <p className="panel-note">若覺得頭暈，請減少動態與閃光，並休息一下。</p>
+      <button
+        className="secondary-button reset-touch-button"
+        type="button"
+        onClick={() =>
+          update({
+            sensitivity: DEFAULT_COMFORT_SETTINGS.sensitivity,
+            leftHanded: DEFAULT_COMFORT_SETTINGS.leftHanded,
+          })
+        }
+      >
+        重設觸控操作
+      </button>
       <button className="primary-button" type="button" onClick={onClose}>
         完成設定
       </button>
