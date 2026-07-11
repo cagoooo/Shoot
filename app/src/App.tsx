@@ -7,6 +7,7 @@ import { BaseScreen } from './ui/screens/BaseScreen'
 import { StartScreen } from './ui/screens/StartScreen'
 import { WorkbenchScreen } from './ui/screens/WorkbenchScreen'
 import { ReportScreen } from './ui/screens/ReportScreen'
+import { CampaignScreen } from './ui/screens/CampaignScreen'
 import { reduceLearningEvents } from './learning/reducer'
 import { createBrowserSaveRepository } from './persistence/saveRepository'
 import { deserializeSave, serializeSave } from './persistence/exportSave'
@@ -28,6 +29,11 @@ const MissionScreen = lazy(async () => {
 const WaterGuardianScreen = lazy(async () => {
   const module = await import('./ui/screens/WaterGuardianScreen')
   return { default: module.WaterGuardianScreen }
+})
+
+const GreenEnergyScreen = lazy(async () => {
+  const module = await import('./ui/screens/GreenEnergyScreen')
+  return { default: module.GreenEnergyScreen }
 })
 
 function AppContent() {
@@ -54,6 +60,11 @@ function AppContent() {
   )
   const audio = useMemo(() => new AudioManager(audioAdapter), [audioAdapter])
   const transitionAudio = useMemo(() => audio.transitionTo.bind(audio), [audio])
+  const nextMission = activeMission === 'recycling-storm'
+    ? { id: 'water-guardian' as const, label: '前往下一關：水滴守護行動' }
+    : activeMission === 'water-guardian'
+      ? { id: 'green-energy-community' as const, label: '前往下一關：綠能社區行動' }
+      : null
 
   useEffect(() => {
     void audioAdapter.initialize()
@@ -68,6 +79,7 @@ function AppContent() {
       start: 'base',
       base: 'base',
       workbench: 'base',
+      campaign: 'base',
       range: 'exploration',
       mission: 'exploration',
       report: 'report',
@@ -154,6 +166,19 @@ function AppContent() {
     )
   }
 
+  if (screen === 'campaign') {
+    return (
+      <CampaignScreen
+        completedMissions={completedMissions}
+        onBack={() => setScreen('base')}
+        onMissionSelect={(mission) => {
+          setActiveMission(mission)
+          setScreen('mission')
+        }}
+      />
+    )
+  }
+
   if (screen === 'workbench') {
     if (contentLoadFailed) {
       return (
@@ -186,7 +211,30 @@ function AppContent() {
   if (screen === 'mission') {
     return (
       <Suspense fallback={<main className="loading-screen">正在打開垃圾風暴任務…</main>}>
-        {activeMission === 'water-guardian' ? (
+        {activeMission === 'green-energy-community' ? (
+          <GreenEnergyScreen
+            learningMode={mode}
+            comfortSettings={comfortSettings}
+            onComfortSettingsChange={setComfortSettings}
+            onBack={() => setScreen('base')}
+            onAudioSceneChange={transitionAudio}
+            onMissionComplete={(events) => {
+              recordLearningEvents(events)
+              setCompletedMissions((missions) =>
+                Array.from(new Set([...missions, 'green-energy-community'])),
+              )
+              void saveRepository.load().then((save) =>
+                saveRepository.save({
+                  ...save,
+                  completedMissions: Array.from(
+                    new Set([...save.completedMissions, 'green-energy-community']),
+                  ),
+                }),
+              )
+              setScreen('report')
+            }}
+          />
+        ) : activeMission === 'water-guardian' ? (
           <WaterGuardianScreen
             learningMode={mode}
             comfortSettings={comfortSettings}
@@ -243,13 +291,13 @@ function AppContent() {
         report={reduceLearningEvents(learningEvents)}
         onBack={() => setScreen('base')}
         onReplay={() => setScreen('mission')}
-        nextMissionAvailable={
-          activeMission === 'recycling-storm' &&
-          completedMissions.includes('recycling-storm')
-        }
+        nextMissionAvailable={Boolean(nextMission && completedMissions.includes(activeMission))}
+        nextMissionLabel={nextMission?.label}
         onNextMission={() => {
-          setActiveMission('water-guardian')
-          setScreen('mission')
+          if (nextMission) {
+            setActiveMission(nextMission.id)
+            setScreen('mission')
+          }
         }}
         onReflection={(choice) => {
           recordLearningEvents([{ type: 'reflection-chosen', choice }])

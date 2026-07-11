@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { LearningEvent } from '../learning/events'
+import type { CampaignMissionId } from '../content/missionCatalog'
 import {
   DEFAULT_COMFORT_SETTINGS,
   type ComfortSettings,
@@ -12,9 +13,10 @@ export type GameScreen =
   | 'range'
   | 'mission'
   | 'report'
+  | 'campaign'
 
 export type LearningMode = 'middle-assist' | 'upper-standard'
-export type MissionId = 'recycling-storm' | 'water-guardian'
+export type MissionId = CampaignMissionId
 
 interface GameStore {
   screen: GameScreen

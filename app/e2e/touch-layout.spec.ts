@@ -51,6 +51,20 @@ test('手機可關閉背景音樂，且不影響基地主要操作', async ({ pa
   await expect(page.getByRole('button', { name: /今天任務/ })).toBeVisible()
 })
 
+test('手機可閱讀九大世界地圖且沒有水平溢出', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('./')
+  await page.getByRole('button', { name: '開始任務' }).click()
+  await page.getByRole('button', { name: '查看九大世界任務地圖 →' }).click()
+
+  await expect(page.getByRole('heading', { name: '地球行動地圖' })).toBeVisible()
+  await expect(page.getByText('地球夥伴總動員')).toBeVisible()
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  )
+  expect(overflow).toBe(0)
+})
+
 test('平板直向可打開任務與操作閱讀設定', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 })
   await page.goto('./')

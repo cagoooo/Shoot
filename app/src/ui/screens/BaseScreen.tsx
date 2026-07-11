@@ -72,6 +72,9 @@ export function BaseScreen({
                 <b>水滴守護行動</b>
                 <small>{completedMissions.includes('recycling-storm') ? 'SDG 6｜已解鎖' : '完成第一關後解鎖'}</small>
               </button>
+              <button className="mission-map-link" type="button" onClick={() => onNavigate('campaign')}>
+                查看九大世界任務地圖 →
+              </button>
             </span>
           </div>
         ) : (

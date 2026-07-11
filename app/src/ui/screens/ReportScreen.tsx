@@ -8,6 +8,7 @@ interface ReportScreenProps {
   onReplay?: () => void
   onNextMission?: () => void
   nextMissionAvailable?: boolean
+  nextMissionLabel?: string
   onReflection?: (choice: string) => void
   onPrint?: () => void
   onExport?: () => void
@@ -25,6 +26,7 @@ export function ReportScreen({
   onReplay,
   onNextMission,
   nextMissionAvailable = false,
+  nextMissionLabel = '前往下一關',
   onReflection,
   onPrint,
   onExport,
@@ -126,7 +128,7 @@ export function ReportScreen({
         )}
         {onNextMission && nextMissionAvailable && (
           <button className="primary-button" type="button" onClick={onNextMission}>
-            前往下一關：水滴守護行動
+            {nextMissionLabel}
           </button>
         )}
         <button
