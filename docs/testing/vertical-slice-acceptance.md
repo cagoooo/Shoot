@@ -41,7 +41,7 @@
 
 ## BGM 授權狀態
 
-7 個音樂情境已建立清單與切換／閃避管線，但正式檔案目前均為 `awaiting-audited-file`。每首都必須由教師成人 Suno 帳號完成作品連結、日期、方案、提示詞、模型、檔案雜湊、剪輯、條款快照與審核人紀錄後才可發布；詳見 `suno-asset-ledger.md`。
+教師成人 Suno Pro Plan 產生的 6 首正式 MP3 已匯入並部署：基地、探索、緊張、首領、撤離、成功。每首皆有候選作品連結、方案紀錄與 SHA-256 驗證，詳見 `suno-asset-ledger.md` 與 `suno-asset-verification.md`。任務報告曲的兩個候選作品尚未顯示 MP3 下載選項，因此維持 `awaiting-audited-file`；報告畫面暫時沿用已核可的成功曲，避免播放中斷。
 
 ## GitHub Pages 預發布狀態
 
@@ -52,6 +52,6 @@
 
 ## 發行前仍需人工完成
 
-- 使用老師的成人 Suno 帳號匯入已確認授權的正式 BGM，並完成素材台帳；學生端不接觸 Suno。
+- 待任務報告曲可下載後，以教師成人 Suno Pro Plan 的正式 MP3 取代結算畫面的暫用成功曲；學生端不接觸 Suno。
 - 使用學校常見 Chromebook、iPad 與 Android 平板各做一次實機試玩。
 - GitHub 遠端與 Pages 網址建立後，依發行指引驗證正式子路徑網址。

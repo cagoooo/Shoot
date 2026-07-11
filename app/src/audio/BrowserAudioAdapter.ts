@@ -25,6 +25,7 @@ export class BrowserAudioAdapter implements AudioAdapter {
   private currentTrack?: BrowserAudioElement
   private musicGain = 0.7
   private initialized = false
+  private fadeTimer?: ReturnType<typeof setInterval>
 
   constructor(
     basePath: string,
@@ -54,17 +55,34 @@ export class BrowserAudioAdapter implements AudioAdapter {
     this.initialized = true
   }
 
-  async transitionMusic(trackId: string, _fadeMs: number): Promise<void> {
+  async transitionMusic(trackId: string, fadeMs: number): Promise<void> {
     const nextTrack = this.tracks.get(trackId)
     if (!nextTrack || nextTrack === this.currentTrack) return
-    this.currentTrack?.pause()
+    const previousTrack = this.currentTrack
+    if (this.fadeTimer) clearInterval(this.fadeTimer)
     this.currentTrack = nextTrack
-    nextTrack.volume = this.musicGain
+    nextTrack.volume = previousTrack && fadeMs > 0 ? 0 : this.musicGain
     try {
       await nextTrack.play()
     } catch {
       // 行動裝置可能暫時拒絕播放；下一次使用者互動會重新解鎖。
     }
+    if (!previousTrack || fadeMs <= 0) {
+      previousTrack?.pause()
+      return
+    }
+    const steps = Math.max(1, Math.ceil(fadeMs / 50))
+    let step = 0
+    this.fadeTimer = setInterval(() => {
+      step += 1
+      const progress = Math.min(1, step / steps)
+      previousTrack.volume = this.musicGain * (1 - progress)
+      nextTrack.volume = this.musicGain * progress
+      if (progress < 1) return
+      previousTrack.pause()
+      clearInterval(this.fadeTimer)
+      this.fadeTimer = undefined
+    }, fadeMs / steps)
   }
 
   setMusicGain(gain: number): void {

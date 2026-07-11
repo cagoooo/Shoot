@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it, vi } from 'vitest'
 import { audioManifestSchema, loadAudioManifest } from './audioManifest'
 
@@ -55,5 +55,22 @@ describe('audio manifest', () => {
 
     await expect(loadAudioManifest('/Shoot/', fetcher)).resolves.toHaveLength(1)
     expect(fetcher).toHaveBeenCalledWith('/Shoot/content/audio-manifest.json')
+  })
+
+  it('每個已核可音樂來源都確實存在於可部署的 public 資料夾', () => {
+    const file = new URL('../../public/content/audio-manifest.json', import.meta.url)
+    const manifest = audioManifestSchema.parse(
+      JSON.parse(readFileSync(file, 'utf8')),
+    )
+
+    for (const asset of manifest.filter(
+      (item) => item.deploymentStatus === 'approved',
+    )) {
+      for (const source of asset.sources) {
+        expect(
+          existsSync(new URL(`../../public/${source.path}`, import.meta.url)),
+        ).toBe(true)
+      }
+    }
   })
 })

@@ -64,4 +64,29 @@ describe('BrowserAudioAdapter', () => {
     expect(first.pause).toHaveBeenCalledOnce()
     expect(second.play).toHaveBeenCalledOnce()
   })
+
+  it('切換時以指定時間交叉淡化，而非突然中止前一首', async () => {
+    vi.useFakeTimers()
+    const first = makeAudio()
+    const second = makeAudio()
+    const adapter = new BrowserAudioAdapter(
+      '/',
+      vi.fn().mockReturnValueOnce(first).mockReturnValueOnce(second),
+      async () => [
+        { id: 'music-base', kind: 'music', sources: [{ format: 'mp3', path: 'base.mp3' }], loop: true, licenseRecord: 'x', deploymentStatus: 'approved' },
+        { id: 'music-boss', kind: 'music', sources: [{ format: 'mp3', path: 'boss.mp3' }], loop: true, licenseRecord: 'x', deploymentStatus: 'approved' },
+      ],
+    )
+
+    await adapter.initialize()
+    await adapter.transitionMusic('music-base', 0)
+    await adapter.transitionMusic('music-boss', 100)
+
+    expect(first.pause).not.toHaveBeenCalled()
+    expect(second.volume).toBe(0)
+    await vi.advanceTimersByTimeAsync(100)
+    expect(first.pause).toHaveBeenCalledOnce()
+    expect(second.volume).toBeCloseTo(0.7)
+    vi.useRealTimers()
+  })
 })
