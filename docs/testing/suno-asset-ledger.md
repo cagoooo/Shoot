@@ -44,6 +44,22 @@
 
 這兩首是在成人帳號登入後依 `suno-generation-prompts.md` 的基地提示詞產生。帳號當下顯示為 Free Plan，不符合本專案「正式遊戲 BGM 使用具有商用權利的成人付費方案」的發布門檻，因此不列入正式資產、不寫入 manifest，也不放進 GitHub Pages。
 
+## 正式方案候選（待聽檢、下載與雜湊）
+
+生成日期：2026-07-11　　帳號方案：Pro Plan　　模型：v5.5　　作品權利：Suno 帳戶頁明示「Commercial use rights for new songs made」。
+
+| manifest ID | 場景 | 候選 A | 候選 B | 暫定選擇 | 狀態 |
+|---|---|---|---|---|---|
+| music-base | 守護隊基地 | [Sprout Hub Morning](https://suno.com/song/6047429d-1597-49ce-9fa8-2628c2eff65a) | [Sprout Hub Morning](https://suno.com/song/9de1423c-26d7-4911-95e3-77eca76f519e) | A | 待下載、聽檢與剪輯 |
+| music-exploration | 區域探索 | [Recycling Trail Map](https://suno.com/song/17110dd1-6eae-4858-85b3-6fd49dcd338d) | [Recycling Trail Map](https://suno.com/song/a5e10576-c7e6-4d75-95d3-ad9c14e93d82) | B | 待下載、聽檢與剪輯 |
+| music-tension | 黃色警示 | [Yellow Bin Check](https://suno.com/song/d38473e0-21cc-473e-952c-137d14f3d731) | [Yellow Bin Check](https://suno.com/song/bc926a16-77ef-43b6-b882-44b7de453c76) | B | 待下載、聽檢與剪輯 |
+| music-boss | 垃圾風暴機 | [Recycled Reactor Run](https://suno.com/song/2e342971-4902-429c-b774-eed81aba5c29) | [Recycled Reactor Run](https://suno.com/song/72e96691-489b-4f61-b64e-c64b4dad934d) | B | 待下載、聽檢與剪輯 |
+| music-evacuation | 屋頂撤離 | [Rooftop Relay](https://suno.com/song/9fb25329-63d4-41af-989a-a3ceddea974b) | [Rooftop Relay](https://suno.com/song/bb402fb0-b945-4d93-9af9-8252f7e74ff9) | A | 待下載、聽檢與剪輯 |
+| music-success | 任務成功短曲 | [Little Green Win](https://suno.com/song/f4a15b3a-799a-44e3-833e-760f1b7f329e) | [Little Green Win](https://suno.com/song/d7464ad9-74aa-41d4-9ccf-1320f1b83cf7) | B | 待剪輯為 5–10 秒短曲 |
+| music-report | 永續行動報告 | [Little Green Steps](https://suno.com/song/943e5f17-e267-4830-ac01-c5f6deda81ac) | [Little Green Steps](https://suno.com/song/f8f95908-a373-4ac5-951e-3ffe7f7112d7) | A | 待下載、聽檢與剪輯 |
+
+「暫定選擇」依場景長度與提示詞契合度安排；部署前仍須以實際聽感確認無人聲、突發巨響、恐怖音色或干擾閱讀的頻段，並填入原始／最終檔 SHA-256、剪輯紀錄與條款快照。
+
 ## 建議的無歌詞提示詞方向
 
 完整可直接貼入 Suno 的提示詞、節奏、長度與篩選流程見 `suno-generation-prompts.md`。
