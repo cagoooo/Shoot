@@ -67,7 +67,7 @@ export const campaignMissions: readonly CampaignMission[] = [
     icon: '🌱',
     story: '土壤變硬，小樹苗找不到安全的家。',
     mechanic: '土壤觀察、棲地修復',
-    status: 'building',
+    status: 'playable',
     requires: 'green-energy-community',
   },
   {
@@ -79,7 +79,7 @@ export const campaignMissions: readonly CampaignMission[] = [
     icon: '🥕',
     story: '配送站的保存箱失去平衡，食物可能被浪費。',
     mechanic: '保存、分配、營養選擇',
-    status: 'building',
+    status: 'playable',
     requires: 'seed-forest',
   },
   {
@@ -91,7 +91,7 @@ export const campaignMissions: readonly CampaignMission[] = [
     icon: '🫧',
     story: '校園水站和清潔站需要重新啟動。',
     mechanic: '衛生判斷、補給路線',
-    status: 'building',
+    status: 'playable',
     requires: 'food-rescue',
   },
   {
@@ -103,7 +103,7 @@ export const campaignMissions: readonly CampaignMission[] = [
     icon: '🏠',
     story: '暴雨後的社區需要安全通道和避難準備。',
     mechanic: '防災建造、撤離規劃',
-    status: 'building',
+    status: 'playable',
     requires: 'health-bubble',
   },
   {
@@ -115,7 +115,7 @@ export const campaignMissions: readonly CampaignMission[] = [
     icon: '🐋',
     story: '海岸潮池被漂流物覆蓋，海洋生物需要幫忙。',
     mechanic: '潮汐判讀、海廢回收',
-    status: 'building',
+    status: 'playable',
     requires: 'safe-home',
   },
   {
@@ -127,7 +127,7 @@ export const campaignMissions: readonly CampaignMission[] = [
     icon: '🤝',
     story: '九個世界的資料需要一起校正，才能讓平衡星核回到地球。',
     mechanic: '資料整合、合作分工',
-    status: 'building',
+    status: 'playable',
     requires: 'ocean-blue',
   },
 ]

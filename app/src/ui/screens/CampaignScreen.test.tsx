@@ -17,7 +17,7 @@ describe('CampaignScreen', () => {
 
     expect(screen.getByRole('heading', { name: '地球行動地圖' })).toBeVisible()
     expect(screen.getByRole('button', { name: '開始行動' })).toBeEnabled()
-    for (const button of screen.getAllByRole('button', { name: '建造中' })) {
+    for (const button of screen.getAllByRole('button', { name: '完成前一關後解鎖' })) {
       expect(button).toBeDisabled()
     }
     await user.click(screen.getByRole('button', { name: '開始行動' }))

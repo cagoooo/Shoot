@@ -8,6 +8,8 @@ import { StartScreen } from './ui/screens/StartScreen'
 import { WorkbenchScreen } from './ui/screens/WorkbenchScreen'
 import { ReportScreen } from './ui/screens/ReportScreen'
 import { CampaignScreen } from './ui/screens/CampaignScreen'
+import { getStoryMission } from './game/missions/storyWorld/storyMissionConfig'
+import { campaignMissions } from './content/missionCatalog'
 import { reduceLearningEvents } from './learning/reducer'
 import { createBrowserSaveRepository } from './persistence/saveRepository'
 import { deserializeSave, serializeSave } from './persistence/exportSave'
@@ -36,6 +38,11 @@ const GreenEnergyScreen = lazy(async () => {
   return { default: module.GreenEnergyScreen }
 })
 
+const StoryWorldScreen = lazy(async () => {
+  const module = await import('./ui/screens/StoryWorldScreen')
+  return { default: module.StoryWorldScreen }
+})
+
 function AppContent() {
   const {
     screen,
@@ -60,11 +67,11 @@ function AppContent() {
   )
   const audio = useMemo(() => new AudioManager(audioAdapter), [audioAdapter])
   const transitionAudio = useMemo(() => audio.transitionTo.bind(audio), [audio])
-  const nextMission = activeMission === 'recycling-storm'
-    ? { id: 'water-guardian' as const, label: '前往下一關：水滴守護行動' }
-    : activeMission === 'water-guardian'
-      ? { id: 'green-energy-community' as const, label: '前往下一關：綠能社區行動' }
-      : null
+  const currentMission = campaignMissions.find((mission) => mission.id === activeMission)
+  const nextMission = currentMission
+    ? campaignMissions.find((mission) => mission.order === currentMission.order + 1)
+    : undefined
+  const storyMission = getStoryMission(activeMission)
 
   useEffect(() => {
     void audioAdapter.initialize()
@@ -211,7 +218,31 @@ function AppContent() {
   if (screen === 'mission') {
     return (
       <Suspense fallback={<main className="loading-screen">正在打開垃圾風暴任務…</main>}>
-        {activeMission === 'green-energy-community' ? (
+        {storyMission ? (
+          <StoryWorldScreen
+            mission={storyMission}
+            learningMode={mode}
+            comfortSettings={comfortSettings}
+            onComfortSettingsChange={setComfortSettings}
+            onBack={() => setScreen('base')}
+            onAudioSceneChange={transitionAudio}
+            onMissionComplete={(events) => {
+              recordLearningEvents(events)
+              setCompletedMissions((missions) =>
+                Array.from(new Set([...missions, storyMission.id])),
+              )
+              void saveRepository.load().then((save) =>
+                saveRepository.save({
+                  ...save,
+                  completedMissions: Array.from(
+                    new Set([...save.completedMissions, storyMission.id]),
+                  ),
+                }),
+              )
+              setScreen('report')
+            }}
+          />
+        ) : activeMission === 'green-energy-community' ? (
           <GreenEnergyScreen
             learningMode={mode}
             comfortSettings={comfortSettings}
@@ -292,7 +323,7 @@ function AppContent() {
         onBack={() => setScreen('base')}
         onReplay={() => setScreen('mission')}
         nextMissionAvailable={Boolean(nextMission && completedMissions.includes(activeMission))}
-        nextMissionLabel={nextMission?.label}
+        nextMissionLabel={nextMission ? `前往下一關：${nextMission.title}` : undefined}
         onNextMission={() => {
           if (nextMission) {
             setActiveMission(nextMission.id)
