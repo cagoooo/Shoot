@@ -35,6 +35,15 @@
 | music-success | 任務成功短曲 | 待阿凱老師提供 | — | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | 等待稽核檔案 |
 | music-report | 永續行動報告 | 待阿凱老師提供 | — | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | 等待稽核檔案 |
 
+## 僅供試聽的候選作品（不可部署）
+
+| manifest ID | Suno 作品連結 | 生成日期 | 帳號方案 | 模型 | 用途 | 上架狀態 |
+|---|---|---|---|---|---|---|
+| music-base | https://suno.com/song/44fc9a08-87b1-46c2-87ac-026e83fb2c3a | 2026-07-11 | Free Plan | v4.5-all | 基地候選 A：Sprout Lab Morning | 僅供試聽；不得下載或部署 |
+| music-base | https://suno.com/song/b05ee56c-1fcc-49a9-ae15-28c8538be9ed | 2026-07-11 | Free Plan | v4.5-all | 基地候選 B：Sprout Lab Morning | 僅供試聽；不得下載或部署 |
+
+這兩首是在成人帳號登入後依 `suno-generation-prompts.md` 的基地提示詞產生。帳號當下顯示為 Free Plan，不符合本專案「正式遊戲 BGM 使用具有商用權利的成人付費方案」的發布門檻，因此不列入正式資產、不寫入 manifest，也不放進 GitHub Pages。
+
 ## 建議的無歌詞提示詞方向
 
 完整可直接貼入 Suno 的提示詞、節奏、長度與篩選流程見 `suno-generation-prompts.md`。
