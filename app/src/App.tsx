@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from './app/ErrorBoundary'
 import { useGameStore } from './app/gameStore'
 import { loadContent } from './content/loadContent'
@@ -8,6 +8,8 @@ import { StartScreen } from './ui/screens/StartScreen'
 import { WorkbenchScreen } from './ui/screens/WorkbenchScreen'
 import { ReportScreen } from './ui/screens/ReportScreen'
 import { reduceLearningEvents } from './learning/reducer'
+import { createBrowserSaveRepository } from './persistence/saveRepository'
+import { deserializeSave, serializeSave } from './persistence/exportSave'
 import './App.css'
 
 const RangeScreen = lazy(async () => {
@@ -33,6 +35,37 @@ function AppContent() {
   } = useGameStore()
   const [parts, setParts] = useState<PartContent[]>([])
   const [contentLoadFailed, setContentLoadFailed] = useState(false)
+  const saveRepository = useMemo(() => createBrowserSaveRepository(), [])
+
+  useEffect(() => {
+    void saveRepository.load().then((save) => setMode(save.mode))
+  }, [saveRepository, setMode])
+
+  const saveMode = (nextMode: typeof mode) => {
+    setMode(nextMode)
+    void saveRepository.load().then((save) =>
+      saveRepository.save({ ...save, mode: nextMode }),
+    )
+  }
+
+  const exportProgress = () => {
+    void saveRepository.load().then((save) => {
+      const url = URL.createObjectURL(
+        new Blob([serializeSave(save)], { type: 'application/json' }),
+      )
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = 'earth-guardian-progress.json'
+      anchor.click()
+      URL.revokeObjectURL(url)
+    })
+  }
+
+  const importProgress = async (serialized: string) => {
+    const save = deserializeSave(serialized)
+    await saveRepository.save(save)
+    setMode(save.mode)
+  }
 
   useEffect(() => {
     if (screen !== 'workbench' || parts.length > 0) return
@@ -47,14 +80,21 @@ function AppContent() {
     return (
       <StartScreen
         mode={mode}
-        onModeChange={setMode}
+        onModeChange={saveMode}
         onStart={() => setScreen('base')}
       />
     )
   }
 
   if (screen === 'base') {
-    return <BaseScreen mode={mode} onNavigate={setScreen} />
+    return (
+      <BaseScreen
+        mode={mode}
+        onNavigate={setScreen}
+        onExportProgress={exportProgress}
+        onImportProgress={importProgress}
+      />
+    )
   }
 
   if (screen === 'workbench') {
@@ -96,6 +136,14 @@ function AppContent() {
           onBack={() => setScreen('base')}
           onMissionComplete={(events) => {
             recordLearningEvents(events)
+            void saveRepository.load().then((save) =>
+              saveRepository.save({
+                ...save,
+                completedMissions: Array.from(
+                  new Set([...save.completedMissions, 'recycling-storm']),
+                ),
+              }),
+            )
             setScreen('report')
           }}
         />
@@ -108,9 +156,22 @@ function AppContent() {
       <ReportScreen
         report={reduceLearningEvents(learningEvents)}
         onBack={() => setScreen('base')}
-        onReflection={(choice) =>
+        onReflection={(choice) => {
           recordLearningEvents([{ type: 'reflection-chosen', choice }])
-        }
+          void saveRepository.load().then((save) =>
+            saveRepository.save({
+              ...save,
+              reflections: [
+                ...save.reflections,
+                {
+                  missionId: 'recycling-storm',
+                  choice,
+                  createdAt: new Date().toISOString(),
+                },
+              ],
+            }),
+          )
+        }}
       />
     )
   }

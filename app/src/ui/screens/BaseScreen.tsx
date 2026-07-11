@@ -1,8 +1,11 @@
 import type { GameScreen, LearningMode } from '../../app/gameStore'
+import { ProgressControls } from '../components/ProgressControls'
 
 interface BaseScreenProps {
   mode: LearningMode
   onNavigate: (screen: GameScreen) => void
+  onExportProgress: () => void
+  onImportProgress: (serialized: string) => Promise<void>
 }
 
 const baseZones: Array<{
@@ -17,7 +20,12 @@ const baseZones: Array<{
   { screen: 'report', title: '我的行動紀錄', description: '查看結果和改良想法', symbol: '□' },
 ]
 
-export function BaseScreen({ mode, onNavigate }: BaseScreenProps) {
+export function BaseScreen({
+  mode,
+  onNavigate,
+  onExportProgress,
+  onImportProgress,
+}: BaseScreenProps) {
   return (
     <main className="base-screen">
       <header className="base-header">
@@ -46,6 +54,10 @@ export function BaseScreen({ mode, onNavigate }: BaseScreenProps) {
           </button>
         ))}
       </section>
+      <ProgressControls
+        onExport={onExportProgress}
+        onImport={onImportProgress}
+      />
     </main>
   )
 }

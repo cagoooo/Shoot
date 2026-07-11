@@ -6,12 +6,18 @@ import type { ComfortSettings } from '../domain/settings/accessibility'
 import { InputManager } from '../input/InputManager'
 import { bindKeyboardMouseInput } from '../input/bindKeyboardMouseInput'
 import type { WeaponState } from '../domain/combat/weaponState'
+import {
+  createPerformanceMonitor,
+  feedPerformanceSample,
+} from './engine/performanceMonitor'
 
 export interface RuntimeEngine {
   runRenderLoop(callback: () => void): void
   stopRenderLoop(): void
   resize(): void
   dispose(): void
+  getFps?(): number
+  setHardwareScalingLevel?(level: number): void
 }
 
 export interface RuntimeScene {
@@ -84,7 +90,16 @@ export function GameCanvas({
         comfortSettings,
         onWeaponStateChange,
       )
-      engine.runRenderLoop(() => scene?.render())
+      const performance = createPerformanceMonitor('high')
+      engine.runRenderLoop(() => {
+        scene?.render()
+        if (!engine?.getFps) return
+        const decision = feedPerformanceSample(performance, engine.getFps())
+        if (decision.reason !== 'sustained-low-fps') return
+        engine.setHardwareScalingLevel?.(
+          decision.profile === 'medium' ? 1.5 : 2,
+        )
+      })
       window.addEventListener('resize', handleResize)
     })
 
