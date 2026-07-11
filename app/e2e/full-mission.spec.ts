@@ -32,5 +32,21 @@ test('高年級學生可由準備、探索到撤離並查看永續紀錄', async
 
   await expect(page.getByRole('heading', { name: '我的永續行動紀錄' })).toBeVisible()
   await expect(page.getByText('省電高手')).toBeVisible()
+  await page.getByRole('button', { name: /前往下一關：水滴守護行動/ }).click()
+  await expect(page.getByRole('heading', { name: '水滴守護行動' })).toBeVisible()
+  await page.getByRole('button', { name: '我準備好了' }).click()
+  for (let drop = 0; drop < 3; drop += 1) {
+    await page.getByRole('button', { name: '收集一滴雨水' }).click()
+  }
+  await page.getByRole('button', { name: '前往過濾站' }).click()
+  for (const part of ['布', '砂子', '活性碳']) {
+    await page.getByRole('button', { name: new RegExp(part) }).click()
+  }
+  await page.getByRole('button', { name: '完成過濾' }).click()
+  await page.getByRole('button', { name: /飲水站/ }).click()
+  await page.getByRole('button', { name: /菜園澆灌/ }).click()
+  await page.getByRole('button', { name: '完成水滴守護' }).click()
+  await page.getByRole('button', { name: '查看永續行動紀錄' }).click()
+  await expect(page.getByRole('heading', { name: '水滴守護成功' })).not.toBeVisible()
   expect(pageErrors).toEqual([])
 })

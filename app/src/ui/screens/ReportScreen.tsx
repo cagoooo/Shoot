@@ -5,6 +5,9 @@ import type { LearningReport } from '../../learning/events'
 interface ReportScreenProps {
   report: LearningReport
   onBack: () => void
+  onReplay?: () => void
+  onNextMission?: () => void
+  nextMissionAvailable?: boolean
   onReflection?: (choice: string) => void
   onPrint?: () => void
   onExport?: () => void
@@ -19,6 +22,9 @@ const reflectionChoices = [
 export function ReportScreen({
   report,
   onBack,
+  onReplay,
+  onNextMission,
+  nextMissionAvailable = false,
   onReflection,
   onPrint,
   onExport,
@@ -113,6 +119,16 @@ export function ReportScreen({
       </section>
 
       <div className="report-actions no-print">
+        {onReplay && (
+          <button className="secondary-button" type="button" onClick={onReplay}>
+            再挑戰本關
+          </button>
+        )}
+        {onNextMission && nextMissionAvailable && (
+          <button className="primary-button" type="button" onClick={onNextMission}>
+            前往下一關：水滴守護行動
+          </button>
+        )}
         <button
           className="secondary-button no-print"
           type="button"

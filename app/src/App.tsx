@@ -25,18 +25,26 @@ const MissionScreen = lazy(async () => {
   return { default: module.MissionScreen }
 })
 
+const WaterGuardianScreen = lazy(async () => {
+  const module = await import('./ui/screens/WaterGuardianScreen')
+  return { default: module.WaterGuardianScreen }
+})
+
 function AppContent() {
   const {
     screen,
     mode,
+    activeMission,
     learningEvents,
     comfortSettings,
     setMode,
+    setActiveMission,
     setScreen,
     recordLearningEvents,
     setComfortSettings,
   } = useGameStore()
   const [parts, setParts] = useState<PartContent[]>([])
+  const [completedMissions, setCompletedMissions] = useState<string[]>([])
   const [contentLoadFailed, setContentLoadFailed] = useState(false)
   const [audioMuted, setAudioMuted] = useState(false)
   const saveRepository = useMemo(() => createBrowserSaveRepository(), [])
@@ -76,7 +84,10 @@ function AppContent() {
   }, [audio])
 
   useEffect(() => {
-    void saveRepository.load().then((save) => setMode(save.mode))
+    void saveRepository.load().then((save) => {
+      setMode(save.mode)
+      setCompletedMissions(save.completedMissions)
+    })
   }, [saveRepository, setMode])
 
   const saveMode = (nextMode: typeof mode) => {
@@ -103,6 +114,7 @@ function AppContent() {
     const save = deserializeSave(serialized)
     await saveRepository.save(save)
     setMode(save.mode)
+    setCompletedMissions(save.completedMissions)
   }
 
   useEffect(() => {
@@ -134,6 +146,8 @@ function AppContent() {
         audioMuted={audioMuted}
         onAudioMutedChange={setAudioMuted}
         onNavigate={setScreen}
+        completedMissions={completedMissions}
+        onMissionSelect={setActiveMission}
         onExportProgress={exportProgress}
         onImportProgress={importProgress}
       />
@@ -172,6 +186,30 @@ function AppContent() {
   if (screen === 'mission') {
     return (
       <Suspense fallback={<main className="loading-screen">正在打開垃圾風暴任務…</main>}>
+        {activeMission === 'water-guardian' ? (
+          <WaterGuardianScreen
+            learningMode={mode}
+            comfortSettings={comfortSettings}
+            onComfortSettingsChange={setComfortSettings}
+            onBack={() => setScreen('base')}
+            onAudioSceneChange={transitionAudio}
+            onMissionComplete={(events) => {
+              recordLearningEvents(events)
+              setCompletedMissions((missions) =>
+                Array.from(new Set([...missions, 'water-guardian'])),
+              )
+              void saveRepository.load().then((save) =>
+                saveRepository.save({
+                  ...save,
+                  completedMissions: Array.from(
+                    new Set([...save.completedMissions, 'water-guardian']),
+                  ),
+                }),
+              )
+              setScreen('report')
+            }}
+          />
+        ) : (
         <MissionScreen
           learningMode={mode}
           comfortSettings={comfortSettings}
@@ -180,6 +218,9 @@ function AppContent() {
           onAudioSceneChange={transitionAudio}
           onMissionComplete={(events) => {
             recordLearningEvents(events)
+            setCompletedMissions((missions) =>
+              Array.from(new Set([...missions, 'recycling-storm'])),
+            )
             void saveRepository.load().then((save) =>
               saveRepository.save({
                 ...save,
@@ -191,6 +232,7 @@ function AppContent() {
             setScreen('report')
           }}
         />
+        )}
       </Suspense>
     )
   }
@@ -200,6 +242,15 @@ function AppContent() {
       <ReportScreen
         report={reduceLearningEvents(learningEvents)}
         onBack={() => setScreen('base')}
+        onReplay={() => setScreen('mission')}
+        nextMissionAvailable={
+          activeMission === 'recycling-storm' &&
+          completedMissions.includes('recycling-storm')
+        }
+        onNextMission={() => {
+          setActiveMission('water-guardian')
+          setScreen('mission')
+        }}
         onReflection={(choice) => {
           recordLearningEvents([{ type: 'reflection-chosen', choice }])
           void saveRepository.load().then((save) =>
@@ -208,7 +259,7 @@ function AppContent() {
               reflections: [
                 ...save.reflections,
                 {
-                  missionId: 'recycling-storm',
+                  missionId: activeMission,
                   choice,
                   createdAt: new Date().toISOString(),
                 },

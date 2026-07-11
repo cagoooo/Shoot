@@ -1,0 +1,171 @@
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
+import type { AudioScene } from '../../audio/AudioManager'
+import type { LearningMode } from '../../app/gameStore'
+import type { ComfortSettings } from '../../domain/settings/accessibility'
+import type { LearningEvent } from '../../learning/events'
+import { InputManager } from '../../input/InputManager'
+import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
+import { TouchControls } from '../components/TouchControls'
+import { SettingsScreen } from './SettingsScreen'
+import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/buildWaterGuardian'
+
+type WaterPhase = 'briefing' | 'collect' | 'filter' | 'distribute' | 'report'
+type FilterPart = 'cloth' | 'sand' | 'charcoal'
+
+interface WaterGuardianScreenProps {
+  learningMode: LearningMode
+  comfortSettings: ComfortSettings
+  onComfortSettingsChange: (settings: ComfortSettings) => void
+  onBack: () => void
+  onMissionComplete: (events: LearningEvent[]) => void
+  onAudioSceneChange?: (scene: AudioScene) => void
+  mapSlot?: ReactNode
+}
+
+const phaseGuide: Record<WaterPhase, { icon: string; now: string; learn: string }> = {
+  briefing: { icon: '💧', now: '雨水收集站需要你的幫忙。', learn: '水可以被收集、過濾和再次使用。' },
+  collect: { icon: '🌧️', now: '收集 3 滴雨水，準備修復淨水站。', learn: '雨水是可以珍惜的自然資源。' },
+  filter: { icon: '🧪', now: '選出能一起工作的過濾材料。', learn: '不同材料能擋住不同大小的雜質。' },
+  distribute: { icon: '🚰', now: '把乾淨的水分配給需要的地方。', learn: '先想清楚用途，才能公平用水。' },
+  report: { icon: '🌍', now: '看看你完成的淨水行動。', learn: 'SDG 6 從珍惜每一滴水開始。' },
+}
+
+export function WaterGuardianScreen({
+  learningMode,
+  comfortSettings,
+  onComfortSettingsChange,
+  onBack,
+  onMissionComplete,
+  onAudioSceneChange,
+  mapSlot,
+}: WaterGuardianScreenProps) {
+  const inputManager = useMemo(() => new InputManager(), [])
+  const [phase, setPhase] = useState<WaterPhase>('briefing')
+  const [drops, setDrops] = useState(0)
+  const [filterParts, setFilterParts] = useState<FilterPart[]>([])
+  const [uses, setUses] = useState<string[]>([])
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const guide = phaseGuide[phase]
+  const sceneFactory = useCallback<SceneFactory>(
+    (engine, runtimeInput, runtimeComfort) =>
+      buildWaterGuardianScene(
+        engine as AbstractEngine,
+        runtimeInput ?? inputManager,
+        runtimeComfort,
+      ),
+    [inputManager],
+  )
+
+  const finish = () => {
+    onMissionComplete([
+      { type: 'machine-repaired', id: 'water-filter-station' },
+      { type: 'protected-target', id: 'clean-water-tank' },
+      { type: 'material-recycled', category: 'water', amount: drops },
+      { type: 'energy-used', amount: 24 },
+      { type: 'part-selected', partId: 'water-filter-kit' },
+    ])
+  }
+
+  const toggleFilter = (part: FilterPart) =>
+    setFilterParts((current) =>
+      current.includes(part)
+        ? current.filter((item) => item !== part)
+        : [...current, part],
+    )
+
+  const toggleUse = (use: string) =>
+    setUses((current) =>
+      current.includes(use)
+        ? current.filter((item) => item !== use)
+        : [...current, use],
+    )
+
+  useEffect(() => {
+    onAudioSceneChange?.(phase === 'report' ? 'success' : 'exploration')
+  }, [onAudioSceneChange, phase])
+
+  return (
+    <main className={`mission-screen${comfortSettings.largeText ? ' large-text' : ''}`}>
+      <header className="mission-header">
+        <button className="text-button" type="button" onClick={onBack}>← 回基地</button>
+        <div>
+          <p className="eyebrow">SDG 6 淨水與衛生</p>
+          <h1>水滴守護行動</h1>
+        </div>
+        <span className="mission-phase">第 2 關</span>
+        <button className="secondary-button mission-settings-button" type="button" onClick={() => setSettingsOpen(true)}>
+          操作與閱讀設定
+        </button>
+      </header>
+
+      <div className="mission-layout">
+        {phase !== 'report' && (
+          <div className="mission-map-frame">
+            {mapSlot ?? <GameCanvas inputManager={inputManager} sceneFactory={sceneFactory} comfortSettings={comfortSettings} />}
+            <TouchControls leftHanded={comfortSettings.leftHanded} onInputChange={(state) => inputManager.updateSource('touch', state)} />
+            <p className="game-hint">靠近水站觀察，再回到任務卡完成步驟。</p>
+          </div>
+        )}
+        <section className="mission-task-card" aria-live="polite">
+          <aside className="mission-guide" aria-label="水滴任務圖卡引導">
+            <span className="mission-guide-icon" aria-hidden="true">{guide.icon}</span>
+            <div><strong>現在要做什麼？</strong><p>{guide.now}</p></div>
+            {learningMode === 'middle-assist' && <div className="mission-guide-next"><strong>下一步</strong><p>看完提示再做選擇。</p></div>}
+            <div className="mission-guide-learn"><strong>小小科學發現</strong><p>{guide.learn}</p></div>
+          </aside>
+
+          {phase === 'briefing' && <>
+            <p className="eyebrow">任務 1／4</p>
+            <h2>讓雨水重新流動</h2>
+            <p>社區的淨水站被落葉和泥沙堵住了。請收集雨水、組合過濾材料，再把乾淨的水分配出去。</p>
+            <button className="primary-button" type="button" onClick={() => setPhase('collect')}>我準備好了</button>
+          </>}
+
+          {phase === 'collect' && <>
+            <p className="eyebrow">任務 2／4</p>
+            <h2>收集雨水</h2>
+            <p>目前收集：{drops}／3 滴。每按一次就觀察一滴雨水進入水箱。</p>
+            <button className="primary-button" type="button" onClick={() => setDrops((value) => Math.min(3, value + 1))} disabled={drops >= 3}>收集一滴雨水</button>
+            {drops >= 3 && <button className="primary-button" type="button" onClick={() => setPhase('filter')}>前往過濾站</button>}
+          </>}
+
+          {phase === 'filter' && <>
+            <p className="eyebrow">任務 3／4</p>
+            <h2>組合過濾材料</h2>
+            <p>選擇材料並比較用途：布先擋落葉，砂子擋小顆粒，活性碳改善味道。</p>
+            <div className="route-options water-options">
+              {(['cloth', 'sand', 'charcoal'] as FilterPart[]).map((part) => (
+                <button key={part} type="button" aria-pressed={filterParts.includes(part)} onClick={() => toggleFilter(part)}>
+                  <strong>{part === 'cloth' ? '布' : part === 'sand' ? '砂子' : '活性碳'}</strong>
+                  <span>{part === 'cloth' ? '擋住落葉' : part === 'sand' ? '擋住小顆粒' : '改善味道'}</span>
+                </button>
+              ))}
+            </div>
+            {filterParts.length === 3 && <button className="primary-button" type="button" onClick={() => setPhase('distribute')}>完成過濾</button>}
+          </>}
+
+          {phase === 'distribute' && <>
+            <p className="eyebrow">任務 4／4</p>
+            <h2>分配乾淨的水</h2>
+            <p>選擇至少兩個需要用水的地方，想想怎麼珍惜有限的水。</p>
+            <div className="route-options water-options">
+              {['飲水站', '菜園澆灌', '清潔工具'].map((use) => (
+                <button key={use} type="button" aria-pressed={uses.includes(use)} onClick={() => toggleUse(use)}><strong>{use}</strong><span>安排一份乾淨的水</span></button>
+              ))}
+            </div>
+            {uses.length >= 2 && <button className="primary-button" type="button" onClick={() => setPhase('report')}>完成水滴守護</button>}
+          </>}
+
+          {phase === 'report' && <>
+            <p className="eyebrow">任務完成</p>
+            <h2>水滴守護成功</h2>
+            <div className="boss-result" role="status"><span>收集雨水：{drops} 滴</span><span>過濾材料：{filterParts.length} 種</span><span>分配用途：{uses.length} 處</span><strong>SDG 6：珍惜每一滴水</strong></div>
+            <button className="primary-button" type="button" onClick={finish}>查看永續行動紀錄</button>
+          </>}
+        </section>
+      </div>
+      {settingsOpen && <SettingsScreen settings={comfortSettings} onChange={onComfortSettingsChange} onClose={() => setSettingsOpen(false)} />}
+    </main>
+  )
+}

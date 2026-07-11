@@ -1,4 +1,4 @@
-import type { GameScreen, LearningMode } from '../../app/gameStore'
+import type { GameScreen, LearningMode, MissionId } from '../../app/gameStore'
 import { ProgressControls } from '../components/ProgressControls'
 
 interface BaseScreenProps {
@@ -6,6 +6,8 @@ interface BaseScreenProps {
   audioMuted: boolean
   onAudioMutedChange: (muted: boolean) => void
   onNavigate: (screen: GameScreen) => void
+  completedMissions?: string[]
+  onMissionSelect?: (mission: MissionId) => void
   onExportProgress: () => void
   onImportProgress: (serialized: string) => Promise<void>
 }
@@ -27,6 +29,8 @@ export function BaseScreen({
   audioMuted,
   onAudioMutedChange,
   onNavigate,
+  completedMissions = [],
+  onMissionSelect = () => undefined,
   onExportProgress,
   onImportProgress,
 }: BaseScreenProps) {
@@ -51,7 +55,26 @@ export function BaseScreen({
       </header>
 
       <section className="base-map" aria-label="基地區域">
-        {baseZones.map((zone, index) => (
+        {baseZones.map((zone, index) => zone.screen === 'mission' ? (
+          <div className="base-zone mission-zone-group" key={zone.screen}>
+            <span className="zone-symbol" aria-hidden="true">🗺️</span>
+            <span className="mission-zone-list">
+              <strong>今天任務</strong>
+              <button aria-label="今天任務：垃圾風暴救援行動" type="button" onClick={() => { onMissionSelect('recycling-storm'); onNavigate('mission') }}>
+                <b>垃圾風暴救援行動</b>
+                <small>SDG 7・12・13｜已完成也可以再挑戰</small>
+              </button>
+              <button
+                type="button"
+                disabled={!completedMissions.includes('recycling-storm')}
+                onClick={() => { onMissionSelect('water-guardian'); onNavigate('mission') }}
+              >
+                <b>水滴守護行動</b>
+                <small>{completedMissions.includes('recycling-storm') ? 'SDG 6｜已解鎖' : '完成第一關後解鎖'}</small>
+              </button>
+            </span>
+          </div>
+        ) : (
           <button
             className={`base-zone zone-${index + 1}`}
             type="button"
