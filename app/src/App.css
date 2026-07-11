@@ -1272,3 +1272,43 @@ button:focus-visible {
   flex-basis: 100%;
   margin: 0;
 }
+.update-banner {
+  position: fixed;
+  z-index: 50;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  left: max(14px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(560px, calc(100vw - 28px));
+  margin: 0 auto;
+  padding: 14px;
+  border: 1px solid #b8f94f;
+  border-radius: 18px;
+  background: #083c42;
+  box-shadow: 0 16px 42px rgba(5, 35, 37, 0.35);
+  color: #fff;
+}
+
+.update-banner span {
+  flex: 1;
+  min-width: 0;
+}
+
+.update-banner button:not(.primary-button) {
+  border: 0;
+  background: transparent;
+  color: #d5f5ed;
+}
+
+@media (max-width: 520px) {
+  .update-banner {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .update-banner span {
+    flex-basis: 100%;
+  }
+}

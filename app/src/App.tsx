@@ -12,6 +12,7 @@ import { createBrowserSaveRepository } from './persistence/saveRepository'
 import { deserializeSave, serializeSave } from './persistence/exportSave'
 import { AudioManager, type AudioScene } from './audio/AudioManager'
 import { BrowserAudioAdapter } from './audio/BrowserAudioAdapter'
+import { registerServiceWorker, type ApplyUpdate } from './pwa/serviceWorker'
 import './App.css'
 
 const RangeScreen = lazy(async () => {
@@ -233,21 +234,37 @@ function AppContent() {
 function App() {
   const setScreen = useGameStore((state) => state.setScreen)
   const [boundaryKey, setBoundaryKey] = useState(0)
+  const [applyUpdate, setApplyUpdate] = useState<ApplyUpdate | null>(null)
 
   const restartBoundary = () => setBoundaryKey((key) => key + 1)
 
+  useEffect(() => registerServiceWorker((apply) => setApplyUpdate(() => apply)), [])
+
   return (
-    <ErrorBoundary
-      key={boundaryKey}
-      phase={useGameStore.getState().screen}
-      onReload={restartBoundary}
-      onHome={() => {
-        setScreen('base')
-        restartBoundary()
-      }}
-    >
-      <AppContent />
-    </ErrorBoundary>
+    <>
+      <ErrorBoundary
+        key={boundaryKey}
+        phase={useGameStore.getState().screen}
+        onReload={restartBoundary}
+        onHome={() => {
+          setScreen('base')
+          restartBoundary()
+        }}
+      >
+        <AppContent />
+      </ErrorBoundary>
+      {applyUpdate && (
+        <aside className="update-banner" role="status" aria-live="polite">
+          <span>新版本已準備好，重新整理後就能使用。</span>
+          <button className="primary-button" type="button" onClick={applyUpdate}>
+            立即更新
+          </button>
+          <button type="button" aria-label="稍後再更新" onClick={() => setApplyUpdate(null)}>
+            稍後
+          </button>
+        </aside>
+      )}
+    </>
   )
 }
 

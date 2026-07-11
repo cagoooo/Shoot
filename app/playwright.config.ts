@@ -2,13 +2,14 @@ import { defineConfig, devices } from '@playwright/test'
 
 const repoName = process.env.VITE_REPO_NAME?.replace(/^\/+|\/+$/g, '')
 const basePath = repoName ? `/${repoName}/` : '/'
+const previewPort = Number(process.env.PLAYWRIGHT_PORT ?? 5180)
 
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   reporter: 'line',
   use: {
-    baseURL: `http://127.0.0.1:5180${basePath}`,
+    baseURL: `http://127.0.0.1:${previewPort}${basePath}`,
     trace: 'retain-on-failure',
   },
   projects: [
@@ -17,9 +18,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'npm run preview -- --host 127.0.0.1 --port 5180',
-    port: 5180,
+  webServer: process.env.PLAYWRIGHT_SKIP_SERVER ? undefined : {
+    // Rebuild so a prior GitHub Pages build cannot leak into root-path tests.
+    command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${previewPort}`,
+    port: previewPort,
     reuseExistingServer: !process.env.CI,
   },
 })
