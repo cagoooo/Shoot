@@ -37,6 +37,20 @@ test('手機直向沒有水平溢出且主要按鈕可操作', async ({ page }) 
   )
 })
 
+test('手機可關閉背景音樂，且不影響基地主要操作', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 })
+  await page.goto('./')
+  await page.getByRole('button', { name: '開始任務' }).click()
+
+  const muteButton = page.getByRole('button', { name: '關閉背景音樂' })
+  await expect(muteButton).toHaveAttribute('aria-pressed', 'false')
+  await muteButton.click()
+  await expect(
+    page.getByRole('button', { name: '開啟背景音樂' }),
+  ).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: /今天任務/ })).toBeVisible()
+})
+
 test('平板直向可打開任務與操作閱讀設定', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 })
   await page.goto('./')

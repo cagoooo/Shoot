@@ -45,7 +45,7 @@
 
 ## GitHub Pages 預發布狀態
 
-- `VITE_REPO_NAME=Shoot` 的 `/Shoot/` 本機子路徑建置與 16 個 Chromium 瀏覽器流程：2026-07-11 全部通過。
+- `VITE_REPO_NAME=Shoot` 的 `/Shoot/` 本機子路徑建置與 17 個 Chromium 瀏覽器流程：2026-07-11 全部通過。
 - GitHub Actions Pages workflow：已建立並在 `main` 成功執行（2026-07-11）。
 - 正式網址：[https://cagoooo.github.io/Shoot/](https://cagoooo.github.io/Shoot/)。
 - 線上驗證：首頁、`version.json`、`content/parts.zh-TW.json`、主程式 JS 均回傳 HTTP 200；`version.json` 為 `0.1.0-vertical-slice`。
