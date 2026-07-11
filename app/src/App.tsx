@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { ErrorBoundary } from './app/ErrorBoundary'
 import { useGameStore } from './app/gameStore'
 import { loadContent } from './content/loadContent'
 import type { PartContent } from './content/schema'
@@ -19,7 +20,7 @@ const MissionScreen = lazy(async () => {
   return { default: module.MissionScreen }
 })
 
-function App() {
+function AppContent() {
   const {
     screen,
     mode,
@@ -122,6 +123,27 @@ function App() {
         回基地
       </button>
     </main>
+  )
+}
+
+function App() {
+  const setScreen = useGameStore((state) => state.setScreen)
+  const [boundaryKey, setBoundaryKey] = useState(0)
+
+  const restartBoundary = () => setBoundaryKey((key) => key + 1)
+
+  return (
+    <ErrorBoundary
+      key={boundaryKey}
+      phase={useGameStore.getState().screen}
+      onReload={restartBoundary}
+      onHome={() => {
+        setScreen('base')
+        restartBoundary()
+      }}
+    >
+      <AppContent />
+    </ErrorBoundary>
   )
 }
 
