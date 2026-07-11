@@ -548,8 +548,15 @@ button:focus-visible {
 .sequence-feedback strong { color: #0f6b53; }
 .sequence-feedback p { margin: 3px 0 0; font-weight: 800; }
 .sequence-feedback.is-success { border-color: #5eb987; background: #e6f7eb; }
+.multi-select-feedback { display: grid; gap: 4px; margin: 14px 0; padding: 12px 14px; border: 2px solid #a8c8bd; border-radius: 6px 16px 6px 16px; background: #f0f8f3; color: #174d3d; line-height: 1.4; }
+.multi-select-feedback strong { color: #0f6b53; }
+.multi-select-feedback p { margin: 3px 0 0; font-weight: 800; }
+.multi-select-feedback.is-success { border-color: #5eb987; background: #e6f7eb; }
 .route-options button.is-sequence-selected { border-color: #257b5c; background: #dff5e8; box-shadow: inset 5px 0 #257b5c; }
 .route-options button.is-sequence-selected::after { content: '已放入順序'; display: block; margin-top: 5px; color: #176342; font-size: 0.85rem; font-weight: 900; }
+.route-options button[aria-pressed='true'] { border-color: #257b5c; background: #dff5e8; box-shadow: inset 5px 0 #257b5c; }
+.route-options button[aria-pressed='true']::after { content: '✓ 已選擇'; display: block; margin-top: 5px; color: #176342; font-size: 0.85rem; font-weight: 900; }
+.evacuation-options label:has(input:checked) { border: 2px solid #257b5c; background: #dff5e8; box-shadow: inset 5px 0 #257b5c; }
 
 .route-options button:disabled,
 .sorting-bins button:disabled,

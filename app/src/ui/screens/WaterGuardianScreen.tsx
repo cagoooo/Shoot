@@ -8,6 +8,7 @@ import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { SettingsScreen } from './SettingsScreen'
 import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/buildWaterGuardian'
 
@@ -186,6 +187,7 @@ export function WaterGuardianScreen({
             <p className="eyebrow">任務 4／4</p>
             <h2>分配乾淨的水</h2>
             <p>選擇至少兩個需要用水的地方，想想怎麼珍惜有限的水。</p>
+            <MultiSelectFeedback selected={uses} required={2} noun="個用水地點" />
             <div className="route-options water-options">
               {['飲水站', '菜園澆灌', '清潔工具'].map((use) => (
                 <button key={use} type="button" disabled={!canInteract} aria-pressed={uses.includes(use)} onClick={() => toggleUse(use)}><strong>{use}</strong><span>安排一份乾淨的水</span></button>

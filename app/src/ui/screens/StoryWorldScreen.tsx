@@ -8,6 +8,7 @@ import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { SettingsScreen } from './SettingsScreen'
 import { buildStoryWorldScene } from '../../game/missions/storyWorld/buildStoryWorld'
 import type { StoryMissionConfig } from '../../game/missions/storyWorld/storyMissionConfig'
@@ -28,6 +29,7 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
   const inputManager = useMemo(() => new InputManager(), [])
   const [phase, setPhase] = useState(0)
   const [selected, setSelected] = useState<string[]>([])
+  const [selectionFeedback, setSelectionFeedback] = useState('選出對地球有幫助的方法。')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [nearObjective, setNearObjective] = useState(false)
   const [objectiveObserved, setObjectiveObserved] = useState(false)
@@ -42,9 +44,23 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
 
   useEffect(() => { setNearObjective(false); setObjectiveObserved(false) }, [phase])
 
-  const toggleChoice = (id: string) => setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+  const toggleChoice = (id: string) => {
+    const choice = step.choices.find((item) => item.id === id)
+    if (!choice) return
+    const isHelpful = step.choices.indexOf(choice) < step.requiredChoices
+    if (!isHelpful) {
+      setSelectionFeedback(`再想想：${choice.title} 不適合，${choice.description}`)
+      return
+    }
+    setSelected((current) => {
+      const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
+      setSelectionFeedback(next.length >= step.requiredChoices ? '選得很好！這些都是能幫助任務的做法。' : `已選「${choice.title}」，再找一個好方法。`)
+      return next
+    })
+  }
   const goNext = () => {
     setSelected([])
+    setSelectionFeedback('選出對地球有幫助的方法。')
     setPhase((current) => Math.min(current + 1, mission.steps.length))
   }
 
@@ -74,6 +90,7 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
           <h2>{step.title}</h2>
           <p>{step.description}</p>
           {!canInteract && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}
+          <MultiSelectFeedback selected={selected.map((id) => step.choices.find((choice) => choice.id === id)?.title ?? id)} required={step.requiredChoices} message={selectionFeedback} />
           <div className="route-options water-options">
             {step.choices.map((choice) => <button key={choice.id} type="button" disabled={!canInteract} aria-pressed={selected.includes(choice.id)} onClick={() => toggleChoice(choice.id)}><strong>{choice.title}</strong><span>{choice.description}</span></button>)}
           </div>

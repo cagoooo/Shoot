@@ -20,6 +20,7 @@ import {
 import { InputManager } from '../../input/InputManager'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { MissionGuide } from '../components/MissionGuide'
 import type { LearningMode } from '../../app/gameStore'
 import {
@@ -438,6 +439,7 @@ export function MissionScreen({
             <>
               <p className="eyebrow">任務 6／7</p>
               <h2>最多帶三件重要物品</h2>
+              <MultiSelectFeedback selected={bag.map((id) => evacuationChoices.find((item) => item.id === id)?.name ?? id)} required={3} noun="個撤離物品" />
               <div className="evacuation-options">
                 {evacuationChoices.map((item) => (
                   <label key={item.id}>
