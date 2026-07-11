@@ -4,6 +4,8 @@
 
 目前的 `0.1.0-vertical-slice` 收錄完整任務〈垃圾風暴救援行動〉，聚焦 SDG 7、12、13，並預留未來 17 項 SDGs 任務、多元能量工具及多人連線架構。
 
+🌐 **線上試玩版**：[https://cagoooo.github.io/Shoot/](https://cagoooo.github.io/Shoot/)
+
 ## 本機開始
 
 需求：Node.js 24。
@@ -26,7 +28,7 @@ npm run test:e2e
 
 ## GitHub Pages
 
-專案已提供 `.github/workflows/deploy-pages.yml`。推送 `main` 後會用儲存庫名稱設定 Vite 子路徑並部署 `app/dist`。目前本機尚未設定 GitHub 遠端，因此正式 Demo 網址尚未產生；請勿先填入猜測網址。
+專案已提供 `.github/workflows/deploy-pages.yml`。推送 `main` 後會用儲存庫名稱設定 Vite 子路徑並部署 `app/dist`；正式網址為 [https://cagoooo.github.io/Shoot/](https://cagoooo.github.io/Shoot/)。
 
 本機模擬 `Shoot` 儲存庫子路徑：
 
