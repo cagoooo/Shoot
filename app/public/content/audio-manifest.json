@@ -2,50 +2,50 @@
   {
     "id": "music-base",
     "kind": "music",
-    "sources": [],
+    "sources": [{ "format": "mp3", "path": "assets/audio/music-base.mp3" }],
     "loop": true,
     "licenseRecord": "docs/testing/suno-asset-ledger.md#music-base",
-    "deploymentStatus": "awaiting-audited-file"
+    "deploymentStatus": "approved"
   },
   {
     "id": "music-exploration",
     "kind": "music",
-    "sources": [],
+    "sources": [{ "format": "mp3", "path": "assets/audio/music-exploration.mp3" }],
     "loop": true,
     "licenseRecord": "docs/testing/suno-asset-ledger.md#music-exploration",
-    "deploymentStatus": "awaiting-audited-file"
+    "deploymentStatus": "approved"
   },
   {
     "id": "music-tension",
     "kind": "music",
-    "sources": [],
+    "sources": [{ "format": "mp3", "path": "assets/audio/music-tension.mp3" }],
     "loop": true,
     "licenseRecord": "docs/testing/suno-asset-ledger.md#music-tension",
-    "deploymentStatus": "awaiting-audited-file"
+    "deploymentStatus": "approved"
   },
   {
     "id": "music-boss",
     "kind": "music",
-    "sources": [],
+    "sources": [{ "format": "mp3", "path": "assets/audio/music-boss.mp3" }],
     "loop": true,
     "licenseRecord": "docs/testing/suno-asset-ledger.md#music-boss",
-    "deploymentStatus": "awaiting-audited-file"
+    "deploymentStatus": "approved"
   },
   {
     "id": "music-evacuation",
     "kind": "music",
-    "sources": [],
+    "sources": [{ "format": "mp3", "path": "assets/audio/music-evacuation.mp3" }],
     "loop": true,
     "licenseRecord": "docs/testing/suno-asset-ledger.md#music-evacuation",
-    "deploymentStatus": "awaiting-audited-file"
+    "deploymentStatus": "approved"
   },
   {
     "id": "music-success",
     "kind": "music",
-    "sources": [],
+    "sources": [{ "format": "mp3", "path": "assets/audio/music-success.mp3" }],
     "loop": false,
     "licenseRecord": "docs/testing/suno-asset-ledger.md#music-success",
-    "deploymentStatus": "awaiting-audited-file"
+    "deploymentStatus": "approved"
   },
   {
     "id": "music-report",

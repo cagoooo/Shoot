@@ -38,6 +38,7 @@ import {
 import { SettingsScreen } from './SettingsScreen'
 import { AccessibilityAnnouncer } from '../accessibility/announcer'
 import { useReducedMotion } from '../accessibility/useReducedMotion'
+import type { AudioScene } from '../../audio/AudioManager'
 
 interface MissionCheckpoint {
   load(): Promise<(MissionState & { safeSpawnId: string }) | null>
@@ -52,6 +53,7 @@ interface MissionScreenProps {
   onMissionComplete?: (events: LearningEvent[]) => void
   comfortSettings?: ComfortSettings
   onComfortSettingsChange?: (settings: ComfortSettings) => void
+  onAudioSceneChange?: (scene: AudioScene) => void
 }
 
 const phaseNames: Record<MissionState['phase'], string> = {
@@ -111,6 +113,7 @@ export function MissionScreen({
   onMissionComplete,
   comfortSettings: comfortSettingsInput = DEFAULT_COMFORT_SETTINGS,
   onComfortSettingsChange,
+  onAudioSceneChange,
 }: MissionScreenProps) {
   const defaultCheckpoint = useMemo(() => new CheckpointService(), [])
   const checkpoint = checkpointInput ?? defaultCheckpoint
@@ -149,6 +152,19 @@ export function MissionScreen({
       active = false
     }
   }, [checkpoint])
+
+  useEffect(() => {
+    const audioByPhase: Record<MissionState['phase'], AudioScene> = {
+      briefing: 'exploration',
+      loadout: 'exploration',
+      entrance: 'exploration',
+      'sorting-hall': 'tension',
+      'storm-machine': 'boss',
+      evacuation: 'evacuation',
+      report: 'success',
+    }
+    onAudioSceneChange?.(audioByPhase[mission.phase])
+  }, [mission.phase, onAudioSceneChange])
 
   const advance = (objective: string, event: MissionEvent) => {
     setMission((current) => {

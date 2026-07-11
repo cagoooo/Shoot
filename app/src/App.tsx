@@ -10,6 +10,8 @@ import { ReportScreen } from './ui/screens/ReportScreen'
 import { reduceLearningEvents } from './learning/reducer'
 import { createBrowserSaveRepository } from './persistence/saveRepository'
 import { deserializeSave, serializeSave } from './persistence/exportSave'
+import { AudioManager, type AudioScene } from './audio/AudioManager'
+import { BrowserAudioAdapter } from './audio/BrowserAudioAdapter'
 import './App.css'
 
 const RangeScreen = lazy(async () => {
@@ -36,6 +38,36 @@ function AppContent() {
   const [parts, setParts] = useState<PartContent[]>([])
   const [contentLoadFailed, setContentLoadFailed] = useState(false)
   const saveRepository = useMemo(() => createBrowserSaveRepository(), [])
+  const audioAdapter = useMemo(
+    () => new BrowserAudioAdapter(import.meta.env.BASE_URL),
+    [],
+  )
+  const audio = useMemo(() => new AudioManager(audioAdapter), [audioAdapter])
+  const transitionAudio = useMemo(() => audio.transitionTo.bind(audio), [audio])
+
+  useEffect(() => {
+    void audioAdapter.initialize()
+  }, [audioAdapter])
+
+  useEffect(() => {
+    const sceneByScreen: Record<typeof screen, AudioScene> = {
+      start: 'base',
+      base: 'base',
+      workbench: 'base',
+      range: 'exploration',
+      mission: 'exploration',
+      report: 'report',
+    }
+    audio.transitionTo(sceneByScreen[screen])
+  }, [audio, screen])
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      void audio.setPageHidden(document.hidden)
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [audio])
 
   useEffect(() => {
     void saveRepository.load().then((save) => setMode(save.mode))
@@ -81,7 +113,10 @@ function AppContent() {
       <StartScreen
         mode={mode}
         onModeChange={saveMode}
-        onStart={() => setScreen('base')}
+        onStart={() => {
+          void audio.unlockFromUserGesture()
+          setScreen('base')
+        }}
       />
     )
   }
@@ -134,6 +169,7 @@ function AppContent() {
           comfortSettings={comfortSettings}
           onComfortSettingsChange={setComfortSettings}
           onBack={() => setScreen('base')}
+          onAudioSceneChange={transitionAudio}
           onMissionComplete={(events) => {
             recordLearningEvents(events)
             void saveRepository.load().then((save) =>
