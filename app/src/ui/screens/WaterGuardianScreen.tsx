@@ -7,6 +7,7 @@ import type { LearningEvent } from '../../learning/events'
 import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
+import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
 import { SettingsScreen } from './SettingsScreen'
 import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/buildWaterGuardian'
 
@@ -21,6 +22,7 @@ interface WaterGuardianScreenProps {
   onMissionComplete: (events: LearningEvent[]) => void
   onAudioSceneChange?: (scene: AudioScene) => void
   mapSlot?: ReactNode
+  objectiveGate?: 'enabled' | 'unlocked'
 }
 
 const phaseGuide: Record<WaterPhase, { icon: string; now: string; learn: string }> = {
@@ -39,6 +41,7 @@ export function WaterGuardianScreen({
   onMissionComplete,
   onAudioSceneChange,
   mapSlot,
+  objectiveGate = 'enabled',
 }: WaterGuardianScreenProps) {
   const inputManager = useMemo(() => new InputManager(), [])
   const [phase, setPhase] = useState<WaterPhase>('briefing')
@@ -46,15 +49,25 @@ export function WaterGuardianScreen({
   const [filterParts, setFilterParts] = useState<FilterPart[]>([])
   const [uses, setUses] = useState<string[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [nearObjective, setNearObjective] = useState(false)
+  const [objectiveObserved, setObjectiveObserved] = useState(false)
   const guide = phaseGuide[phase]
+  const objective = phase === 'collect'
+    ? { label: '雨水箱', position: { x: -4, z: 3 } }
+    : phase === 'filter'
+      ? { label: '過濾站', position: { x: 4, z: 6 } }
+      : { label: '乾淨水箱', position: { x: 0, z: 14 } }
+  const canInteract = objectiveGate === 'unlocked' || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
   const sceneFactory = useCallback<SceneFactory>(
     (engine, runtimeInput, runtimeComfort) =>
       buildWaterGuardianScene(
         engine as AbstractEngine,
         runtimeInput ?? inputManager,
         runtimeComfort,
+        objective.position,
+        setNearObjective,
       ),
-    [inputManager],
+    [inputManager, phase],
   )
 
   const finish = () => {
@@ -85,6 +98,11 @@ export function WaterGuardianScreen({
     onAudioSceneChange?.(phase === 'report' ? 'success' : 'exploration')
   }, [onAudioSceneChange, phase])
 
+  useEffect(() => {
+    setNearObjective(false)
+    setObjectiveObserved(false)
+  }, [phase])
+
   return (
     <main className={`mission-screen${comfortSettings.largeText ? ' large-text' : ''}`}>
       <header className="mission-header">
@@ -103,6 +121,7 @@ export function WaterGuardianScreen({
         {phase !== 'report' && (
           <div className="mission-map-frame">
             {mapSlot ?? <GameCanvas inputManager={inputManager} sceneFactory={sceneFactory} comfortSettings={comfortSettings} />}
+            {!mapSlot && <SceneObjectivePrompt label={objective.label} near={nearObjective} observed={objectiveObserved} onObserve={() => setObjectiveObserved(true)} />}
             <TouchControls leftHanded={comfortSettings.leftHanded} onInputChange={(state) => inputManager.updateSource('touch', state)} />
             <p className="game-hint">靠近水站觀察，再回到任務卡完成步驟。</p>
           </div>
@@ -114,6 +133,7 @@ export function WaterGuardianScreen({
             {learningMode === 'middle-assist' && <div className="mission-guide-next"><strong>下一步</strong><p>看完提示再做選擇。</p></div>}
             <div className="mission-guide-learn"><strong>小小科學發現</strong><p>{guide.learn}</p></div>
           </aside>
+          {phase !== 'briefing' && phase !== 'report' && !canInteract && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}
 
           {phase === 'briefing' && <>
             <p className="eyebrow">任務 1／4</p>
@@ -126,7 +146,7 @@ export function WaterGuardianScreen({
             <p className="eyebrow">任務 2／4</p>
             <h2>收集雨水</h2>
             <p>目前收集：{drops}／3 滴。每按一次就觀察一滴雨水進入水箱。</p>
-            <button className="primary-button" type="button" onClick={() => setDrops((value) => Math.min(3, value + 1))} disabled={drops >= 3}>收集一滴雨水</button>
+            <button className="primary-button" type="button" onClick={() => setDrops((value) => Math.min(3, value + 1))} disabled={drops >= 3 || !canInteract}>收集一滴雨水</button>
             {drops >= 3 && <button className="primary-button" type="button" onClick={() => setPhase('filter')}>前往過濾站</button>}
           </>}
 
@@ -136,7 +156,7 @@ export function WaterGuardianScreen({
             <p>選擇材料並比較用途：布先擋落葉，砂子擋小顆粒，活性碳改善味道。</p>
             <div className="route-options water-options">
               {(['cloth', 'sand', 'charcoal'] as FilterPart[]).map((part) => (
-                <button key={part} type="button" aria-pressed={filterParts.includes(part)} onClick={() => toggleFilter(part)}>
+                <button key={part} type="button" disabled={!canInteract} aria-pressed={filterParts.includes(part)} onClick={() => toggleFilter(part)}>
                   <strong>{part === 'cloth' ? '布' : part === 'sand' ? '砂子' : '活性碳'}</strong>
                   <span>{part === 'cloth' ? '擋住落葉' : part === 'sand' ? '擋住小顆粒' : '改善味道'}</span>
                 </button>
@@ -151,7 +171,7 @@ export function WaterGuardianScreen({
             <p>選擇至少兩個需要用水的地方，想想怎麼珍惜有限的水。</p>
             <div className="route-options water-options">
               {['飲水站', '菜園澆灌', '清潔工具'].map((use) => (
-                <button key={use} type="button" aria-pressed={uses.includes(use)} onClick={() => toggleUse(use)}><strong>{use}</strong><span>安排一份乾淨的水</span></button>
+                <button key={use} type="button" disabled={!canInteract} aria-pressed={uses.includes(use)} onClick={() => toggleUse(use)}><strong>{use}</strong><span>安排一份乾淨的水</span></button>
               ))}
             </div>
             {uses.length >= 2 && <button className="primary-button" type="button" onClick={() => setPhase('report')}>完成水滴守護</button>}

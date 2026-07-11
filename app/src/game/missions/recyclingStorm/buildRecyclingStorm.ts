@@ -65,6 +65,8 @@ export function buildRecyclingStormScene(
   inputManager: InputManager,
   assetProvider?: RecyclingStationAssetProvider,
   comfortInput: Partial<ComfortSettings> = DEFAULT_COMFORT_SETTINGS,
+  objectivePosition?: { x: number; z: number },
+  onProximityChange?: (near: boolean) => void,
 ): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.78, 0.9, 0.94, 1)
@@ -217,6 +219,15 @@ export function buildRecyclingStormScene(
   panelMaterial.diffuseColor = Color3.FromHexString('#48a878')
   protectedPanel.material = panelMaterial
 
+  if (objectivePosition) {
+    const markerMaterial = new StandardMaterial('recycling-objective-marker-material', scene)
+    markerMaterial.emissiveColor = Color3.FromHexString('#d9ff4a')
+    const marker = MeshBuilder.CreateTorus('recycling-objective-marker', { diameter: 4.2, thickness: 0.15, tessellation: 24 }, scene)
+    marker.position = new Vector3(objectivePosition.x, 0.12, objectivePosition.z)
+    marker.material = markerMaterial
+  }
+  let wasNear: boolean | undefined
+
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
     const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
@@ -229,6 +240,13 @@ export function buildRecyclingStormScene(
     )
     camera.position.x = Math.max(-16, Math.min(16, next.x))
     camera.position.z = Math.max(-21, Math.min(24, next.z))
+    if (objectivePosition) {
+      const near = Math.hypot(camera.position.x - objectivePosition.x, camera.position.z - objectivePosition.z) <= 4.8
+      if (near !== wasNear) {
+        wasNear = near
+        onProximityChange?.(near)
+      }
+    }
   })
 
   if (assetProvider) void assetProvider.load(scene)

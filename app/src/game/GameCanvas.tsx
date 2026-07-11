@@ -31,6 +31,7 @@ export type SceneFactory = (
   inputManager?: InputManager,
   comfortSettings?: Partial<ComfortSettings>,
   onWeaponStateChange?: (state: WeaponState) => void,
+  onProximityChange?: (near: boolean) => void,
 ) => RuntimeScene
 
 const defaultEngineFactory: EngineFactory = createGameEngine
@@ -53,6 +54,7 @@ interface GameCanvasProps {
   inputManager?: InputManager
   comfortSettings?: Partial<ComfortSettings>
   onWeaponStateChange?: (state: WeaponState) => void
+  onProximityChange?: (near: boolean) => void
 }
 
 export function GameCanvas({
@@ -61,6 +63,7 @@ export function GameCanvas({
   inputManager,
   comfortSettings,
   onWeaponStateChange,
+  onProximityChange,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -89,6 +92,7 @@ export function GameCanvas({
         inputManager,
         comfortSettings,
         onWeaponStateChange,
+        onProximityChange,
       )
       const performance = createPerformanceMonitor('high')
       engine.runRenderLoop(() => {
@@ -116,6 +120,7 @@ export function GameCanvas({
     engineFactory,
     inputManager,
     onWeaponStateChange,
+    onProximityChange,
     sceneFactory,
   ])
 

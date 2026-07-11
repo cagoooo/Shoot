@@ -14,6 +14,8 @@ export function buildGreenEnergyScene(
   engine: AbstractEngine,
   inputManager: InputManager,
   comfortInput: Partial<ComfortSettings> = {},
+  objectivePosition?: { x: number; z: number },
+  onProximityChange?: (near: boolean) => void,
 ): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.76, 0.9, 0.98, 1)
@@ -54,12 +56,28 @@ export function buildGreenEnergyScene(
   battery.position = new Vector3(5, 1.1, 11)
   battery.material = batteryMaterial
 
+  if (objectivePosition) {
+    const markerMaterial = new StandardMaterial('energy-objective-marker-material', scene)
+    markerMaterial.emissiveColor = Color3.FromHexString('#d9ff4a')
+    const marker = MeshBuilder.CreateTorus('energy-objective-marker', { diameter: 3.8, thickness: 0.14, tessellation: 24 }, scene)
+    marker.position = new Vector3(objectivePosition.x, 0.12, objectivePosition.z)
+    marker.material = markerMaterial
+  }
+  let wasNear: boolean | undefined
+
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
     const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
     const next = integrateMovement({ x: camera.position.x, z: camera.position.z }, input, deltaSeconds, 4, camera.rotation.y)
     camera.position.x = Math.max(-14, Math.min(14, next.x))
     camera.position.z = Math.max(-18, Math.min(21, next.z))
+    if (objectivePosition) {
+      const near = Math.hypot(camera.position.x - objectivePosition.x, camera.position.z - objectivePosition.z) <= 4.5
+      if (near !== wasNear) {
+        wasNear = near
+        onProximityChange?.(near)
+      }
+    }
   })
   return scene
 }

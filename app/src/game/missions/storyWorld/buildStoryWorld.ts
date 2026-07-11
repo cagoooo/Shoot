@@ -16,6 +16,8 @@ export function buildStoryWorldScene(
   inputManager: InputManager,
   mission: StoryMissionConfig,
   comfortInput: Partial<ComfortSettings> = {},
+  objectivePosition?: { x: number; z: number },
+  onProximityChange?: (near: boolean) => void,
 ): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.79, 0.9, 0.84, 1)
@@ -51,6 +53,15 @@ export function buildStoryWorldScene(
   landmark.position = new Vector3(0, mission.landmark === 'ocean' ? 0.55 : 1.8, 7)
   landmark.material = landmarkMaterial
 
+  if (objectivePosition) {
+    const markerMaterial = new StandardMaterial(`${mission.id}-objective-marker-material`, scene)
+    markerMaterial.emissiveColor = Color3.FromHexString('#d9ff4a')
+    const marker = MeshBuilder.CreateTorus(`${mission.id}-objective-marker`, { diameter: 4.2, thickness: 0.15, tessellation: 24 }, scene)
+    marker.position = new Vector3(objectivePosition.x, 0.12, objectivePosition.z)
+    marker.material = markerMaterial
+  }
+  let wasNear: boolean | undefined
+
   for (const [index, x] of [-6, -3, 3, 6].entries()) {
     const beacon = MeshBuilder.CreateCylinder(`${mission.id}-beacon-${index}`, { height: 2.2, diameter: 0.34 }, scene)
     beacon.position = new Vector3(x, 1.1, 11 + (index % 2) * 3)
@@ -63,6 +74,13 @@ export function buildStoryWorldScene(
     const next = integrateMovement({ x: camera.position.x, z: camera.position.z }, input, deltaSeconds, 4, camera.rotation.y)
     camera.position.x = Math.max(-14, Math.min(14, next.x))
     camera.position.z = Math.max(-18, Math.min(21, next.z))
+    if (objectivePosition) {
+      const near = Math.hypot(camera.position.x - objectivePosition.x, camera.position.z - objectivePosition.z) <= 4.8
+      if (near !== wasNear) {
+        wasNear = near
+        onProximityChange?.(near)
+      }
+    }
   })
   return scene
 }

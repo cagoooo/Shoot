@@ -512,6 +512,31 @@ button:focus-visible {
   font-size: 0.9rem;
 }
 
+.scene-objective-prompt {
+  position: absolute;
+  z-index: 4;
+  top: 16px;
+  left: 16px;
+  display: grid;
+  gap: 5px;
+  width: min(300px, calc(100% - 32px));
+  padding: 12px 14px;
+  border: 2px solid #d9ff4a;
+  border-radius: 6px 16px 6px 16px;
+  background: rgba(7, 54, 42, 0.91);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(8, 47, 38, 0.24);
+}
+
+.scene-objective-prompt span { font-size: 0.9rem; line-height: 1.4; }
+.scene-objective-prompt.is-complete { border-color: #8ee1ad; background: rgba(20, 101, 69, 0.93); }
+.scene-observe-button { justify-self: start; margin-top: 3px; padding: 7px 11px; border: 0; border-radius: 999px; background: #d9ff4a; color: #123a2e; font: inherit; font-weight: 900; cursor: pointer; }
+.objective-locked { margin: 14px 0; padding: 10px 12px; border-left: 5px solid #e5b74f; border-radius: 4px 12px 4px 12px; background: #fff4c5; color: #624300; font-weight: 800; line-height: 1.45; }
+
+.route-options button:disabled,
+.sorting-bins button:disabled,
+.energy-choice-panel button:disabled { cursor: not-allowed; opacity: 0.52; filter: grayscale(0.25); }
+
 .comfort-panel {
   position: absolute;
   z-index: 5;

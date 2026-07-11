@@ -19,6 +19,7 @@ import {
 } from '../../game/missions/recyclingStorm/interactions'
 import { InputManager } from '../../input/InputManager'
 import { TouchControls } from '../components/TouchControls'
+import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
 import { MissionGuide } from '../components/MissionGuide'
 import type { LearningMode } from '../../app/gameStore'
 import {
@@ -78,7 +79,7 @@ const evacuationChoices: Array<{
   { id: 'heavy-scrap', name: '沉重廢鐵', description: '很重，而且可以稍後再回收' },
 ]
 
-function MissionMap({ comfortSettings }: { comfortSettings: ComfortSettings }) {
+function MissionMap({ comfortSettings, objective, near, observed, onNearChange, onObserve }: { comfortSettings: ComfortSettings; objective: { label: string; position: { x: number; z: number } }; near: boolean; observed: boolean; onNearChange: (near: boolean) => void; onObserve: () => void }) {
   const inputManager = useMemo(() => new InputManager(), [])
   const sceneFactory = useCallback<SceneFactory>(
     (engine, runtimeInput, runtimeComfort) =>
@@ -87,8 +88,10 @@ function MissionMap({ comfortSettings }: { comfortSettings: ComfortSettings }) {
         runtimeInput ?? inputManager,
         undefined,
         runtimeComfort,
+        objective.position,
+        onNearChange,
       ),
-    [inputManager],
+    [inputManager, objective.position, onNearChange],
   )
 
   return (
@@ -98,6 +101,7 @@ function MissionMap({ comfortSettings }: { comfortSettings: ComfortSettings }) {
         sceneFactory={sceneFactory}
         comfortSettings={comfortSettings}
       />
+      <SceneObjectivePrompt label={objective.label} near={near} observed={observed} onObserve={onObserve} />
       <TouchControls
         leftHanded={comfortSettings.leftHanded}
         onInputChange={(state) => inputManager.updateSource('touch', state)}
@@ -136,6 +140,8 @@ export function MissionScreen({
   const [bag, setBag] = useState<EvacuationItem[]>([])
   const [boss, setBoss] = useState(() => createStormMachine())
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [nearObjective, setNearObjective] = useState(false)
+  const [objectiveObserved, setObjectiveObserved] = useState(false)
   const [localComfortSettings, setLocalComfortSettings] = useState(
     comfortSettingsInput,
   )
@@ -145,6 +151,15 @@ export function MissionScreen({
   const setComfortSettings =
     onComfortSettingsChange ?? setLocalComfortSettings
   const systemReducedMotion = useReducedMotion()
+  const objectiveByPhase = useMemo<Partial<Record<MissionState['phase'], { label: string; position: { x: number; z: number } }>>>(() => ({
+    loadout: { label: '基地工具桌', position: { x: 0, z: -16 } },
+    entrance: { label: '回收站入口', position: { x: 0, z: -11 } },
+    'sorting-hall': { label: '分類大廳', position: { x: -6, z: 2 } },
+    'storm-machine': { label: '風暴機器', position: { x: 0, z: 14 } },
+    evacuation: { label: '屋頂撤離點', position: { x: 0, z: 21 } },
+  }), [])
+  const objective = objectiveByPhase[mission.phase]
+  const canInteract = !objective || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
 
   useEffect(() => {
     let active = true
@@ -175,6 +190,8 @@ export function MissionScreen({
     }
     onAudioSceneChange?.(audioByPhase[mission.phase])
   }, [mission.phase, onAudioSceneChange])
+
+  useEffect(() => { setNearObjective(false); setObjectiveObserved(false) }, [mission.phase])
 
   const advance = (objective: string, event: MissionEvent) => {
     setMission((current) => {
@@ -283,10 +300,11 @@ export function MissionScreen({
 
       <div className="mission-layout">
         {mission.phase !== 'report' &&
-          (mapSlot ?? <MissionMap comfortSettings={comfortSettings} />)}
+          (mapSlot ?? (objective && <MissionMap comfortSettings={comfortSettings} objective={objective} near={nearObjective} observed={objectiveObserved} onNearChange={setNearObjective} onObserve={() => setObjectiveObserved(true)} />))}
 
-        <section className="mission-task-card" aria-live="polite">
+        <section className="mission-task-card" aria-live="polite" onClickCapture={(event) => { if (!canInteract) { event.preventDefault(); event.stopPropagation() } }} onChangeCapture={(event) => { if (!canInteract) { event.preventDefault(); event.stopPropagation() } }}>
           <MissionGuide phase={mission.phase} learningMode={learningMode} />
+          {!canInteract && objective && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}
           {mission.phase === 'briefing' && (
             <>
               <p className="eyebrow">任務 1／7</p>

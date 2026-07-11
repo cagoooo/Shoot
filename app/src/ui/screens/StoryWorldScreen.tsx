@@ -7,6 +7,7 @@ import type { LearningEvent } from '../../learning/events'
 import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
+import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
 import { SettingsScreen } from './SettingsScreen'
 import { buildStoryWorldScene } from '../../game/missions/storyWorld/buildStoryWorld'
 import type { StoryMissionConfig } from '../../game/missions/storyWorld/storyMissionConfig'
@@ -20,19 +21,26 @@ interface StoryWorldScreenProps {
   onMissionComplete: (events: LearningEvent[]) => void
   onAudioSceneChange?: (scene: AudioScene) => void
   mapSlot?: ReactNode
+  objectiveGate?: 'enabled' | 'unlocked'
 }
 
-export function StoryWorldScreen({ mission, learningMode, comfortSettings, onComfortSettingsChange, onBack, onMissionComplete, onAudioSceneChange, mapSlot }: StoryWorldScreenProps) {
+export function StoryWorldScreen({ mission, learningMode, comfortSettings, onComfortSettingsChange, onBack, onMissionComplete, onAudioSceneChange, mapSlot, objectiveGate = 'enabled' }: StoryWorldScreenProps) {
   const inputManager = useMemo(() => new InputManager(), [])
   const [phase, setPhase] = useState(0)
   const [selected, setSelected] = useState<string[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [nearObjective, setNearObjective] = useState(false)
+  const [objectiveObserved, setObjectiveObserved] = useState(false)
   const step = mission.steps[phase]
-  const sceneFactory = useCallback<SceneFactory>((engine, runtimeInput, runtimeComfort) => buildStoryWorldScene(engine as AbstractEngine, runtimeInput ?? inputManager, mission, runtimeComfort), [inputManager, mission])
+  const objective = { label: phase < mission.steps.length ? step.title : mission.title, position: { x: 0, z: 7 } }
+  const canInteract = objectiveGate === 'unlocked' || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
+  const sceneFactory = useCallback<SceneFactory>((engine, runtimeInput, runtimeComfort) => buildStoryWorldScene(engine as AbstractEngine, runtimeInput ?? inputManager, mission, runtimeComfort, objective.position, setNearObjective), [inputManager, mission, phase])
 
   useEffect(() => {
     onAudioSceneChange?.(phase >= mission.steps.length ? 'success' : 'exploration')
   }, [mission.steps.length, onAudioSceneChange, phase])
+
+  useEffect(() => { setNearObjective(false); setObjectiveObserved(false) }, [phase])
 
   const toggleChoice = (id: string) => setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
   const goNext = () => {
@@ -50,6 +58,7 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
     <div className="mission-layout">
       {phase < mission.steps.length && <div className="mission-map-frame">
         {mapSlot ?? <GameCanvas inputManager={inputManager} sceneFactory={sceneFactory} comfortSettings={comfortSettings} />}
+        {!mapSlot && <SceneObjectivePrompt label={objective.label} near={nearObjective} observed={objectiveObserved} onObserve={() => setObjectiveObserved(true)} />}
         <TouchControls leftHanded={comfortSettings.leftHanded} onInputChange={(state) => inputManager.updateSource('touch', state)} />
         <p className="game-hint">在世界場景中觀察線索，再回任務卡做出守護選擇。</p>
       </div>}
@@ -64,8 +73,9 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
           <p className="eyebrow">任務 {phase + 1}／{mission.steps.length}</p>
           <h2>{step.title}</h2>
           <p>{step.description}</p>
+          {!canInteract && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}
           <div className="route-options water-options">
-            {step.choices.map((choice) => <button key={choice.id} type="button" aria-pressed={selected.includes(choice.id)} onClick={() => toggleChoice(choice.id)}><strong>{choice.title}</strong><span>{choice.description}</span></button>)}
+            {step.choices.map((choice) => <button key={choice.id} type="button" disabled={!canInteract} aria-pressed={selected.includes(choice.id)} onClick={() => toggleChoice(choice.id)}><strong>{choice.title}</strong><span>{choice.description}</span></button>)}
           </div>
           {selected.length >= step.requiredChoices && <button className="primary-button" type="button" onClick={goNext}>{phase === mission.steps.length - 1 ? '完成世界修復' : '帶著發現繼續前進'}</button>}
         </> : <>
