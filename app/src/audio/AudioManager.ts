@@ -24,8 +24,7 @@ const musicByScene: Record<AudioScene, string> = {
   boss: 'music-boss',
   evacuation: 'music-evacuation',
   success: 'music-success',
-  // 報告專屬曲尚在 Suno 完成處理；先延用已核可的成功曲，避免結算畫面無聲。
-  report: 'music-success',
+  report: 'music-report',
 }
 
 const clampVolume = (volume: number) => Math.max(0, Math.min(1, volume))

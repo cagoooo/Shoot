@@ -10,5 +10,6 @@
 | music-boss | `assets/audio/music-boss.mp3` | `536C2A4F1C87AB7B4C71330338E864901ED22745C6EE82DA506B25CE68EF899F` | Recycled Reactor Run B |
 | music-evacuation | `assets/audio/music-evacuation.mp3` | `90B54D6F92BAF3271C3E823297440D2AF34F09D6FDEC0161850ACF96BA35DC2E` | Rooftop Relay A |
 | music-success | `assets/audio/music-success.mp3` | `D499B07CA968391A22F7F44903CB6395D422769E74DA06F177172A764EB41B80` | Little Green Win B |
+| music-report | `assets/audio/music-report.mp3` | `B9BF8F6C71D0344E7E857E0826282894F4D31E3A7A41DCD028FD1570A1533E37` | [Little Green Steps](https://suno.com/song/51e2b2c6-4c53-448b-83b7-18ee38018906) |
 
-`music-report` 的兩個候選曲目前尚未出現 MP3 下載選項，故保持 `awaiting-audited-file`。結算畫面暫時安全地沿用已核可的 `music-success`；待正式報告曲可下載後再替換。
+`music-report` 於 2026-07-11 由教師成人 Suno Pro Plan（v5.5）重新生成並完成 MP3 下載，已恢復結算畫面的專屬反思音樂。學生端不接觸 Suno。

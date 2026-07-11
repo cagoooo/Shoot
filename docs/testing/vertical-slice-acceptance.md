@@ -41,17 +41,16 @@
 
 ## BGM 授權狀態
 
-教師成人 Suno Pro Plan 產生的 6 首正式 MP3 已匯入並部署：基地、探索、緊張、首領、撤離、成功。每首皆有候選作品連結、方案紀錄與 SHA-256 驗證，詳見 `suno-asset-ledger.md` 與 `suno-asset-verification.md`。任務報告曲的兩個候選作品尚未顯示 MP3 下載選項，因此維持 `awaiting-audited-file`；報告畫面暫時沿用已核可的成功曲，避免播放中斷。
+教師成人 Suno Pro Plan 產生的 7 首正式 MP3 已匯入並部署：基地、探索、緊張、首領、撤離、成功、任務報告。每首皆有候選作品連結、方案紀錄與 SHA-256 驗證，詳見 `suno-asset-ledger.md` 與 `suno-asset-verification.md`。
 
 ## GitHub Pages 預發布狀態
 
-- `VITE_REPO_NAME=Shoot` 的 `/Shoot/` 本機子路徑建置與 15 個 Chromium 瀏覽器流程：2026-07-11 全部通過。
+- `VITE_REPO_NAME=Shoot` 的 `/Shoot/` 本機子路徑建置與 16 個 Chromium 瀏覽器流程：2026-07-11 全部通過。
 - GitHub Actions Pages workflow：已建立並在 `main` 成功執行（2026-07-11）。
 - 正式網址：[https://cagoooo.github.io/Shoot/](https://cagoooo.github.io/Shoot/)。
 - 線上驗證：首頁、`version.json`、`content/parts.zh-TW.json`、主程式 JS 均回傳 HTTP 200；`version.json` 為 `0.1.0-vertical-slice`。
 
 ## 發行前仍需人工完成
 
-- 待任務報告曲可下載後，以教師成人 Suno Pro Plan 的正式 MP3 取代結算畫面的暫用成功曲；學生端不接觸 Suno。
 - 使用學校常見 Chromebook、iPad 與 Android 平板各做一次實機試玩。
 - GitHub 遠端與 Pages 網址建立後，依發行指引驗證正式子路徑網址。

@@ -50,9 +50,9 @@
   {
     "id": "music-report",
     "kind": "music",
-    "sources": [],
+    "sources": [{ "format": "mp3", "path": "assets/audio/music-report.mp3" }],
     "loop": true,
     "licenseRecord": "docs/testing/suno-asset-ledger.md#music-report",
-    "deploymentStatus": "awaiting-audited-file"
+    "deploymentStatus": "approved"
   }
 ]
