@@ -12,7 +12,12 @@ import { SpeakButton } from '../components/SpeakButton'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { SettingsScreen } from './SettingsScreen'
 import { buildStoryWorldScene } from '../../game/missions/storyWorld/buildStoryWorld'
-import type { StoryMissionConfig } from '../../game/missions/storyWorld/storyMissionConfig'
+import type { StoryMissionConfig, StoryStep } from '../../game/missions/storyWorld/storyMissionConfig'
+
+const initialFeedbackFor = (step?: StoryStep) =>
+  step?.kind === 'sequence'
+    ? `照順序來：先選「${step.choices[0].title}」。`
+    : '選出對地球有幫助的方法。'
 
 interface StoryWorldScreenProps {
   mission: StoryMissionConfig
@@ -30,12 +35,15 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
   const inputManager = useMemo(() => new InputManager(), [])
   const [phase, setPhase] = useState(0)
   const [selected, setSelected] = useState<string[]>([])
-  const [selectionFeedback, setSelectionFeedback] = useState('選出對地球有幫助的方法。')
+  const [selectionFeedback, setSelectionFeedback] = useState(() => initialFeedbackFor(mission.steps[0]))
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [nearObjective, setNearObjective] = useState(false)
   const [objectiveObserved, setObjectiveObserved] = useState(false)
   const step = mission.steps[phase]
-  const objective = { label: phase < mission.steps.length ? step.title : mission.title, position: { x: 0, z: 7 } }
+  const objective = {
+    label: phase < mission.steps.length ? step.title : mission.title,
+    position: (phase < mission.steps.length && step.position) || { x: 0, z: 7 },
+  }
   const canInteract = objectiveGate === 'unlocked' || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
   const sceneFactory = useCallback<SceneFactory>((engine, runtimeInput, runtimeComfort) => buildStoryWorldScene(engine as AbstractEngine, runtimeInput ?? inputManager, mission, runtimeComfort, objective.position, setNearObjective), [inputManager, mission, phase])
 
@@ -59,9 +67,29 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
       return next
     })
   }
+  const chooseSequence = (id: string) => {
+    const choice = step.choices.find((item) => item.id === id)
+    if (!choice) return
+    if (selected.includes(id)) {
+      setSelectionFeedback(`「${choice.title}」已是第 ${selected.indexOf(id) + 1} 步；請接著選下一步。`)
+      return
+    }
+    const expected = step.choices[selected.length]
+    if (id !== expected.id) {
+      setSelectionFeedback(`還差一步：先選「${expected.title}」。${expected.description}`)
+      return
+    }
+    const next = [...selected, id]
+    setSelected(next)
+    setSelectionFeedback(
+      next.length === step.choices.length
+        ? '全部順序正確！你完成了這個步驟。'
+        : `第 ${next.length} 步正確！${choice.description} 接著選下一步。`,
+    )
+  }
   const goNext = () => {
     setSelected([])
-    setSelectionFeedback('選出對地球有幫助的方法。')
+    setSelectionFeedback(initialFeedbackFor(mission.steps[phase + 1]))
     setPhase((current) => Math.min(current + 1, mission.steps.length))
   }
 
@@ -91,9 +119,17 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
           <h2>{step.title}</h2>
           <p>{step.description}</p>
           {!canInteract && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}
-          <MultiSelectFeedback selected={selected.map((id) => step.choices.find((choice) => choice.id === id)?.title ?? id)} required={step.requiredChoices} message={selectionFeedback} />
+          {step.kind === 'sequence' ? (
+            <div className={`sequence-feedback${selected.length === step.choices.length ? ' is-success' : ''}`} role="status">
+              <strong>順序 {selected.length}／{step.choices.length}</strong>
+              <span>{selected.length ? selected.map((id, index) => `${index + 1}. ${step.choices.find((choice) => choice.id === id)?.title ?? id}`).join('　') : '還沒開始排順序'}</span>
+              <p>{selectionFeedback}</p>
+            </div>
+          ) : (
+            <MultiSelectFeedback selected={selected.map((id) => step.choices.find((choice) => choice.id === id)?.title ?? id)} required={step.requiredChoices} message={selectionFeedback} />
+          )}
           <div className="route-options water-options">
-            {step.choices.map((choice) => <button key={choice.id} type="button" disabled={!canInteract} aria-pressed={selected.includes(choice.id)} onClick={() => toggleChoice(choice.id)}><strong>{choice.title}</strong><span>{choice.description}</span></button>)}
+            {step.choices.map((choice) => <button key={choice.id} type="button" disabled={!canInteract} className={step.kind === 'sequence' && selected.includes(choice.id) ? 'is-sequence-selected' : undefined} aria-pressed={selected.includes(choice.id)} onClick={() => (step.kind === 'sequence' ? chooseSequence(choice.id) : toggleChoice(choice.id))}><strong>{choice.title}</strong><span>{choice.description}</span></button>)}
           </div>
           {selected.length >= step.requiredChoices && <button className="primary-button" type="button" onClick={goNext}>{phase === mission.steps.length - 1 ? '完成世界修復' : '帶著發現繼續前進'}</button>}
         </> : <>

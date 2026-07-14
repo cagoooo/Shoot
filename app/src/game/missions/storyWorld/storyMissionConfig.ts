@@ -17,6 +17,10 @@ export interface StoryStep {
   description: string
   choices: readonly StoryChoice[]
   requiredChoices: number
+  /** 'sequence' 代表要依 choices 的排列順序逐一選取；預設為多選。 */
+  kind?: 'multi-select' | 'sequence'
+  /** 這一步在 3D 世界中的觀察地點；未指定時使用世界地標（0, 7）。 */
+  position?: { x: number; z: number }
 }
 
 export interface StoryMissionConfig {
@@ -38,9 +42,9 @@ export const storyMissions: readonly StoryMissionConfig[] = [
     id: 'seed-forest', title: '種子森林行動', sdgs: 'SDG 13・15', chapter: 4, icon: '🌱',
     intro: '土壤變硬，幼苗找不到安全的地方生根。請修復森林的呼吸角落。', conclusion: '種子森林重新有了可以長大的家。', color: '#77a96e', landmark: 'forest',
     steps: [
-      { title: '觀察土壤', description: '找出讓土壤恢復鬆軟的方法。', requiredChoices: 2, choices: [{ id: 'leaves', title: '鋪上落葉', description: '讓土壤保有水分。' }, { id: 'compost', title: '加入堆肥', description: '補充有機養分。' }, { id: 'plastic', title: '鋪滿塑膠片', description: '會讓雨水更難進入土壤。' }] },
-      { title: '選擇棲地', description: '挑選幼苗需要的兩種條件。', requiredChoices: 2, choices: [{ id: 'shade', title: '保留樹蔭', description: '減少過熱。' }, { id: 'water', title: '留下水源', description: '讓根有水可以吸收。' }, { id: 'noise', title: '增加噪音', description: '不是生物需要的棲地條件。' }] },
-      { title: '守護幼苗', description: '安排兩個長大後能幫助森林的行動。', requiredChoices: 2, choices: [{ id: 'observe', title: '定期觀察', description: '記錄幼苗的變化。' }, { id: 'native', title: '種原生植物', description: '幫助在地生物。' }, { id: 'waste', title: '留下垃圾', description: '會傷害棲地。' }] },
+      { title: '觀察土壤', description: '走到硬土觀察區，找出讓土壤恢復鬆軟的方法。', requiredChoices: 2, position: { x: -7, z: 4 }, choices: [{ id: 'leaves', title: '鋪上落葉', description: '讓土壤保有水分。' }, { id: 'compost', title: '加入堆肥', description: '補充有機養分。' }, { id: 'plastic', title: '鋪滿塑膠片', description: '會讓雨水更難進入土壤。' }] },
+      { title: '種植的順序', description: '在育苗棚照正確順序種下種子，順序錯了種子會長不好。', requiredChoices: 3, kind: 'sequence', position: { x: 0, z: 7 }, choices: [{ id: 'loosen', title: '鬆開土壤', description: '先讓空氣和水能進入土裡。' }, { id: 'seed', title: '放入種子', description: '種子要接觸鬆軟的土才容易發芽。' }, { id: 'mulch', title: '鋪落葉並澆水', description: '最後保濕，保護剛種下的種子。' }] },
+      { title: '守護幼苗', description: '走到幼苗區，安排兩個長大後能幫助森林的行動。', requiredChoices: 2, position: { x: 7, z: 4 }, choices: [{ id: 'observe', title: '定期觀察', description: '記錄幼苗的變化。' }, { id: 'native', title: '種原生植物', description: '幫助在地生物。' }, { id: 'waste', title: '留下垃圾', description: '會傷害棲地。' }] },
     ],
     events: [{ type: 'machine-repaired', id: 'soil-breathing-station' }, { type: 'protected-target', id: 'forest-seedlings' }, { type: 'part-selected', partId: 'seed-launcher-kit' }, { type: 'energy-used', amount: 20 }],
   },
@@ -48,9 +52,9 @@ export const storyMissions: readonly StoryMissionConfig[] = [
     id: 'food-rescue', title: '食物救援行動', sdgs: 'SDG 2・3・12', chapter: 5, icon: '🥕',
     intro: '配送站的保存箱失去平衡，食物可能在送到需要的人手上前就被浪費。', conclusion: '食物被好好保存，也送到了需要的地方。', color: '#d8914d', landmark: 'food',
     steps: [
-      { title: '分類保存', description: '選出兩種能延長食物新鮮度的方法。', requiredChoices: 2, choices: [{ id: 'cool', title: '放入冷藏箱', description: '適合需要低溫保存的食物。' }, { id: 'label', title: '標示日期', description: '先使用快到期的食物。' }, { id: 'sun', title: '放在陽光下', description: '容易讓食物變質。' }] },
-      { title: '安排餐盤', description: '選出兩種讓餐點更均衡的食物。', requiredChoices: 2, choices: [{ id: 'vegetable', title: '加入蔬菜', description: '提供多種營養。' }, { id: 'protein', title: '加入蛋白質', description: '幫助身體成長。' }, { id: 'candy', title: '只選糖果', description: '不能成為均衡的一餐。' }] },
-      { title: '減少浪費', description: '選兩個送出食物前的好做法。', requiredChoices: 2, choices: [{ id: 'share', title: '分享多出的食物', description: '讓資源被好好使用。' }, { id: 'portion', title: '準備剛好的份量', description: '減少吃不完。' }, { id: 'discard', title: '先丟掉再說', description: '會增加浪費。' }] },
+      { title: '分類保存', description: '走到保存箱旁，選出兩種能延長食物新鮮度的方法。', requiredChoices: 2, position: { x: -7, z: 4 }, choices: [{ id: 'cool', title: '放入冷藏箱', description: '適合需要低溫保存的食物。' }, { id: 'label', title: '標示日期', description: '先使用快到期的食物。' }, { id: 'sun', title: '放在陽光下', description: '容易讓食物變質。' }] },
+      { title: '出餐的順序', description: '在配送台照正確順序處理食物，才不會有食物被放到壞掉。', requiredChoices: 3, kind: 'sequence', position: { x: 0, z: 7 }, choices: [{ id: 'check', title: '檢查保存期限', description: '先知道哪些食物快到期。' }, { id: 'use-first', title: '先送出快到期的', description: '讓食物在變質前被吃掉。' }, { id: 'store-rest', title: '其餘冷藏保存', description: '最後把剩下的食物妥善收好。' }] },
+      { title: '減少浪費', description: '走到分享站，選兩個送出食物前的好做法。', requiredChoices: 2, position: { x: 7, z: 4 }, choices: [{ id: 'share', title: '分享多出的食物', description: '讓資源被好好使用。' }, { id: 'portion', title: '準備剛好的份量', description: '減少吃不完。' }, { id: 'discard', title: '先丟掉再說', description: '會增加浪費。' }] },
     ],
     events: [{ type: 'machine-repaired', id: 'food-storage-station' }, { type: 'protected-target', id: 'community-meal-box' }, { type: 'part-selected', partId: 'freshness-scanner-kit' }, { type: 'energy-used', amount: 26 }],
   },

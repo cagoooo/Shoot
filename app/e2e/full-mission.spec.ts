@@ -61,7 +61,7 @@ test('高年級學生可由準備、探索到撤離並查看永續紀錄', async
   await page.getByRole('button', { name: '查看永續行動紀錄' }).click()
   await page.getByRole('button', { name: /前往下一關：種子森林行動/ }).click()
   await expect(page.getByRole('heading', { name: '種子森林行動' })).toBeVisible()
-  for (const choices of [['鋪上落葉', '加入堆肥'], ['保留樹蔭', '留下水源'], ['定期觀察', '種原生植物']]) {
+  for (const choices of [['鋪上落葉', '加入堆肥'], ['鬆開土壤', '放入種子', '鋪落葉並澆水'], ['定期觀察', '種原生植物']]) {
     for (const choice of choices) {
       await page.getByRole('button', { name: new RegExp(choice) }).click()
     }

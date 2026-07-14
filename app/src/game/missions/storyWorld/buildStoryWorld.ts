@@ -69,6 +69,56 @@ export function buildStoryWorldScene(
     beacon.material = landmarkMaterial
   }
 
+  if (mission.landmark === 'forest') {
+    const trunkMaterial = new StandardMaterial(`${mission.id}-trunk-material`, scene)
+    trunkMaterial.diffuseColor = Color3.FromHexString('#8a6a48')
+    const crownMaterial = new StandardMaterial(`${mission.id}-crown-material`, scene)
+    crownMaterial.diffuseColor = Color3.FromHexString('#4f8f4f')
+    for (const [index, spot] of [{ x: -10, z: 10 }, { x: 9, z: 12 }, { x: -4, z: 16 }].entries()) {
+      const trunk = MeshBuilder.CreateCylinder(`${mission.id}-tree-trunk-${index}`, { height: 3, diameter: 0.6 }, scene)
+      trunk.position = new Vector3(spot.x, 1.5, spot.z)
+      trunk.material = trunkMaterial
+      const crown = MeshBuilder.CreateSphere(`${mission.id}-tree-crown-${index}`, { diameter: 2.6, segments: 10 }, scene)
+      crown.position = new Vector3(spot.x, 3.5, spot.z)
+      crown.material = crownMaterial
+    }
+    const soilMaterial = new StandardMaterial(`${mission.id}-soil-material`, scene)
+    soilMaterial.diffuseColor = Color3.FromHexString('#6b5136')
+    const soilPatch = MeshBuilder.CreateCylinder(`${mission.id}-soil-patch`, { height: 0.2, diameter: 4, tessellation: 18 }, scene)
+    soilPatch.position = new Vector3(-7, 0.1, 4)
+    soilPatch.material = soilMaterial
+    const seedlingMaterial = new StandardMaterial(`${mission.id}-seedling-material`, scene)
+    seedlingMaterial.diffuseColor = Color3.FromHexString('#7fbf6a')
+    for (const [index, offset] of [-1, 0, 1].entries()) {
+      const seedling = MeshBuilder.CreateCylinder(`${mission.id}-seedling-${index}`, { height: 0.9, diameterTop: 0, diameterBottom: 0.55 }, scene)
+      seedling.position = new Vector3(7 + offset, 0.45, 4 + Math.abs(offset) * 0.8)
+      seedling.material = seedlingMaterial
+    }
+  }
+
+  if (mission.landmark === 'food') {
+    const crateMaterial = new StandardMaterial(`${mission.id}-crate-material`, scene)
+    crateMaterial.diffuseColor = Color3.FromHexString('#c48a4f')
+    for (const [index, spot] of [{ x: -7.6, z: 3.4 }, { x: -6.4, z: 4.6 }, { x: -7, z: 4 }].entries()) {
+      const crate = MeshBuilder.CreateBox(`${mission.id}-crate-${index}`, { size: 1.1 }, scene)
+      crate.position = new Vector3(spot.x, index === 2 ? 1.65 : 0.55, spot.z)
+      crate.material = crateMaterial
+    }
+    const coolBoxMaterial = new StandardMaterial(`${mission.id}-coolbox-material`, scene)
+    coolBoxMaterial.diffuseColor = Color3.FromHexString('#7fb7d9')
+    const coolBox = MeshBuilder.CreateBox(`${mission.id}-coolbox`, { width: 1.8, height: 1.4, depth: 1.2 }, scene)
+    coolBox.position = new Vector3(-5, 0.7, 5.4)
+    coolBox.material = coolBoxMaterial
+    const standMaterial = new StandardMaterial(`${mission.id}-stand-material`, scene)
+    standMaterial.diffuseColor = Color3.FromHexString('#e0b64f')
+    const shareStand = MeshBuilder.CreateBox(`${mission.id}-share-stand`, { width: 2.6, height: 1.1, depth: 1.4 }, scene)
+    shareStand.position = new Vector3(7, 0.55, 4)
+    shareStand.material = standMaterial
+    const roof = MeshBuilder.CreateCylinder(`${mission.id}-share-roof`, { height: 0.3, diameter: 3.2, tessellation: 4 }, scene)
+    roof.position = new Vector3(7, 2.3, 4)
+    roof.material = standMaterial
+  }
+
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
     const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
