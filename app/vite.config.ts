@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import type { Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { normalizeBasePath } from './src/app/basePath.js'
+import { APP_MISSION, APP_VERSION } from './src/app/appVersion.js'
 import { readFileSync } from 'node:fs'
 
 const pwaVersionPlugin = (): Plugin => ({
@@ -18,9 +19,9 @@ const pwaVersionPlugin = (): Plugin => ({
       type: 'asset',
       fileName: 'version.json',
       source: JSON.stringify({
-        version: '0.1.0-vertical-slice',
+        version: APP_VERSION,
         buildId: buildVersion,
-        mission: 'recycling-storm',
+        mission: APP_MISSION,
       }),
     })
   },

@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { createSafeErrorLog } from './safeErrorLog'
+import { APP_VERSION } from './appVersion'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -30,7 +31,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     const log = JSON.stringify(
       createSafeErrorLog(this.state.error, {
         phase: this.props.phase ?? 'unknown',
-        version: this.props.version ?? '0.1.0-vertical-slice',
+        version: this.props.version ?? APP_VERSION,
       }),
       null,
       2,
