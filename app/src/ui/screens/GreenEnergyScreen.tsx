@@ -8,6 +8,7 @@ import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { SpeakButton } from '../components/SpeakButton'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { SettingsScreen } from './SettingsScreen'
 import { buildGreenEnergyScene } from '../../game/missions/greenEnergy/buildGreenEnergy'
@@ -85,7 +86,7 @@ export function GreenEnergyScreen({ learningMode, comfortSettings, onComfortSett
         <p className="game-hint">觀察太陽能板、風力塔和社區電池，再回任務卡做決定。</p>
       </div>}
       <section className="mission-task-card" aria-live="polite">
-        <aside className="mission-guide" aria-label="綠能任務圖卡引導"><span className="mission-guide-icon" aria-hidden="true">{guide[phase].icon}</span><div><strong>現在要做什麼？</strong><p>{guide[phase].now}</p></div>{learningMode === 'middle-assist' && <div className="mission-guide-next"><strong>下一步</strong><p>先看資料，再選一個最合適的方法。</p></div>}<div className="mission-guide-learn"><strong>小小科學發現</strong><p>{guide[phase].learn}</p></div></aside>
+        <aside className="mission-guide" aria-label="綠能任務圖卡引導"><span className="mission-guide-icon" aria-hidden="true">{guide[phase].icon}</span><div><strong>現在要做什麼？</strong><p>{guide[phase].now}</p><SpeakButton text={`現在要做什麼？${guide[phase].now}${learningMode === 'middle-assist' ? ' 下一步：先看資料，再選一個最合適的方法。' : ''} 小小科學發現：${guide[phase].learn}`} /></div>{learningMode === 'middle-assist' && <div className="mission-guide-next"><strong>下一步</strong><p>先看資料，再選一個最合適的方法。</p></div>}<div className="mission-guide-learn"><strong>小小科學發現</strong><p>{guide[phase].learn}</p></div></aside>
         {phase === 'briefing' && <><p className="eyebrow">任務 1／4</p><h2>把白天的能量留給晚上</h2><p>社區的太陽能板和風力塔都能發電，但今天的天氣只有一種方式最合適。</p><button className="primary-button" type="button" onClick={() => setPhase('weather')}>開始觀察天氣</button></>}
         {phase === 'weather' && <><p className="eyebrow">任務 2／4</p><h2>閱讀天氣資料</h2><p>現在是晴朗、微風的下午：陽光充足，風力較弱。</p>{!canInteract && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}<MultiSelectFeedback selected={source ? ['太陽能板'] : []} required={1} noun="種發電方式" message={sourceFeedback} /><div className="route-options water-options"><button type="button" disabled={!canInteract} aria-pressed={source === 'solar'} onClick={() => chooseSource('solar')}><strong>太陽能板</strong><span>晴天時能收集較多能量</span></button><button type="button" disabled={!canInteract} aria-pressed={source === 'wind'} onClick={() => chooseSource('wind')}><strong>風力塔</strong><span>需要較強的風才會轉得快</span></button></div>{source && <button className="primary-button" type="button" onClick={() => setPhase('storage')}>確認發電方式</button>}</>}
         {phase === 'storage' && <><p className="eyebrow">任務 3／4</p><h2>啟動社區電池</h2><p>{source === 'solar' ? '太陽能板收集到許多能量，快把多出的部分存進電池。' : '風力不強，收集到的能量不多；先把它安全存起來。'}</p>{!canInteract && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}<button className="primary-button" type="button" onClick={() => setStored(true)} disabled={stored || !canInteract}>儲存綠色能量</button>{stored && <button className="primary-button" type="button" onClick={() => setPhase('balance')}>安排晚上的用電</button>}</>}

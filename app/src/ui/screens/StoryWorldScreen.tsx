@@ -8,6 +8,7 @@ import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { SpeakButton } from '../components/SpeakButton'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { SettingsScreen } from './SettingsScreen'
 import { buildStoryWorldScene } from '../../game/missions/storyWorld/buildStoryWorld'
@@ -81,7 +82,7 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
       <section className="mission-task-card" aria-live="polite">
         <aside className="mission-guide" aria-label={`${mission.title}圖卡引導`}>
           <span className="mission-guide-icon" aria-hidden="true">{mission.icon}</span>
-          <div><strong>世界求救訊號</strong><p>{phase === 0 ? mission.intro : phase < mission.steps.length ? step.description : mission.conclusion}</p></div>
+          <div><strong>世界求救訊號</strong><p>{phase === 0 ? mission.intro : phase < mission.steps.length ? step.description : mission.conclusion}</p><SpeakButton text={`世界求救訊號：${phase === 0 ? mission.intro : phase < mission.steps.length ? step.description : mission.conclusion}${learningMode === 'middle-assist' ? ` 下一步：${phase < mission.steps.length ? `選出至少 ${step.requiredChoices} 個好方法，再繼續前進。` : '把今天的守護方法帶回生活中。'}` : ''}`} /></div>
           {learningMode === 'middle-assist' && <div className="mission-guide-next"><strong>下一步</strong><p>{phase < mission.steps.length ? `選出至少 ${step.requiredChoices} 個好方法，再繼續前進。` : '把今天的守護方法帶回生活中。'}</p></div>}
           <div className="mission-guide-learn"><strong>小小科學發現</strong><p>{phase < mission.steps.length ? step.title : '每一個小選擇，都會讓地球更平衡。'}</p></div>
         </aside>

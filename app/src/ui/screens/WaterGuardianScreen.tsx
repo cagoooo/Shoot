@@ -8,6 +8,7 @@ import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { SpeakButton } from '../components/SpeakButton'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { SettingsScreen } from './SettingsScreen'
 import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/buildWaterGuardian'
@@ -142,7 +143,7 @@ export function WaterGuardianScreen({
         <section className="mission-task-card" aria-live="polite">
           <aside className="mission-guide" aria-label="水滴任務圖卡引導">
             <span className="mission-guide-icon" aria-hidden="true">{guide.icon}</span>
-            <div><strong>現在要做什麼？</strong><p>{guide.now}</p></div>
+            <div><strong>現在要做什麼？</strong><p>{guide.now}</p><SpeakButton text={`現在要做什麼？${guide.now}${learningMode === 'middle-assist' ? ' 下一步：看完提示再做選擇。' : ''} 小小科學發現：${guide.learn}`} /></div>
             {learningMode === 'middle-assist' && <div className="mission-guide-next"><strong>下一步</strong><p>看完提示再做選擇。</p></div>}
             <div className="mission-guide-learn"><strong>小小科學發現</strong><p>{guide.learn}</p></div>
           </aside>

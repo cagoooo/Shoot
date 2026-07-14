@@ -1,5 +1,6 @@
 import type { LearningMode } from '../../app/gameStore'
 import type { MissionState } from '../../domain/missions/missionState'
+import { SpeakButton } from './SpeakButton'
 
 interface MissionGuideProps {
   phase: MissionState['phase']
@@ -21,6 +22,13 @@ const guideByPhase: Record<
 
 export function MissionGuide({ phase, learningMode }: MissionGuideProps) {
   const guide = guideByPhase[phase]
+  const speechText = [
+    `現在要做什麼？${guide.now}`,
+    learningMode === 'middle-assist' ? `下一步：${guide.next}` : '',
+    `小小科學發現：${guide.learn}`,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <aside className="mission-guide" aria-label="任務圖卡引導">
@@ -28,6 +36,7 @@ export function MissionGuide({ phase, learningMode }: MissionGuideProps) {
       <div>
         <strong>現在要做什麼？</strong>
         <p>{guide.now}</p>
+        <SpeakButton text={speechText} />
       </div>
       {learningMode === 'middle-assist' && (
         <div className="mission-guide-next">
