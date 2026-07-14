@@ -43,4 +43,27 @@ describe('SettingsScreen', () => {
       expect.objectContaining({ sensitivity: 1, leftHanded: false }),
     )
   })
+
+  it('可調整音樂音量並開啟色彩辨識輔助', () => {
+    const onChange = vi.fn()
+    render(
+      <SettingsScreen
+        settings={DEFAULT_COMFORT_SETTINGS}
+        onChange={onChange}
+        onClose={vi.fn()}
+      />,
+    )
+
+    fireEvent.change(screen.getByLabelText('音樂音量'), {
+      target: { value: '0.3' },
+    })
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ musicVolume: 0.3 }),
+    )
+
+    fireEvent.click(screen.getByLabelText('色彩辨識輔助（加上符號標示）'))
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ colorAssist: true }),
+    )
+  })
 })

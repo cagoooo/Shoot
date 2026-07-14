@@ -562,6 +562,32 @@ button:focus-visible {
 .sorting-bins button:disabled,
 .energy-choice-panel button:disabled { cursor: not-allowed; opacity: 0.52; filter: grayscale(0.25); }
 
+.speak-button {
+  margin-top: 6px;
+  padding: 6px 12px;
+  min-height: 40px;
+  border: 2px solid #2f7d64;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1c5c48;
+  font-size: 0.9rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.speak-button:hover { background: #e6f7eb; }
+
+/* 色彩辨識輔助：狀態除了顏色外，再加上符號與線條樣式差異 */
+body[data-color-assist='true'] .sequence-feedback strong::before,
+body[data-color-assist='true'] .multi-select-feedback strong::before { content: '⏳ '; }
+body[data-color-assist='true'] .sequence-feedback.is-success strong::before,
+body[data-color-assist='true'] .multi-select-feedback.is-success strong::before { content: '✅ '; }
+body[data-color-assist='true'] .sequence-feedback.is-success,
+body[data-color-assist='true'] .multi-select-feedback.is-success { border-style: double; border-width: 4px; }
+body[data-color-assist='true'] .route-options button.is-sequence-selected,
+body[data-color-assist='true'] .route-options button[aria-pressed='true'],
+body[data-color-assist='true'] .evacuation-options label:has(input:checked) { border-style: double; border-width: 4px; }
+body[data-color-assist='true'] .heat-progress { outline: 2px dashed #8a4a12; outline-offset: 2px; }
+
 .comfort-panel {
   position: absolute;
   z-index: 5;

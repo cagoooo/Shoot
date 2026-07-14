@@ -16,6 +16,7 @@ import { deserializeSave, serializeSave } from './persistence/exportSave'
 import { AudioManager, type AudioScene } from './audio/AudioManager'
 import { BrowserAudioAdapter } from './audio/BrowserAudioAdapter'
 import { registerServiceWorker, type ApplyUpdate } from './pwa/serviceWorker'
+import { loadAudioMuted, saveAudioMuted } from './domain/settings/settingsStorage'
 import './App.css'
 
 const RangeScreen = lazy(async () => {
@@ -59,7 +60,7 @@ function AppContent() {
   const [parts, setParts] = useState<PartContent[]>([])
   const [completedMissions, setCompletedMissions] = useState<string[]>([])
   const [contentLoadFailed, setContentLoadFailed] = useState(false)
-  const [audioMuted, setAudioMuted] = useState(false)
+  const [audioMuted, setAudioMuted] = useState(() => loadAudioMuted())
   const saveRepository = useMemo(() => createBrowserSaveRepository(), [])
   const audioAdapter = useMemo(
     () => new BrowserAudioAdapter(import.meta.env.BASE_URL),
@@ -79,7 +80,16 @@ function AppContent() {
 
   useEffect(() => {
     audio.setMuted(audioMuted)
+    saveAudioMuted(audioMuted)
   }, [audio, audioMuted])
+
+  useEffect(() => {
+    audio.setMusicVolume(comfortSettings.musicVolume)
+  }, [audio, comfortSettings.musicVolume])
+
+  useEffect(() => {
+    document.body.dataset.colorAssist = String(comfortSettings.colorAssist)
+  }, [comfortSettings.colorAssist])
 
   useEffect(() => {
     const sceneByScreen: Record<typeof screen, AudioScene> = {

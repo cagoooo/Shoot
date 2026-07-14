@@ -12,6 +12,8 @@ export interface ComfortSettings {
   subtitlesBackground: boolean
   reducedMotion: boolean
   narrationAnnouncements: boolean
+  musicVolume: number
+  colorAssist: boolean
 }
 
 export const DEFAULT_COMFORT_SETTINGS: ComfortSettings = {
@@ -26,6 +28,8 @@ export const DEFAULT_COMFORT_SETTINGS: ComfortSettings = {
   subtitlesBackground: true,
   reducedMotion: false,
   narrationAnnouncements: true,
+  musicVolume: 0.7,
+  colorAssist: false,
 }
 
 function clamp(value: number, minimum: number, maximum: number) {
@@ -47,6 +51,11 @@ export function normalizeComfortSettings(
       input.sensitivity ?? DEFAULT_COMFORT_SETTINGS.sensitivity,
       0.2,
       2,
+    ),
+    musicVolume: clamp(
+      input.musicVolume ?? DEFAULT_COMFORT_SETTINGS.musicVolume,
+      0,
+      1,
     ),
   }
 }

@@ -40,6 +40,21 @@ export function SettingsScreen({
       </label>
 
       <label>
+        <span>音樂音量：{Math.round(settings.musicVolume * 100)}%</span>
+        <input
+          aria-label="音樂音量"
+          type="range"
+          min="0"
+          max="1"
+          step="0.1"
+          value={settings.musicVolume}
+          onChange={(event) =>
+            update({ musicVolume: Number(event.currentTarget.value) })
+          }
+        />
+      </label>
+
+      <label>
         <span>瞄準速度：{Math.round(settings.sensitivity * 100)}%</span>
         <input
           aria-label="瞄準速度"
@@ -125,6 +140,17 @@ export function SettingsScreen({
           }
         />
         <span>減少閃光效果</span>
+      </label>
+
+      <label className="check-setting">
+        <input
+          type="checkbox"
+          checked={settings.colorAssist}
+          onChange={(event) =>
+            update({ colorAssist: event.currentTarget.checked })
+          }
+        />
+        <span>色彩辨識輔助（加上符號標示）</span>
       </label>
 
       <label className="check-setting">

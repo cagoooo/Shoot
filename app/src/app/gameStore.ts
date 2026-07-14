@@ -1,10 +1,11 @@
 import { create } from 'zustand'
 import type { LearningEvent } from '../learning/events'
 import type { CampaignMissionId } from '../content/missionCatalog'
+import type { ComfortSettings } from '../domain/settings/accessibility'
 import {
-  DEFAULT_COMFORT_SETTINGS,
-  type ComfortSettings,
-} from '../domain/settings/accessibility'
+  loadComfortSettings,
+  saveComfortSettings,
+} from '../domain/settings/settingsStorage'
 
 export type GameScreen =
   | 'start'
@@ -37,12 +38,15 @@ export const useGameStore = create<GameStore>((set) => ({
   mode: 'middle-assist',
   activeMission: 'recycling-storm',
   learningEvents: [],
-  comfortSettings: DEFAULT_COMFORT_SETTINGS,
+  comfortSettings: loadComfortSettings(),
   setScreen: (screen) => set({ screen }),
   setMode: (mode) => set({ mode }),
   setActiveMission: (activeMission) => set({ activeMission }),
   recordLearningEvents: (events) =>
     set((state) => ({ learningEvents: [...state.learningEvents, ...events] })),
   clearLearningEvents: () => set({ learningEvents: [] }),
-  setComfortSettings: (comfortSettings) => set({ comfortSettings }),
+  setComfortSettings: (comfortSettings) => {
+    saveComfortSettings(comfortSettings)
+    set({ comfortSettings })
+  },
 }))
