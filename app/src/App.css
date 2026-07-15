@@ -600,6 +600,22 @@ button:focus-visible {
 .sorting-bins button:disabled,
 .energy-choice-panel button:disabled { cursor: not-allowed; opacity: 0.52; filter: grayscale(0.25); }
 
+.guide-dialogue {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 12px 0;
+  padding: 11px 13px;
+  border: 2px solid #b9a3dd;
+  border-radius: 16px 16px 16px 4px;
+  background: #f4effc;
+  color: #3d2a5c;
+  line-height: 1.5;
+}
+.guide-dialogue-icon { font-size: 1.5rem; line-height: 1; margin-top: 2px; }
+.guide-dialogue strong { display: block; margin-bottom: 2px; color: #5b3f8f; font-size: 0.85rem; }
+.guide-dialogue p { margin: 0; font-size: 0.95rem; }
+
 .speak-button {
   margin-top: 6px;
   padding: 6px 12px;

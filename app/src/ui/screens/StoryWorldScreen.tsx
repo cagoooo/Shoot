@@ -19,7 +19,9 @@ import type { StoryMissionConfig, StoryStep } from '../../game/missions/storyWor
 const initialFeedbackFor = (step?: StoryStep) =>
   step?.kind === 'sequence'
     ? `照順序來：先選「${step.choices[0].title}」。`
-    : '選出對地球有幫助的方法。'
+    : step?.requiredChoices === 1
+      ? '想一想，選出一個最好的答案。'
+      : '選出對地球有幫助的方法。'
 
 interface StoryWorldScreenProps {
   mission: StoryMissionConfig
@@ -122,6 +124,15 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
           <p className="eyebrow">任務 {phase + 1}／{mission.steps.length}</p>
           <h2>{step.title}</h2>
           <p>{step.description}</p>
+          {step.dialogue && (
+            <div className="guide-dialogue">
+              <span className="guide-dialogue-icon" aria-hidden="true">{mission.guide.icon}</span>
+              <div>
+                <strong>{mission.guide.name}</strong>
+                <p>{step.dialogue}</p>
+              </div>
+            </div>
+          )}
           {!canInteract && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}
           {step.kind === 'sequence' ? (
             <div className={`sequence-feedback${selected.length === step.choices.length ? ' is-success' : ''}`} role="status">

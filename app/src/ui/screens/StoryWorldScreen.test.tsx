@@ -70,4 +70,31 @@ describe('StoryWorldScreen', () => {
     expect(screen.getByText(/順序 1／3/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '帶著發現繼續前進' })).not.toBeInTheDocument()
   })
+
+  it('顯示引導角色對話，判斷題選錯有引導、選對可前進', () => {
+    const ocean = storyMissions.find((mission) => mission.id === 'ocean-blue')!
+    render(
+      <StoryWorldScreen
+        mission={ocean}
+        learningMode="upper-standard"
+        comfortSettings={DEFAULT_COMFORT_SETTINGS}
+        onComfortSettingsChange={vi.fn()}
+        onBack={vi.fn()}
+        onMissionComplete={vi.fn()}
+        mapSlot={<div>海洋 3D 測試畫面</div>}
+      />,
+    )
+
+    const quizStep = ocean.steps[0]
+    expect(quizStep.requiredChoices).toBe(1)
+    expect(screen.getByText(ocean.guide.name)).toBeInTheDocument()
+    expect(screen.getByText(quizStep.dialogue!)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(quizStep.choices[1].title) }))
+    expect(screen.getByText(new RegExp(`再想想：${quizStep.choices[1].title}`))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '帶著發現繼續前進' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(quizStep.choices[0].title) }))
+    expect(screen.getByRole('button', { name: '帶著發現繼續前進' })).toBeInTheDocument()
+  })
 })
