@@ -8,15 +8,23 @@ describe('storyMissions', () => {
     expect(new Set(storyMissions.map((mission) => mission.landmark)).size).toBe(6)
   })
 
-  it('第 4、5 關有排順序玩法且每一步要走到不同地點', () => {
+  it('第 4、5 關有排順序玩法且要照 choices 順序完成', () => {
     for (const id of ['seed-forest', 'food-rescue'] as const) {
       const mission = storyMissions.find((item) => item.id === id)
       expect(mission).toBeDefined()
       const sequenceStep = mission!.steps.find((step) => step.kind === 'sequence')
       expect(sequenceStep).toBeDefined()
       expect(sequenceStep!.requiredChoices).toBe(sequenceStep!.choices.length)
-      const positions = mission!.steps.map((step) => `${step.position?.x},${step.position?.z}`)
-      expect(new Set(positions).size).toBe(mission!.steps.length)
+    }
+  })
+
+  it('第 4 至第 9 關每一步都要走到不同的 3D 地點', () => {
+    for (const mission of storyMissions) {
+      const positions = mission.steps.map((step) => {
+        expect(step.position).toBeDefined()
+        return `${step.position?.x},${step.position?.z}`
+      })
+      expect(new Set(positions).size).toBe(mission.steps.length)
     }
   })
 })

@@ -99,6 +99,119 @@ export function buildStoryWorldScene(
     }
   }
 
+  if (mission.landmark === 'health') {
+    const basinMaterial = new StandardMaterial(`${mission.id}-basin-material`, scene)
+    basinMaterial.diffuseColor = Color3.FromHexString('#e8f4f6')
+    const basin = MeshBuilder.CreateBox(`${mission.id}-wash-basin`, { width: 2.6, height: 1, depth: 1.2 }, scene)
+    basin.position = new Vector3(-7, 0.5, 4)
+    basin.material = basinMaterial
+    const faucetMaterial = new StandardMaterial(`${mission.id}-faucet-material`, scene)
+    faucetMaterial.diffuseColor = Color3.FromHexString('#9db4bd')
+    for (const [index, offset] of [-0.8, 0, 0.8].entries()) {
+      const faucet = MeshBuilder.CreateCylinder(`${mission.id}-faucet-${index}`, { height: 0.7, diameter: 0.14 }, scene)
+      faucet.position = new Vector3(-7 + offset, 1.35, 3.6)
+      faucet.material = faucetMaterial
+    }
+    const stationMaterial = new StandardMaterial(`${mission.id}-water-station-material`, scene)
+    stationMaterial.diffuseColor = Color3.FromHexString('#5fb3d9')
+    stationMaterial.emissiveColor = Color3.FromHexString('#123c4f')
+    const waterStation = MeshBuilder.CreateBox(`${mission.id}-water-station`, { width: 1.6, height: 2, depth: 1.2 }, scene)
+    waterStation.position = new Vector3(7, 1, 4)
+    waterStation.material = stationMaterial
+    const bubbleMaterial = new StandardMaterial(`${mission.id}-bubble-material`, scene)
+    bubbleMaterial.diffuseColor = Color3.FromHexString('#bfeef5')
+    bubbleMaterial.alpha = 0.55
+    for (const [index, spot] of [{ x: -3, y: 2.2, z: 9 }, { x: 2, y: 3, z: 10 }, { x: 5, y: 1.8, z: 8 }].entries()) {
+      const bubble = MeshBuilder.CreateSphere(`${mission.id}-bubble-${index}`, { diameter: 0.9 + index * 0.3, segments: 10 }, scene)
+      bubble.position = new Vector3(spot.x, spot.y, spot.z)
+      bubble.material = bubbleMaterial
+    }
+  }
+
+  if (mission.landmark === 'home') {
+    const wallMaterial = new StandardMaterial(`${mission.id}-wall-material`, scene)
+    wallMaterial.diffuseColor = Color3.FromHexString('#e8d9c4')
+    const roofMaterial = new StandardMaterial(`${mission.id}-roof-material`, scene)
+    roofMaterial.diffuseColor = Color3.FromHexString('#a34f3f')
+    for (const [index, spot] of [{ x: -9, z: 11 }, { x: 9, z: 13 }].entries()) {
+      const house = MeshBuilder.CreateBox(`${mission.id}-house-${index}`, { width: 3, height: 2.2, depth: 2.6 }, scene)
+      house.position = new Vector3(spot.x, 1.1, spot.z)
+      house.material = wallMaterial
+      const roof = MeshBuilder.CreateCylinder(`${mission.id}-roof-${index}`, { height: 2.8, diameter: 2.6, tessellation: 3 }, scene)
+      roof.rotation.z = Math.PI / 2
+      roof.position = new Vector3(spot.x, 2.75, spot.z)
+      roof.material = roofMaterial
+    }
+    const drainMaterial = new StandardMaterial(`${mission.id}-drain-material`, scene)
+    drainMaterial.diffuseColor = Color3.FromHexString('#5a6b70')
+    const drain = MeshBuilder.CreateCylinder(`${mission.id}-drain`, { height: 0.16, diameter: 2.4, tessellation: 16 }, scene)
+    drain.position = new Vector3(-7, 0.08, 4)
+    drain.material = drainMaterial
+    const signMaterial = new StandardMaterial(`${mission.id}-sign-material`, scene)
+    signMaterial.diffuseColor = Color3.FromHexString('#f0c93f')
+    const signPole = MeshBuilder.CreateCylinder(`${mission.id}-sign-pole`, { height: 2.4, diameter: 0.16 }, scene)
+    signPole.position = new Vector3(7, 1.2, 3.4)
+    signPole.material = signMaterial
+    const signBoard = MeshBuilder.CreateBox(`${mission.id}-sign-board`, { width: 1.4, height: 0.9, depth: 0.12 }, scene)
+    signBoard.position = new Vector3(7, 2.1, 3.4)
+    signBoard.material = signMaterial
+    const bagMaterial = new StandardMaterial(`${mission.id}-sandbag-material`, scene)
+    bagMaterial.diffuseColor = Color3.FromHexString('#b09a72')
+    for (const [index, offset] of [-0.9, 0, 0.9].entries()) {
+      const sandbag = MeshBuilder.CreateSphere(`${mission.id}-sandbag-${index}`, { diameterX: 1, diameterY: 0.55, diameterZ: 0.7, segments: 8 }, scene)
+      sandbag.position = new Vector3(7 + offset, 0.28, 4.8)
+      sandbag.material = bagMaterial
+    }
+  }
+
+  if (mission.landmark === 'ocean') {
+    const poolMaterial = new StandardMaterial(`${mission.id}-pool-material`, scene)
+    poolMaterial.diffuseColor = Color3.FromHexString('#3f86b8')
+    poolMaterial.emissiveColor = Color3.FromHexString('#0c3d5c')
+    poolMaterial.alpha = 0.85
+    for (const [index, spot] of [{ x: -7, z: 4, d: 3.4 }, { x: 7, z: 4, d: 2.8 }].entries()) {
+      const pool = MeshBuilder.CreateCylinder(`${mission.id}-tide-pool-${index}`, { height: 0.14, diameter: spot.d, tessellation: 20 }, scene)
+      pool.position = new Vector3(spot.x, 0.07, spot.z)
+      pool.material = poolMaterial
+    }
+    const buoyMaterial = new StandardMaterial(`${mission.id}-buoy-material`, scene)
+    buoyMaterial.diffuseColor = Color3.FromHexString('#e2574c')
+    const buoyPole = MeshBuilder.CreateCylinder(`${mission.id}-buoy-pole`, { height: 1.6, diameter: 0.14 }, scene)
+    buoyPole.position = new Vector3(-4, 0.8, 10)
+    buoyPole.material = buoyMaterial
+    const buoyBall = MeshBuilder.CreateSphere(`${mission.id}-buoy-ball`, { diameter: 0.7, segments: 10 }, scene)
+    buoyBall.position = new Vector3(-4, 1.8, 10)
+    buoyBall.material = buoyMaterial
+    const debrisMaterial = new StandardMaterial(`${mission.id}-debris-material`, scene)
+    debrisMaterial.diffuseColor = Color3.FromHexString('#8d8d84')
+    for (const [index, spot] of [{ x: 5.6, z: 3.2 }, { x: 8.2, z: 4.6 }, { x: 6.8, z: 5.4 }].entries()) {
+      const debris = MeshBuilder.CreateBox(`${mission.id}-debris-${index}`, { width: 0.7, height: 0.4, depth: 0.5 }, scene)
+      debris.position = new Vector3(spot.x, 0.2, spot.z)
+      debris.rotation.y = index * 0.9
+      debris.material = debrisMaterial
+    }
+  }
+
+  if (mission.landmark === 'partners') {
+    const worldColors = ['#e2574c', '#77a96e', '#d8914d', '#70b8c1', '#b0836e', '#4f91bb', '#956fba', '#e4b64e', '#5eb987']
+    for (const [index, hex] of worldColors.entries()) {
+      const angle = (index / worldColors.length) * Math.PI * 2
+      const pillarMaterial = new StandardMaterial(`${mission.id}-pillar-material-${index}`, scene)
+      pillarMaterial.diffuseColor = Color3.FromHexString(hex)
+      pillarMaterial.emissiveColor = Color3.FromHexString(hex).scale(0.18)
+      const pillar = MeshBuilder.CreateCylinder(`${mission.id}-pillar-${index}`, { height: 1.8 + (index % 3) * 0.4, diameter: 0.5 }, scene)
+      pillar.position = new Vector3(Math.sin(angle) * 6, 0.9 + (index % 3) * 0.2, 7 + Math.cos(angle) * 6)
+      pillar.material = pillarMaterial
+    }
+    const tableMaterial = new StandardMaterial(`${mission.id}-table-material`, scene)
+    tableMaterial.diffuseColor = Color3.FromHexString('#d9cff0')
+    for (const spot of [{ x: -7, z: 4 }, { x: 7, z: 4 }]) {
+      const table = MeshBuilder.CreateCylinder(`${mission.id}-table-${spot.x}`, { height: 0.9, diameter: 2.2, tessellation: 16 }, scene)
+      table.position = new Vector3(spot.x, 0.45, spot.z)
+      table.material = tableMaterial
+    }
+  }
+
   if (mission.landmark === 'food') {
     const crateMaterial = new StandardMaterial(`${mission.id}-crate-material`, scene)
     crateMaterial.diffuseColor = Color3.FromHexString('#c48a4f')
