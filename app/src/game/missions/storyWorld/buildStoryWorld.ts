@@ -10,6 +10,8 @@ import { normalizeComfortSettings, type ComfortSettings } from '../../../domain/
 import { InputManager } from '../../../input/InputManager'
 import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
+import { applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
+import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
 import type { StoryMissionConfig } from './storyMissionConfig'
 
 export function buildStoryWorldScene(
@@ -18,7 +20,7 @@ export function buildStoryWorldScene(
   mission: StoryMissionConfig,
   comfortInput: Partial<ComfortSettings> = {},
   objectivePosition?: { x: number; z: number },
-  onProximityChange?: (near: boolean) => void,
+  onObjectiveTracking?: (tracking: ObjectiveTracking) => void,
 ): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.79, 0.9, 0.84, 1)
@@ -54,14 +56,15 @@ export function buildStoryWorldScene(
   landmark.position = new Vector3(0, mission.landmark === 'ocean' ? 0.55 : 1.8, 7)
   landmark.material = landmarkMaterial
 
+  applyWorldAmbience(scene, '#cbe6d9')
   if (objectivePosition) {
-    const markerMaterial = new StandardMaterial(`${mission.id}-objective-marker-material`, scene)
-    markerMaterial.emissiveColor = Color3.FromHexString('#d9ff4a')
-    const marker = MeshBuilder.CreateTorus(`${mission.id}-objective-marker`, { diameter: 4.2, thickness: 0.15, tessellation: 24 }, scene)
-    marker.position = new Vector3(objectivePosition.x, 0.12, objectivePosition.z)
-    marker.material = markerMaterial
+    createObjectiveBeacon(scene, objectivePosition, {
+      namePrefix: `${mission.id}-objective`,
+      reducedMotion: comfort.reducedMotion,
+      ringDiameter: 4.2,
+    })
   }
-  let wasNear: boolean | undefined
+  const emitTracking = createTrackingEmitter(onObjectiveTracking)
 
   for (const [index, x] of [-6, -3, 3, 6].entries()) {
     const beacon = MeshBuilder.CreateCylinder(`${mission.id}-beacon-${index}`, { height: 2.2, diameter: 0.34 }, scene)
@@ -127,11 +130,11 @@ export function buildStoryWorldScene(
     camera.position.x = Math.max(-14, Math.min(14, next.x))
     camera.position.z = Math.max(-18, Math.min(21, next.z))
     if (objectivePosition) {
-      const near = Math.hypot(camera.position.x - objectivePosition.x, camera.position.z - objectivePosition.z) <= 4.8
-      if (near !== wasNear) {
-        wasNear = near
-        onProximityChange?.(near)
-      }
+      emitTracking(computeObjectiveTracking(
+        { x: camera.position.x, z: camera.position.z, yaw: camera.rotation.y },
+        objectivePosition,
+        4.8,
+      ))
     }
   })
   return scene

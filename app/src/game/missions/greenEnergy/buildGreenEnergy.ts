@@ -10,13 +10,15 @@ import { normalizeComfortSettings, type ComfortSettings } from '../../../domain/
 import { InputManager } from '../../../input/InputManager'
 import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
+import { applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
+import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
 
 export function buildGreenEnergyScene(
   engine: AbstractEngine,
   inputManager: InputManager,
   comfortInput: Partial<ComfortSettings> = {},
   objectivePosition?: { x: number; z: number },
-  onProximityChange?: (near: boolean) => void,
+  onObjectiveTracking?: (tracking: ObjectiveTracking) => void,
 ): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.76, 0.9, 0.98, 1)
@@ -57,14 +59,15 @@ export function buildGreenEnergyScene(
   battery.position = new Vector3(5, 1.1, 11)
   battery.material = batteryMaterial
 
+  applyWorldAmbience(scene, '#c2dff5')
   if (objectivePosition) {
-    const markerMaterial = new StandardMaterial('energy-objective-marker-material', scene)
-    markerMaterial.emissiveColor = Color3.FromHexString('#d9ff4a')
-    const marker = MeshBuilder.CreateTorus('energy-objective-marker', { diameter: 3.8, thickness: 0.14, tessellation: 24 }, scene)
-    marker.position = new Vector3(objectivePosition.x, 0.12, objectivePosition.z)
-    marker.material = markerMaterial
+    createObjectiveBeacon(scene, objectivePosition, {
+      namePrefix: 'energy-objective',
+      reducedMotion: comfort.reducedMotion,
+      ringDiameter: 3.8,
+    })
   }
-  let wasNear: boolean | undefined
+  const emitTracking = createTrackingEmitter(onObjectiveTracking)
 
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
@@ -74,11 +77,11 @@ export function buildGreenEnergyScene(
     camera.position.x = Math.max(-14, Math.min(14, next.x))
     camera.position.z = Math.max(-18, Math.min(21, next.z))
     if (objectivePosition) {
-      const near = Math.hypot(camera.position.x - objectivePosition.x, camera.position.z - objectivePosition.z) <= 4.5
-      if (near !== wasNear) {
-        wasNear = near
-        onProximityChange?.(near)
-      }
+      emitTracking(computeObjectiveTracking(
+        { x: camera.position.x, z: camera.position.z, yaw: camera.rotation.y },
+        objectivePosition,
+        4.5,
+      ))
     }
   })
   return scene

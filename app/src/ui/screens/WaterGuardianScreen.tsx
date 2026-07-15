@@ -8,7 +8,9 @@ import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { ControlsHintOverlay } from '../components/ControlsHintOverlay'
 import { SpeakButton } from '../components/SpeakButton'
+import type { ObjectiveTracking } from '../../game/missions/objectiveTracking'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { SettingsScreen } from './SettingsScreen'
 import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/buildWaterGuardian'
@@ -55,7 +57,8 @@ export function WaterGuardianScreen({
   const [filterFeedback, setFilterFeedback] = useState('先從最上層開始：選「布」。')
   const [uses, setUses] = useState<string[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [nearObjective, setNearObjective] = useState(false)
+  const [objectiveTracking, setObjectiveTracking] = useState<ObjectiveTracking | null>(null)
+  const nearObjective = objectiveTracking?.near ?? false
   const [objectiveObserved, setObjectiveObserved] = useState(false)
   const guide = phaseGuide[phase]
   const objective = phase === 'collect'
@@ -71,7 +74,7 @@ export function WaterGuardianScreen({
         runtimeInput ?? inputManager,
         runtimeComfort,
         objective.position,
-        setNearObjective,
+        setObjectiveTracking,
       ),
     [inputManager, phase],
   )
@@ -113,7 +116,7 @@ export function WaterGuardianScreen({
   }, [onAudioSceneChange, phase])
 
   useEffect(() => {
-    setNearObjective(false)
+    setObjectiveTracking(null)
     setObjectiveObserved(false)
   }, [phase])
 
@@ -135,8 +138,9 @@ export function WaterGuardianScreen({
         {phase !== 'report' && (
           <div className="mission-map-frame">
             {mapSlot ?? <GameCanvas inputManager={inputManager} sceneFactory={sceneFactory} comfortSettings={comfortSettings} />}
-            {!mapSlot && <SceneObjectivePrompt label={objective.label} near={nearObjective} observed={objectiveObserved} onObserve={() => setObjectiveObserved(true)} />}
+            {!mapSlot && <SceneObjectivePrompt label={objective.label} near={nearObjective} observed={objectiveObserved} onObserve={() => setObjectiveObserved(true)} tracking={objectiveTracking} />}
             <TouchControls leftHanded={comfortSettings.leftHanded} onInputChange={(state) => inputManager.updateSource('touch', state)} />
+            {!mapSlot && <ControlsHintOverlay />}
             <p className="game-hint">靠近水站觀察，再回到任務卡完成步驟。</p>
           </div>
         )}

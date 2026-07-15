@@ -8,7 +8,9 @@ import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { ControlsHintOverlay } from '../components/ControlsHintOverlay'
 import { SpeakButton } from '../components/SpeakButton'
+import type { ObjectiveTracking } from '../../game/missions/objectiveTracking'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { SettingsScreen } from './SettingsScreen'
 import { buildGreenEnergyScene } from '../../game/missions/greenEnergy/buildGreenEnergy'
@@ -42,17 +44,18 @@ export function GreenEnergyScreen({ learningMode, comfortSettings, onComfortSett
   const [stored, setStored] = useState(false)
   const [priorities, setPriorities] = useState<string[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [nearObjective, setNearObjective] = useState(false)
+  const [objectiveTracking, setObjectiveTracking] = useState<ObjectiveTracking | null>(null)
+  const nearObjective = objectiveTracking?.near ?? false
   const [objectiveObserved, setObjectiveObserved] = useState(false)
   const objective = phase === 'weather' ? { label: '太陽能板', position: { x: 0, z: 4 } } : phase === 'storage' ? { label: '社區電池', position: { x: 5, z: 11 } } : { label: '能源面板', position: { x: 0, z: 4 } }
   const canInteract = objectiveGate === 'unlocked' || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
-  const sceneFactory = useCallback<SceneFactory>((engine, runtimeInput, runtimeComfort) => buildGreenEnergyScene(engine as AbstractEngine, runtimeInput ?? inputManager, runtimeComfort, objective.position, setNearObjective), [inputManager, phase])
+  const sceneFactory = useCallback<SceneFactory>((engine, runtimeInput, runtimeComfort) => buildGreenEnergyScene(engine as AbstractEngine, runtimeInput ?? inputManager, runtimeComfort, objective.position, setObjectiveTracking), [inputManager, phase])
 
   useEffect(() => {
     onAudioSceneChange?.(phase === 'report' ? 'success' : 'exploration')
   }, [onAudioSceneChange, phase])
 
-  useEffect(() => { setNearObjective(false); setObjectiveObserved(false) }, [phase])
+  useEffect(() => { setObjectiveTracking(null); setObjectiveObserved(false) }, [phase])
 
   const togglePriority = (name: string) => setPriorities((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name])
   const chooseSource = (next: 'solar' | 'wind') => {
@@ -81,8 +84,9 @@ export function GreenEnergyScreen({ learningMode, comfortSettings, onComfortSett
     <div className="mission-layout">
       {phase !== 'report' && <div className="mission-map-frame">
         {mapSlot ?? <GameCanvas inputManager={inputManager} sceneFactory={sceneFactory} comfortSettings={comfortSettings} />}
-        {!mapSlot && <SceneObjectivePrompt label={objective.label} near={nearObjective} observed={objectiveObserved} onObserve={() => setObjectiveObserved(true)} />}
+        {!mapSlot && <SceneObjectivePrompt label={objective.label} near={nearObjective} observed={objectiveObserved} onObserve={() => setObjectiveObserved(true)} tracking={objectiveTracking} />}
         <TouchControls leftHanded={comfortSettings.leftHanded} onInputChange={(state) => inputManager.updateSource('touch', state)} />
+        {!mapSlot && <ControlsHintOverlay />}
         <p className="game-hint">觀察太陽能板、風力塔和社區電池，再回任務卡做決定。</p>
       </div>}
       <section className="mission-task-card" aria-live="polite">

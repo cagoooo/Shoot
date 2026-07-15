@@ -8,7 +8,9 @@ import { InputManager } from '../../input/InputManager'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { ControlsHintOverlay } from '../components/ControlsHintOverlay'
 import { SpeakButton } from '../components/SpeakButton'
+import type { ObjectiveTracking } from '../../game/missions/objectiveTracking'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { SettingsScreen } from './SettingsScreen'
 import { buildStoryWorldScene } from '../../game/missions/storyWorld/buildStoryWorld'
@@ -37,7 +39,8 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
   const [selected, setSelected] = useState<string[]>([])
   const [selectionFeedback, setSelectionFeedback] = useState(() => initialFeedbackFor(mission.steps[0]))
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [nearObjective, setNearObjective] = useState(false)
+  const [objectiveTracking, setObjectiveTracking] = useState<ObjectiveTracking | null>(null)
+  const nearObjective = objectiveTracking?.near ?? false
   const [objectiveObserved, setObjectiveObserved] = useState(false)
   const step = mission.steps[phase]
   const objective = {
@@ -45,13 +48,13 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
     position: (phase < mission.steps.length && step.position) || { x: 0, z: 7 },
   }
   const canInteract = objectiveGate === 'unlocked' || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
-  const sceneFactory = useCallback<SceneFactory>((engine, runtimeInput, runtimeComfort) => buildStoryWorldScene(engine as AbstractEngine, runtimeInput ?? inputManager, mission, runtimeComfort, objective.position, setNearObjective), [inputManager, mission, phase])
+  const sceneFactory = useCallback<SceneFactory>((engine, runtimeInput, runtimeComfort) => buildStoryWorldScene(engine as AbstractEngine, runtimeInput ?? inputManager, mission, runtimeComfort, objective.position, setObjectiveTracking), [inputManager, mission, phase])
 
   useEffect(() => {
     onAudioSceneChange?.(phase >= mission.steps.length ? 'success' : 'exploration')
   }, [mission.steps.length, onAudioSceneChange, phase])
 
-  useEffect(() => { setNearObjective(false); setObjectiveObserved(false) }, [phase])
+  useEffect(() => { setObjectiveTracking(null); setObjectiveObserved(false) }, [phase])
 
   const toggleChoice = (id: string) => {
     const choice = step.choices.find((item) => item.id === id)
@@ -103,8 +106,9 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
     <div className="mission-layout">
       {phase < mission.steps.length && <div className="mission-map-frame">
         {mapSlot ?? <GameCanvas inputManager={inputManager} sceneFactory={sceneFactory} comfortSettings={comfortSettings} />}
-        {!mapSlot && <SceneObjectivePrompt label={objective.label} near={nearObjective} observed={objectiveObserved} onObserve={() => setObjectiveObserved(true)} />}
+        {!mapSlot && <SceneObjectivePrompt label={objective.label} near={nearObjective} observed={objectiveObserved} onObserve={() => setObjectiveObserved(true)} tracking={objectiveTracking} />}
         <TouchControls leftHanded={comfortSettings.leftHanded} onInputChange={(state) => inputManager.updateSource('touch', state)} />
+        {!mapSlot && <ControlsHintOverlay />}
         <p className="game-hint">在世界場景中觀察線索，再回任務卡做出守護選擇。</p>
       </div>}
       <section className="mission-task-card" aria-live="polite">

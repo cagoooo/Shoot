@@ -20,6 +20,8 @@ import {
 import { InputManager } from '../../input/InputManager'
 import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
+import { ControlsHintOverlay } from '../components/ControlsHintOverlay'
+import type { ObjectiveTracking } from '../../game/missions/objectiveTracking'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { MissionGuide } from '../components/MissionGuide'
 import type { LearningMode } from '../../app/gameStore'
@@ -80,7 +82,7 @@ const evacuationChoices: Array<{
   { id: 'heavy-scrap', name: '沉重廢鐵', description: '很重，而且可以稍後再回收' },
 ]
 
-function MissionMap({ comfortSettings, objective, near, observed, onNearChange, onObserve }: { comfortSettings: ComfortSettings; objective: { label: string; position: { x: number; z: number } }; near: boolean; observed: boolean; onNearChange: (near: boolean) => void; onObserve: () => void }) {
+function MissionMap({ comfortSettings, objective, tracking, observed, onTrackingChange, onObserve }: { comfortSettings: ComfortSettings; objective: { label: string; position: { x: number; z: number } }; tracking: ObjectiveTracking | null; observed: boolean; onTrackingChange: (tracking: ObjectiveTracking) => void; onObserve: () => void }) {
   const inputManager = useMemo(() => new InputManager(), [])
   const sceneFactory = useCallback<SceneFactory>(
     (engine, runtimeInput, runtimeComfort) =>
@@ -90,9 +92,9 @@ function MissionMap({ comfortSettings, objective, near, observed, onNearChange, 
         undefined,
         runtimeComfort,
         objective.position,
-        onNearChange,
+        onTrackingChange,
       ),
-    [inputManager, objective.position, onNearChange],
+    [inputManager, objective.position, onTrackingChange],
   )
 
   return (
@@ -102,11 +104,12 @@ function MissionMap({ comfortSettings, objective, near, observed, onNearChange, 
         sceneFactory={sceneFactory}
         comfortSettings={comfortSettings}
       />
-      <SceneObjectivePrompt label={objective.label} near={near} observed={observed} onObserve={onObserve} />
+      <SceneObjectivePrompt label={objective.label} near={tracking?.near ?? false} observed={observed} onObserve={onObserve} tracking={tracking} />
       <TouchControls
         leftHanded={comfortSettings.leftHanded}
         onInputChange={(state) => inputManager.updateSource('touch', state)}
       />
+      <ControlsHintOverlay />
       <p className="game-hint">沿著黃色主路或藍色維修小路探索回收站。</p>
     </div>
   )
@@ -141,7 +144,7 @@ export function MissionScreen({
   const [bag, setBag] = useState<EvacuationItem[]>([])
   const [boss, setBoss] = useState(() => createStormMachine())
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [nearObjective, setNearObjective] = useState(false)
+  const [objectiveTracking, setObjectiveTracking] = useState<ObjectiveTracking | null>(null)
   const [objectiveObserved, setObjectiveObserved] = useState(false)
   const [localComfortSettings, setLocalComfortSettings] = useState(
     comfortSettingsInput,
@@ -192,7 +195,7 @@ export function MissionScreen({
     onAudioSceneChange?.(audioByPhase[mission.phase])
   }, [mission.phase, onAudioSceneChange])
 
-  useEffect(() => { setNearObjective(false); setObjectiveObserved(false) }, [mission.phase])
+  useEffect(() => { setObjectiveTracking(null); setObjectiveObserved(false) }, [mission.phase])
 
   const advance = (objective: string, event: MissionEvent) => {
     setMission((current) => {
@@ -301,7 +304,7 @@ export function MissionScreen({
 
       <div className="mission-layout">
         {mission.phase !== 'report' &&
-          (mapSlot ?? (objective && <MissionMap comfortSettings={comfortSettings} objective={objective} near={nearObjective} observed={objectiveObserved} onNearChange={setNearObjective} onObserve={() => setObjectiveObserved(true)} />))}
+          (mapSlot ?? (objective && <MissionMap comfortSettings={comfortSettings} objective={objective} tracking={objectiveTracking} observed={objectiveObserved} onTrackingChange={setObjectiveTracking} onObserve={() => setObjectiveObserved(true)} />))}
 
         <section className="mission-task-card" aria-live="polite" onClickCapture={(event) => { if (!canInteract) { event.preventDefault(); event.stopPropagation() } }} onChangeCapture={(event) => { if (!canInteract) { event.preventDefault(); event.stopPropagation() } }}>
           <MissionGuide phase={mission.phase} learningMode={learningMode} />

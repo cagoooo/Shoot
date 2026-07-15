@@ -529,6 +529,44 @@ button:focus-visible {
 }
 
 .scene-objective-prompt span { font-size: 0.9rem; line-height: 1.4; }
+.objective-compass { display: flex; align-items: center; gap: 8px; font-weight: 900; color: #eaff9a; }
+.objective-compass-arrow {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #d9ff4a;
+  border-radius: 50%;
+  background: rgba(217, 255, 74, 0.14);
+  font-size: 1rem;
+  transition: transform 0.25s ease-out;
+}
+[data-reduced-motion='true'] .objective-compass-arrow { transition: none; }
+
+.controls-hint-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(9, 42, 33, 0.55);
+}
+.controls-hint-card {
+  display: grid;
+  gap: 10px;
+  width: min(360px, 100%);
+  padding: 16px 18px;
+  border: 2px solid #d9ff4a;
+  border-radius: 8px 20px 8px 20px;
+  background: rgba(7, 54, 42, 0.96);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(8, 47, 38, 0.4);
+}
+.controls-hint-card strong { font-size: 1.05rem; }
+.controls-hint-card ul { display: grid; gap: 6px; margin: 0; padding-left: 18px; font-size: 0.92rem; line-height: 1.5; }
+.controls-hint-card b { color: #eaff9a; }
+.controls-hint-card .primary-button { justify-self: start; }
 .scene-objective-prompt.is-complete { border-color: #8ee1ad; background: rgba(20, 101, 69, 0.93); }
 .scene-observe-button { justify-self: start; margin-top: 3px; padding: 7px 11px; border: 0; border-radius: 999px; background: #d9ff4a; color: #123a2e; font: inherit; font-weight: 900; cursor: pointer; }
 .objective-locked { margin: 14px 0; padding: 10px 12px; border-left: 5px solid #e5b74f; border-radius: 4px 12px 4px 12px; background: #fff4c5; color: #624300; font-weight: 800; line-height: 1.45; }
