@@ -27,9 +27,10 @@ describe('GameCanvas', () => {
 
     view.unmount()
 
+    // 銷毀在引擎生命週期 promise 鏈上執行，等它完成。
+    await waitFor(() => expect(engine.dispose).toHaveBeenCalledOnce())
     expect(engine.stopRenderLoop).toHaveBeenCalledOnce()
     expect(scene.dispose).toHaveBeenCalledOnce()
-    expect(engine.dispose).toHaveBeenCalledOnce()
   })
 
   it('持續低幀率時只降低一級實際渲染畫質', async () => {

@@ -2,7 +2,11 @@ import { expect, test } from '@playwright/test'
 
 test('高年級學生可由準備、探索到撤離並查看永續紀錄', async ({ page }) => {
   const pageErrors: Error[] = []
+  const consoleErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error))
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text())
+  })
   await page.goto('./')
   await page.getByRole('radio', { name: /高年級標準/ }).check()
   await page.getByRole('button', { name: '開始任務' }).click()
@@ -69,4 +73,5 @@ test('高年級學生可由準備、探索到撤離並查看永續紀錄', async
   }
   await page.getByRole('button', { name: '查看永續行動紀錄' }).click()
   expect(pageErrors).toEqual([])
+  expect(consoleErrors.filter((text) => text.includes('3D 場景建立失敗'))).toEqual([])
 })

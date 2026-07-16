@@ -35,6 +35,11 @@ export type SceneFactory = (
 ) => RuntimeScene
 
 const defaultEngineFactory: EngineFactory = createGameEngine
+
+// 引擎依 canvas 快取重用：WebGPU 引擎在同一個 canvas 上 dispose 後無法再建立
+// 第二顆（context 已被前一顆佔用），所以任務階段切換只重建場景、不重建引擎；
+// canvas 真正從畫面移除後才釋放引擎。
+const engineCache = new WeakMap<HTMLCanvasElement, Promise<RuntimeEngine>>()
 const defaultSceneFactory: SceneFactory = (
   engine,
   inputManager,
@@ -80,22 +85,26 @@ export function GameCanvas({
 
     const handleResize = () => engine?.resize()
 
-    void engineFactory(canvas).then((createdEngine) => {
-      if (cancelled) {
-        createdEngine.dispose()
+    const enginePromise = engineCache.get(canvas) ?? engineFactory(canvas)
+    engineCache.set(canvas, enginePromise)
+
+    void enginePromise.then((sharedEngine) => {
+      if (cancelled) return
+      engine = sharedEngine
+      try {
+        scene = sceneFactory(
+          sharedEngine,
+          inputManager,
+          comfortSettings,
+          onWeaponStateChange,
+          onProximityChange,
+        )
+      } catch (error) {
+        console.error('3D 場景建立失敗', error)
         return
       }
-
-      engine = createdEngine
-      scene = sceneFactory(
-        createdEngine,
-        inputManager,
-        comfortSettings,
-        onWeaponStateChange,
-        onProximityChange,
-      )
       const performance = createPerformanceMonitor('high')
-      engine.runRenderLoop(() => {
+      sharedEngine.runRenderLoop(() => {
         scene?.render()
         if (!engine?.getFps) return
         const decision = feedPerformanceSample(performance, engine.getFps())
@@ -109,11 +118,20 @@ export function GameCanvas({
 
     return () => {
       cancelled = true
-      window.removeEventListener('resize', handleResize)
-      unbindInput?.()
-      engine?.stopRenderLoop()
-      scene?.dispose()
-      engine?.dispose()
+      void enginePromise.then((sharedEngine) => {
+        window.removeEventListener('resize', handleResize)
+        unbindInput?.()
+        sharedEngine.stopRenderLoop()
+        scene?.dispose()
+        // 等一個 tick：StrictMode 重掛載與階段切換時 canvas 仍在畫面上，
+        // 引擎要留給下一個場景重用；只有 canvas 真的被移除才釋放。
+        setTimeout(() => {
+          if (!canvas.isConnected) {
+            sharedEngine.dispose()
+            engineCache.delete(canvas)
+          }
+        }, 0)
+      })
     }
   }, [
     comfortSettings,
