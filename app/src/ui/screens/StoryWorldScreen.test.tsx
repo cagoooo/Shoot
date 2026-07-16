@@ -32,10 +32,52 @@ describe('StoryWorldScreen', () => {
       }
       fireEvent.click(screen.getByRole('button', { name: step === 2 ? '完成世界修復' : '帶著發現繼續前進' }))
     }
+    expect(screen.getByText(storyMissions[0].endings.perfect)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '查看永續行動紀錄' }))
     expect(onMissionComplete).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ type: 'machine-repaired', id: 'soil-breathing-station' }),
+        expect.objectContaining({ type: 'mission-ending', ending: 'perfect' }),
+      ]),
+    )
+  })
+
+  it('途中選錯會走向學習結局', () => {
+    const onMissionComplete = vi.fn()
+    render(
+      <StoryWorldScreen
+        mission={storyMissions[0]}
+        learningMode="upper-standard"
+        comfortSettings={DEFAULT_COMFORT_SETTINGS}
+        onComfortSettingsChange={vi.fn()}
+        onBack={vi.fn()}
+        onMissionComplete={onMissionComplete}
+        mapSlot={<div>森林 3D 測試畫面</div>}
+      />,
+    )
+
+    const firstStep = storyMissions[0].steps[0]
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(firstStep.choices[2].title) }))
+
+    for (let step = 0; step < 3; step += 1) {
+      const config = storyMissions[0].steps[step]
+      if (config.kind === 'sequence') {
+        for (const choice of config.choices) {
+          fireEvent.click(screen.getByRole('button', { name: new RegExp(choice.title) }))
+        }
+      } else {
+        for (const choice of config.choices.slice(0, config.requiredChoices)) {
+          fireEvent.click(screen.getByRole('button', { name: new RegExp(choice.title) }))
+        }
+      }
+      fireEvent.click(screen.getByRole('button', { name: step === 2 ? '完成世界修復' : '帶著發現繼續前進' }))
+    }
+
+    expect(screen.getByText(storyMissions[0].endings.learned)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '查看永續行動紀錄' }))
+    expect(onMissionComplete).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'mission-ending', ending: 'learned' }),
       ]),
     )
   })

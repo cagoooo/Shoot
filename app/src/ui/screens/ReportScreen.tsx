@@ -79,6 +79,9 @@ export function ReportScreen({
           <span className="card-number">02</span>
           <h2>發生了什麼</h2>
           <p>這次使用了 {report.energyUsed} 單位能源。</p>
+          {report.endings.map((ending) => (
+            <p className="ending-note" key={ending}>🌟 {ending}</p>
+          ))}
           <div className="earned-badges" aria-label="獲得的學習徽章">
             {badges.length > 0 ? (
               badges.map((badge) => (

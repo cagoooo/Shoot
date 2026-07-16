@@ -600,6 +600,26 @@ button:focus-visible {
 .sorting-bins button:disabled,
 .energy-choice-panel button:disabled { cursor: not-allowed; opacity: 0.52; filter: grayscale(0.25); }
 
+.data-compare-card {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 2px solid #9cc0d8;
+  border-radius: 6px 16px 6px 16px;
+  background: #eef6fb;
+  color: #17394d;
+}
+.data-compare-card > strong { font-size: 0.95rem; }
+.data-compare-row { display: grid; grid-template-columns: 56px 1fr 74px; align-items: center; gap: 8px; }
+.data-compare-label { font-weight: 900; font-size: 0.88rem; }
+.data-compare-track { display: block; height: 16px; border-radius: 999px; background: #d5e6f0; overflow: hidden; }
+.data-compare-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #4f91bb, #2f6d99); }
+.data-compare-value { font-size: 0.85rem; font-weight: 800; text-align: right; }
+.data-compare-note { margin: 0; font-size: 0.88rem; line-height: 1.45; color: #2b5670; }
+
+.ending-note { padding: 8px 10px; border-radius: 4px 12px 4px 12px; background: #fdf3d8; color: #6b4e00; font-weight: 800; line-height: 1.5; }
+
 .guide-dialogue {
   display: flex;
   gap: 10px;

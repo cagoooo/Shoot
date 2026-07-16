@@ -30,6 +30,7 @@ export function createActionCardSvg(
   <text x="90" y="255" font-size="30" fill="#253c34">整理回收物：${recycled} 件</text>
   <text x="90" y="305" font-size="30" fill="#253c34">修好設備：${report.repairedMachines.length} 項</text>
   <text x="90" y="380" font-size="28" font-weight="700" fill="#8a5b00">獲得徽章：${escapeXml(badgeNames)}</text>
+  ${report.endings.at(-1) ? `<text x="90" y="415" font-size="22" fill="#3d5c50">${escapeXml(report.endings.at(-1)!)}</text>` : ''}
   <rect x="78" y="425" width="1044" height="112" rx="20" fill="#dff2e5"/>
   <text x="104" y="473" font-size="24" font-weight="700" fill="#174f3c">下次想怎麼改：</text>
   <text x="104" y="515" font-size="25" fill="#253c34">${escapeXml(reflection)}</text>

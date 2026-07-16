@@ -31,4 +31,11 @@ describe('reduceLearningEvents', () => {
     expect(report.repairedMachines).toHaveLength(1)
     expect(report.protectedTargets).toHaveLength(1)
   })
+
+  it('任務結局摘要會收進報告', () => {
+    const report = reduceLearningEvents([
+      { type: 'mission-ending', missionId: 'ocean-blue', ending: 'learned', summary: '潮池生物差點少了朋友，最後牠們都平安。' },
+    ])
+    expect(report.endings).toEqual(['潮池生物差點少了朋友，最後牠們都平安。'])
+  })
 })

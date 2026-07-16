@@ -38,6 +38,14 @@ describe('storyMissions', () => {
     }
   })
 
+  it('每一關都有完美與學習兩種結局', () => {
+    for (const mission of storyMissions) {
+      expect(mission.endings.perfect.length).toBeGreaterThan(5)
+      expect(mission.endings.learned.length).toBeGreaterThan(5)
+      expect(mission.endings.perfect).not.toBe(mission.endings.learned)
+    }
+  })
+
   it('第 4 至第 9 關每一步都要走到不同的 3D 地點', () => {
     for (const mission of storyMissions) {
       const positions = mission.steps.map((step) => {

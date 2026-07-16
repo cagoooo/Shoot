@@ -12,6 +12,7 @@ import { ControlsHintOverlay } from '../components/ControlsHintOverlay'
 import { SpeakButton } from '../components/SpeakButton'
 import type { ObjectiveTracking } from '../../game/missions/objectiveTracking'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
+import { DataCompareCard } from '../components/DataCompareCard'
 import { SettingsScreen } from './SettingsScreen'
 import { buildStoryWorldScene } from '../../game/missions/storyWorld/buildStoryWorld'
 import type { StoryMissionConfig, StoryStep } from '../../game/missions/storyWorld/storyMissionConfig'
@@ -39,6 +40,7 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
   const inputManager = useMemo(() => new InputManager(), [])
   const [phase, setPhase] = useState(0)
   const [selected, setSelected] = useState<string[]>([])
+  const [missteps, setMissteps] = useState(0)
   const [selectionFeedback, setSelectionFeedback] = useState(() => initialFeedbackFor(mission.steps[0]))
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [objectiveTracking, setObjectiveTracking] = useState<ObjectiveTracking | null>(null)
@@ -47,7 +49,10 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
   const step = mission.steps[phase]
   const objective = {
     label: phase < mission.steps.length ? step.title : mission.title,
-    position: (phase < mission.steps.length && step.position) || { x: 0, z: 7 },
+    position: {
+      ...((phase < mission.steps.length && step.position) || { x: 0, z: 7 }),
+      icon: (phase < mission.steps.length && step.objectiveIcon) || mission.icon,
+    },
   }
   const canInteract = objectiveGate === 'unlocked' || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
   const sceneFactory = useCallback<SceneFactory>((engine, runtimeInput, runtimeComfort) => buildStoryWorldScene(engine as AbstractEngine, runtimeInput ?? inputManager, mission, runtimeComfort, objective.position, setObjectiveTracking), [inputManager, mission, phase])
@@ -63,6 +68,7 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
     if (!choice) return
     const isHelpful = step.choices.indexOf(choice) < step.requiredChoices
     if (!isHelpful) {
+      setMissteps((count) => count + 1)
       setSelectionFeedback(`再想想：${choice.title} 不適合，${choice.description}`)
       return
     }
@@ -81,6 +87,7 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
     }
     const expected = step.choices[selected.length]
     if (id !== expected.id) {
+      setMissteps((count) => count + 1)
       setSelectionFeedback(`還差一步：先選「${expected.title}」。${expected.description}`)
       return
     }
@@ -130,9 +137,11 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
               <div>
                 <strong>{mission.guide.name}</strong>
                 <p>{step.dialogue}</p>
+                <SpeakButton text={`${mission.guide.name}說：${step.dialogue}`} label="聽角色說" />
               </div>
             </div>
           )}
+          {step.dataCard && <DataCompareCard title={step.dataCard.title} note={step.dataCard.note} bars={step.dataCard.bars} />}
           {!canInteract && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}
           {step.kind === 'sequence' ? (
             <div className={`sequence-feedback${selected.length === step.choices.length ? ' is-success' : ''}`} role="status">
@@ -150,8 +159,32 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
         </> : <>
           <p className="eyebrow">世界修復完成</p>
           <h2>{mission.conclusion}</h2>
+          <div className="guide-dialogue">
+            <span className="guide-dialogue-icon" aria-hidden="true">{mission.guide.icon}</span>
+            <div>
+              <strong>{mission.guide.name}</strong>
+              <p>{missteps === 0 ? mission.endings.perfect : mission.endings.learned}</p>
+              <SpeakButton text={`${mission.guide.name}說：${missteps === 0 ? mission.endings.perfect : mission.endings.learned}`} label="聽角色說" />
+            </div>
+          </div>
           <div className="boss-result" role="status"><span>完成三個守護任務</span><span>收集世界資料</span><span>保護關鍵目標</span><strong>{mission.sdgs} 的行動已寫入地球地圖</strong></div>
-          <button className="primary-button" type="button" onClick={() => onMissionComplete([...mission.events])}>查看永續行動紀錄</button>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={() =>
+              onMissionComplete([
+                ...mission.events,
+                {
+                  type: 'mission-ending',
+                  missionId: mission.id,
+                  ending: missteps === 0 ? 'perfect' : 'learned',
+                  summary: missteps === 0 ? mission.endings.perfect : mission.endings.learned,
+                },
+              ])
+            }
+          >
+            查看永續行動紀錄
+          </button>
         </>}
       </section>
     </div>

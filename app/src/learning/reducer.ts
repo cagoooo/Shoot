@@ -14,6 +14,7 @@ export function createEmptyLearningReport(): LearningReport {
     enemiesCleansed: 0,
     energyModes: [],
     routes: [],
+    endings: [],
   }
 }
 
@@ -67,6 +68,8 @@ export function reduceLearningEvents(
         return report.routes.includes(event.route)
           ? report
           : { ...report, routes: [...report.routes, event.route] }
+      case 'mission-ending':
+        return { ...report, endings: addUnique(report.endings, event.summary) }
     }
   }, createEmptyLearningReport())
 }

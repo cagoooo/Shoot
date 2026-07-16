@@ -8,6 +8,7 @@ export type LearningEvent =
   | { type: 'enemy-cleansed'; amount: number }
   | { type: 'energy-mode'; mode: 'fast-full' | 'slow-saving' | 'zoned' }
   | { type: 'route-chosen'; route: 'main-route' | 'maintenance-route' }
+  | { type: 'mission-ending'; missionId: string; ending: 'perfect' | 'learned'; summary: string }
 
 export interface LearningReport {
   energyUsed: number
@@ -19,4 +20,5 @@ export interface LearningReport {
   enemiesCleansed: number
   energyModes: Array<'fast-full' | 'slow-saving' | 'zoned'>
   routes: Array<'main-route' | 'maintenance-route'>
+  endings: string[]
 }

@@ -12,6 +12,7 @@ import { ControlsHintOverlay } from '../components/ControlsHintOverlay'
 import { SpeakButton } from '../components/SpeakButton'
 import type { ObjectiveTracking } from '../../game/missions/objectiveTracking'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
+import { DataCompareCard } from '../components/DataCompareCard'
 import { SettingsScreen } from './SettingsScreen'
 import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/buildWaterGuardian'
 
@@ -62,10 +63,10 @@ export function WaterGuardianScreen({
   const [objectiveObserved, setObjectiveObserved] = useState(false)
   const guide = phaseGuide[phase]
   const objective = phase === 'collect'
-    ? { label: '雨水箱', position: { x: -4, z: 3 } }
+    ? { label: '雨水箱', position: { x: -4, z: 3, icon: '🌧️' } }
     : phase === 'filter'
-      ? { label: '過濾站', position: { x: 4, z: 6 } }
-      : { label: '乾淨水箱', position: { x: 0, z: 14 } }
+      ? { label: '過濾站', position: { x: 4, z: 6, icon: '🧪' } }
+      : { label: '乾淨水箱', position: { x: 0, z: 14, icon: '🚰' } }
   const canInteract = objectiveGate === 'unlocked' || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
   const sceneFactory = useCallback<SceneFactory>(
     (engine, runtimeInput, runtimeComfort) =>
@@ -172,6 +173,15 @@ export function WaterGuardianScreen({
             <p className="eyebrow">任務 3／4</p>
             <h2>組合過濾材料</h2>
             <p>選擇材料並比較用途：布先擋落葉，砂子擋小顆粒，活性碳改善味道。</p>
+            <DataCompareCard
+              title="過濾材料比較：每分鐘能過濾多少水"
+              note="越往下層過濾越慢，但攔得越細——這就是順序重要的原因！"
+              bars={[
+                { label: '布', value: 10, unit: '公升' },
+                { label: '砂子', value: 6, unit: '公升' },
+                { label: '活性碳', value: 3, unit: '公升' },
+              ]}
+            />
             <div className={`sequence-feedback${filterParts.length === filterOrder.length ? ' is-success' : ''}`} role="status">
               <strong>過濾順序：{filterParts.length}／3</strong>
               <span>{filterParts.length ? filterParts.map((part, index) => `${index + 1}. ${filterLabels[part]}`).join(' → ') : '尚未選擇'}</span>
