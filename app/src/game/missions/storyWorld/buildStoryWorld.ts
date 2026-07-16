@@ -12,6 +12,7 @@ import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
 import { applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
 import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
+import { createIntroOrbit } from '../introCinematic'
 import type { StoryMissionConfig } from './storyMissionConfig'
 
 export function buildStoryWorldScene(
@@ -19,7 +20,7 @@ export function buildStoryWorldScene(
   inputManager: InputManager,
   mission: StoryMissionConfig,
   comfortInput: Partial<ComfortSettings> = {},
-  objectivePosition?: { x: number; z: number },
+  objectivePosition?: { x: number; z: number; icon?: string },
   onObjectiveTracking?: (tracking: ObjectiveTracking) => void,
 ): Scene {
   const scene = new Scene(engine)
@@ -62,9 +63,17 @@ export function buildStoryWorldScene(
       namePrefix: `${mission.id}-objective`,
       reducedMotion: comfort.reducedMotion,
       ringDiameter: 4.2,
+      icon: objectivePosition.icon,
     })
   }
   const emitTracking = createTrackingEmitter(onObjectiveTracking)
+  const intro = createIntroOrbit({
+    key: mission.id,
+    center: { x: 0, z: 7 },
+    disabled: comfort.reducedMotion || (typeof navigator !== 'undefined' && navigator.webdriver === true),
+  })
+  const spawnPosition = camera.position.clone()
+  const spawnTarget = new Vector3(0, 1.3, 3)
 
   for (const [index, x] of [-6, -3, 3, 6].entries()) {
     const beacon = MeshBuilder.CreateCylinder(`${mission.id}-beacon-${index}`, { height: 2.2, diameter: 0.34 }, scene)
@@ -238,6 +247,16 @@ export function buildStoryWorldScene(
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
     const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
+    const introPose = intro.update(deltaSeconds, input.moveX !== 0 || input.moveY !== 0 || input.lookX !== 0 || input.lookY !== 0)
+    if (introPose) {
+      camera.position.set(introPose.x, introPose.y, introPose.z)
+      camera.setTarget(new Vector3(introPose.targetX, introPose.targetY, introPose.targetZ))
+      return
+    }
+    if (intro.consumeJustFinished()) {
+      camera.position.copyFrom(spawnPosition)
+      camera.setTarget(spawnTarget)
+    }
     applyTouchLook(camera, input, deltaSeconds)
     const next = integrateMovement({ x: camera.position.x, z: camera.position.z }, input, deltaSeconds, 4, camera.rotation.y)
     camera.position.x = Math.max(-14, Math.min(14, next.x))

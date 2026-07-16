@@ -82,7 +82,7 @@ const evacuationChoices: Array<{
   { id: 'heavy-scrap', name: '沉重廢鐵', description: '很重，而且可以稍後再回收' },
 ]
 
-function MissionMap({ comfortSettings, objective, tracking, observed, onTrackingChange, onObserve }: { comfortSettings: ComfortSettings; objective: { label: string; position: { x: number; z: number } }; tracking: ObjectiveTracking | null; observed: boolean; onTrackingChange: (tracking: ObjectiveTracking) => void; onObserve: () => void }) {
+function MissionMap({ comfortSettings, objective, tracking, observed, onTrackingChange, onObserve }: { comfortSettings: ComfortSettings; objective: { label: string; position: { x: number; z: number; icon?: string } }; tracking: ObjectiveTracking | null; observed: boolean; onTrackingChange: (tracking: ObjectiveTracking) => void; onObserve: () => void }) {
   const inputManager = useMemo(() => new InputManager(), [])
   const sceneFactory = useCallback<SceneFactory>(
     (engine, runtimeInput, runtimeComfort) =>
@@ -155,12 +155,12 @@ export function MissionScreen({
   const setComfortSettings =
     onComfortSettingsChange ?? setLocalComfortSettings
   const systemReducedMotion = useReducedMotion()
-  const objectiveByPhase = useMemo<Partial<Record<MissionState['phase'], { label: string; position: { x: number; z: number } }>>>(() => ({
-    loadout: { label: '基地工具桌', position: { x: 0, z: -16 } },
-    entrance: { label: '回收站入口', position: { x: 0, z: -11 } },
-    'sorting-hall': { label: '分類大廳', position: { x: -6, z: 2 } },
-    'storm-machine': { label: '風暴機器', position: { x: 0, z: 14 } },
-    evacuation: { label: '屋頂撤離點', position: { x: 0, z: 21 } },
+  const objectiveByPhase = useMemo<Partial<Record<MissionState['phase'], { label: string; position: { x: number; z: number; icon?: string } }>>>(() => ({
+    loadout: { label: '基地工具桌', position: { x: 0, z: -16, icon: '🧰' } },
+    entrance: { label: '回收站入口', position: { x: 0, z: -11, icon: '🚪' } },
+    'sorting-hall': { label: '分類大廳', position: { x: -6, z: 2, icon: '♻️' } },
+    'storm-machine': { label: '風暴機器', position: { x: 0, z: 14, icon: '⚡' } },
+    evacuation: { label: '屋頂撤離點', position: { x: 0, z: 21, icon: '🎒' } },
   }), [])
   const objective = objectiveByPhase[mission.phase]
   const canInteract = !objective || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)

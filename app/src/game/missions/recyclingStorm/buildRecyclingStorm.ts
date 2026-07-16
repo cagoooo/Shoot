@@ -16,6 +16,7 @@ import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
 import { applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
 import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
+import { createIntroOrbit } from '../introCinematic'
 import {
   recyclingStormZones,
   zoneConnections,
@@ -68,7 +69,7 @@ export function buildRecyclingStormScene(
   inputManager: InputManager,
   assetProvider?: RecyclingStationAssetProvider,
   comfortInput: Partial<ComfortSettings> = DEFAULT_COMFORT_SETTINGS,
-  objectivePosition?: { x: number; z: number },
+  objectivePosition?: { x: number; z: number; icon?: string },
   onObjectiveTracking?: (tracking: ObjectiveTracking) => void,
 ): Scene {
   const scene = new Scene(engine)
@@ -228,13 +229,33 @@ export function buildRecyclingStormScene(
       namePrefix: 'recycling-objective',
       reducedMotion: comfort.reducedMotion,
       ringDiameter: 4.2,
+      icon: objectivePosition.icon,
     })
   }
   const emitTracking = createTrackingEmitter(onObjectiveTracking)
+  const intro = createIntroOrbit({
+    key: 'recycling-storm',
+    center: { x: 0, z: 2 },
+    radius: 18,
+    height: 9,
+    disabled: comfort.reducedMotion || (typeof navigator !== 'undefined' && navigator.webdriver === true),
+  })
+  const spawnPosition = camera.position.clone()
+  const spawnTarget = new Vector3(0, 1.4, -11)
 
   scene.onBeforeRenderObservable.add(() => {
     const input = inputManager.snapshot()
     const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)
+    const introPose = intro.update(deltaSeconds, input.moveX !== 0 || input.moveY !== 0 || input.lookX !== 0 || input.lookY !== 0)
+    if (introPose) {
+      camera.position.set(introPose.x, introPose.y, introPose.z)
+      camera.setTarget(new Vector3(introPose.targetX, introPose.targetY, introPose.targetZ))
+      return
+    }
+    if (intro.consumeJustFinished()) {
+      camera.position.copyFrom(spawnPosition)
+      camera.setTarget(spawnTarget)
+    }
     applyTouchLook(camera, input, deltaSeconds)
     const next = integrateMovement(
       { x: camera.position.x, z: camera.position.z },

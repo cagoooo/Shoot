@@ -47,7 +47,7 @@ export function GreenEnergyScreen({ learningMode, comfortSettings, onComfortSett
   const [objectiveTracking, setObjectiveTracking] = useState<ObjectiveTracking | null>(null)
   const nearObjective = objectiveTracking?.near ?? false
   const [objectiveObserved, setObjectiveObserved] = useState(false)
-  const objective = phase === 'weather' ? { label: '太陽能板', position: { x: 0, z: 4 } } : phase === 'storage' ? { label: '社區電池', position: { x: 5, z: 11 } } : { label: '能源面板', position: { x: 0, z: 4 } }
+  const objective = phase === 'weather' ? { label: '太陽能板', position: { x: 0, z: 4, icon: '☀️' } } : phase === 'storage' ? { label: '社區電池', position: { x: 5, z: 11, icon: '🔋' } } : { label: '能源面板', position: { x: 0, z: 4, icon: '⚡' } }
   const canInteract = objectiveGate === 'unlocked' || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
   const sceneFactory = useCallback<SceneFactory>((engine, runtimeInput, runtimeComfort) => buildGreenEnergyScene(engine as AbstractEngine, runtimeInput ?? inputManager, runtimeComfort, objective.position, setObjectiveTracking), [inputManager, phase])
 
