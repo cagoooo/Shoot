@@ -1,5 +1,6 @@
 import type { GameScreen, LearningMode, MissionId } from '../../app/gameStore'
 import { ProgressControls } from '../components/ProgressControls'
+import { InstallPrompt } from '../components/InstallPrompt'
 
 interface BaseScreenProps {
   mode: LearningMode
@@ -97,6 +98,7 @@ export function BaseScreen({
         onExport={onExportProgress}
         onImport={onImportProgress}
       />
+      <InstallPrompt />
     </main>
   )
 }

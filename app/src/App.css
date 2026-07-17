@@ -623,6 +623,36 @@ button:focus-visible {
 .discovery-section { margin-top: 14px; display: grid; gap: 8px; }
 .discovery-section h3 { margin: 0; font-size: 1rem; color: #174f3c; }
 
+.network-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  z-index: 40;
+  transform: translateX(-50%);
+  max-width: min(520px, calc(100% - 24px));
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 800;
+  box-shadow: 0 8px 22px rgba(8, 47, 38, 0.28);
+}
+.network-banner.is-offline { border: 2px solid #e5b74f; background: #fff4c5; color: #624300; }
+.network-banner.is-online { border: 2px solid #5eb987; background: #e6f7eb; color: #176342; }
+
+.install-hint {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 2px solid #8cbcaf;
+  border-radius: 6px 18px 6px 18px;
+  background: #eef7ef;
+  color: #174f3c;
+  line-height: 1.5;
+}
+.install-hint p { margin: 0; }
+.install-hint .primary-button { justify-self: start; }
+.install-hint .text-button { justify-self: start; font-size: 0.85rem; }
+
 .collection-screen { display: grid; gap: 18px; max-width: 980px; margin: 0 auto; padding: 20px clamp(14px, 4vw, 34px) 40px; }
 .collection-stats { display: flex; gap: 14px; }
 .collection-stats div { display: grid; gap: 2px; min-width: 120px; padding: 12px 16px; border: 2px solid #8cbcaf; border-radius: 6px 18px 6px 18px; background: #eef7ef; text-align: center; }

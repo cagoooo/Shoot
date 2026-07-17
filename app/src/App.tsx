@@ -18,6 +18,7 @@ import { deserializeSave, serializeSave } from './persistence/exportSave'
 import { AudioManager, type AudioScene } from './audio/AudioManager'
 import { BrowserAudioAdapter } from './audio/BrowserAudioAdapter'
 import { registerServiceWorker, type ApplyUpdate } from './pwa/serviceWorker'
+import { NetworkStatusBanner } from './ui/components/NetworkStatusBanner'
 import { loadAudioMuted, saveAudioMuted } from './domain/settings/settingsStorage'
 import './App.css'
 
@@ -372,6 +373,7 @@ function App() {
       >
         <AppContent />
       </ErrorBoundary>
+      <NetworkStatusBanner />
       {applyUpdate && (
         <aside className="update-banner" role="status" aria-live="polite">
           <span>新版本已準備好，重新整理後就能使用。</span>
