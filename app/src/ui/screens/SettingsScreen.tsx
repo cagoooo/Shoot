@@ -39,6 +39,25 @@ export function SettingsScreen({
         />
       </label>
 
+      <fieldset className="quality-fieldset">
+        <legend>畫質模式</legend>
+        {([
+          { mode: 'saver', label: '省電', hint: '解析度較低，適合較舊的平板' },
+          { mode: 'standard', label: '標準', hint: '自動依流暢度調整' },
+          { mode: 'fine', label: '精緻', hint: '維持最清晰畫面' },
+        ] as const).map(({ mode, label, hint }) => (
+          <label className="check-setting" key={mode}>
+            <input
+              type="radio"
+              name="quality-mode"
+              checked={settings.qualityMode === mode}
+              onChange={() => update({ qualityMode: mode })}
+            />
+            <span>{label}<small className="quality-hint">{hint}</small></span>
+          </label>
+        ))}
+      </fieldset>
+
       <label>
         <span>音樂音量：{Math.round(settings.musicVolume * 100)}%</span>
         <input

@@ -10,6 +10,7 @@ import {
   createPerformanceMonitor,
   feedPerformanceSample,
 } from './engine/performanceMonitor'
+import { resolveQualityMode } from './engine/qualityProfile'
 
 export interface RuntimeEngine {
   runRenderLoop(callback: () => void): void
@@ -103,14 +104,16 @@ export function GameCanvas({
         console.error('3D 場景建立失敗', error)
         return
       }
+      const quality = resolveQualityMode(comfortSettings?.qualityMode ?? 'standard')
+      sharedEngine.setHardwareScalingLevel?.(quality.hardwareScaling)
       const performance = createPerformanceMonitor('high')
       sharedEngine.runRenderLoop(() => {
         scene?.render()
-        if (!engine?.getFps) return
+        if (!quality.autoDegrade || !engine?.getFps) return
         const decision = feedPerformanceSample(performance, engine.getFps())
         if (decision.reason !== 'sustained-low-fps') return
         engine.setHardwareScalingLevel?.(
-          decision.profile === 'medium' ? 1.5 : 2,
+          Math.max(quality.hardwareScaling, decision.profile === 'medium' ? 1.5 : 2),
         )
       })
       window.addEventListener('resize', handleResize)

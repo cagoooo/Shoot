@@ -1,4 +1,5 @@
 export type FlashStrength = 'reduced' | 'standard'
+export type QualityMode = 'saver' | 'standard' | 'fine'
 
 export interface ComfortSettings {
   cameraBob: boolean
@@ -14,6 +15,7 @@ export interface ComfortSettings {
   narrationAnnouncements: boolean
   musicVolume: number
   colorAssist: boolean
+  qualityMode: QualityMode
 }
 
 export const DEFAULT_COMFORT_SETTINGS: ComfortSettings = {
@@ -30,6 +32,7 @@ export const DEFAULT_COMFORT_SETTINGS: ComfortSettings = {
   narrationAnnouncements: true,
   musicVolume: 0.7,
   colorAssist: false,
+  qualityMode: 'standard',
 }
 
 function clamp(value: number, minimum: number, maximum: number) {
@@ -57,5 +60,10 @@ export function normalizeComfortSettings(
       0,
       1,
     ),
+    qualityMode: (['saver', 'standard', 'fine'] as const).includes(
+      input.qualityMode as QualityMode,
+    )
+      ? (input.qualityMode as QualityMode)
+      : DEFAULT_COMFORT_SETTINGS.qualityMode,
   }
 }

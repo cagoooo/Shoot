@@ -54,7 +54,8 @@ describe('GameCanvas', () => {
     await waitFor(() => expect(renderFrame).toBeTypeOf('function'))
     for (let frame = 0; frame < 600; frame += 1) renderFrame?.()
 
-    expect(engine.setHardwareScalingLevel).toHaveBeenCalledOnce()
-    expect(engine.setHardwareScalingLevel).toHaveBeenCalledWith(1.5)
+    // 第一次是套用畫質模式的初始縮放，第二次才是持續低幀率的自動降級。
+    expect(engine.setHardwareScalingLevel).toHaveBeenCalledTimes(2)
+    expect(engine.setHardwareScalingLevel).toHaveBeenLastCalledWith(1.5)
   })
 })

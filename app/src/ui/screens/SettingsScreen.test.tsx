@@ -66,4 +66,21 @@ describe('SettingsScreen', () => {
       expect.objectContaining({ colorAssist: true }),
     )
   })
+
+  it('可切換省電、標準、精緻三段畫質', () => {
+    const onChange = vi.fn()
+    render(
+      <SettingsScreen
+        settings={DEFAULT_COMFORT_SETTINGS}
+        onChange={onChange}
+        onClose={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('radio', { name: /標準/ })).toBeChecked()
+    fireEvent.click(screen.getByRole('radio', { name: /省電/ }))
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ qualityMode: 'saver' }),
+    )
+  })
 })
