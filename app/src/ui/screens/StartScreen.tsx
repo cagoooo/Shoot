@@ -4,9 +4,10 @@ interface StartScreenProps {
   mode: LearningMode
   onModeChange: (mode: LearningMode) => void
   onStart: () => void
+  onTeacherMode?: () => void
 }
 
-export function StartScreen({ mode, onModeChange, onStart }: StartScreenProps) {
+export function StartScreen({ mode, onModeChange, onStart, onTeacherMode }: StartScreenProps) {
   return (
     <main className="start-screen">
       <section className="start-card" aria-labelledby="game-title">
@@ -47,6 +48,11 @@ export function StartScreen({ mode, onModeChange, onStart }: StartScreenProps) {
         <button className="start-button" type="button" onClick={onStart}>
           開始任務
         </button>
+        {onTeacherMode && (
+          <button className="text-button teacher-entry" type="button" onClick={onTeacherMode}>
+            🍎 我是老師：開啟課堂投影模式
+          </button>
+        )}
       </section>
     </main>
   )
