@@ -124,5 +124,32 @@
     "stats": { "power": 2, "saving": 4, "range": 3, "aim": 3, "cooling": 3, "lightness": 4, "earthCare": 5 },
     "sdgs": [4, 15],
     "why": "先辨認生態目標，才能選擇合適的行動"
+  },
+  {
+    "id": "solar-lens",
+    "name": "太陽能鏡片",
+    "shortDescription": "晴天時把陽光聚成能量，很省電",
+    "slot": "aimTube",
+    "stats": { "power": 3, "saving": 5, "range": 4, "aim": 3, "cooling": 2, "lightness": 4, "earthCare": 5 },
+    "sdgs": [7, 13],
+    "why": "聚光能補充能量，但鏡片聚熱後需要時間降溫"
+  },
+  {
+    "id": "bubble-purifier",
+    "name": "淨水泡泡器",
+    "shortDescription": "發射溫和泡泡，適合清潔水中髒污",
+    "slot": "emitter",
+    "stats": { "power": 2, "saving": 4, "range": 2, "aim": 4, "cooling": 4, "lightness": 4, "earthCare": 5 },
+    "sdgs": [6, 14],
+    "why": "溫和的泡泡能帶走髒污，不會傷害水中生物"
+  },
+  {
+    "id": "recycle-magnet",
+    "name": "回收磁吸器",
+    "shortDescription": "把附近可回收的材料吸過來",
+    "slot": "helper",
+    "stats": { "power": 2, "saving": 3, "range": 4, "aim": 3, "cooling": 3, "lightness": 3, "earthCare": 5 },
+    "sdgs": [11, 12],
+    "why": "把散落的材料集中，回收才會又快又完整"
   }
 ]
