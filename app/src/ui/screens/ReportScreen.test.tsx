@@ -53,4 +53,15 @@ describe('ReportScreen', () => {
     expect(onPrint).toHaveBeenCalledOnce()
     expect(onExport).toHaveBeenCalledOnce()
   })
+
+  it('顯示行動數據長條圖並可選「我的發現」句型', () => {
+    render(<ReportScreen report={report} onBack={vi.fn()} />)
+
+    expect(screen.getByText(/我的行動數據/)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '我這次的發現' })).toBeVisible()
+
+    const discovery = screen.getByRole('button', { name: /把 4 件材料分對類/ })
+    fireEvent.click(discovery)
+    expect(discovery).toHaveAttribute('aria-pressed', 'true')
+  })
 })

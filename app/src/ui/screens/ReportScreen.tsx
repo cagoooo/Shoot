@@ -1,6 +1,21 @@
+import { useState } from 'react'
 import { badgeDetails, calculateBadges } from '../../learning/badges'
 import { createActionCardSvg } from '../../learning/exportActionCard'
 import type { LearningReport } from '../../learning/events'
+import { DataCompareCard } from '../components/DataCompareCard'
+
+export function buildDiscoverySentences(report: LearningReport): string[] {
+  const recycledTotal = Object.values(report.recycledByCategory).reduce(
+    (sum, amount) => sum + amount,
+    0,
+  )
+  const sentences: string[] = []
+  if (recycledTotal > 0) sentences.push(`我發現：把 ${recycledTotal} 件材料分對類，它們就能再被使用。`)
+  if (report.repairedMachines.length > 0) sentences.push(`我發現：修好 ${report.repairedMachines.length} 項設備，比丟掉再買更能守護地球。`)
+  if (report.energyUsed > 0) sentences.push(`我發現：完成任務用了 ${report.energyUsed} 單位能源，下次可以想想怎麼更省。`)
+  if (report.protectedTargets.length > 0) sentences.push(`我發現：保護 ${report.protectedTargets.length} 個重要目標，比打敗誰都更重要。`)
+  return sentences.slice(0, 3)
+}
 
 interface ReportScreenProps {
   report: LearningReport
@@ -36,6 +51,8 @@ export function ReportScreen({
     (sum, amount) => sum + amount,
     0,
   )
+  const discoverySentences = buildDiscoverySentences(report)
+  const [discovery, setDiscovery] = useState<string | null>(null)
 
   const exportCard = () => {
     if (onExport) {
@@ -73,6 +90,14 @@ export function ReportScreen({
             <li>修好了 {report.repairedMachines.length} 項設備</li>
             <li>保護了 {report.protectedTargets.length} 個重要目標</li>
           </ul>
+          <DataCompareCard
+            title="我的行動數據"
+            bars={[
+              { label: '回收', value: recycledTotal, unit: '件' },
+              { label: '修復', value: report.repairedMachines.length, unit: '項' },
+              { label: '保護', value: report.protectedTargets.length, unit: '個' },
+            ]}
+          />
         </article>
 
         <article className="reflection-card result-card pdf-section">
@@ -115,6 +140,25 @@ export function ReportScreen({
           <p className="print-only">
             我的選擇：{report.reflections.at(-1) ?? '下次使用更省電的方案'}
           </p>
+          {discoverySentences.length > 0 && (
+            <div className="discovery-section">
+              <h3>我這次的發現</h3>
+              <div className="reflection-options">
+                {discoverySentences.map((sentence) => (
+                  <button
+                    type="button"
+                    key={sentence}
+                    className="no-print"
+                    aria-pressed={discovery === sentence}
+                    onClick={() => setDiscovery(sentence)}
+                  >
+                    {sentence}
+                  </button>
+                ))}
+              </div>
+              <p className="print-only">{discovery ?? discoverySentences[0]}</p>
+            </div>
+          )}
         </article>
       </section>
 
