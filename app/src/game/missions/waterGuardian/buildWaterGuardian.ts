@@ -10,7 +10,7 @@ import { normalizeComfortSettings, type ComfortSettings } from '../../../domain/
 import { InputManager } from '../../../input/InputManager'
 import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
-import { applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
+import { addWorldLife, applyGroundTexture, applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
 import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
 import { createIntroOrbit } from '../introCinematic'
 
@@ -46,6 +46,8 @@ export function buildWaterGuardianScene(
   const groundMaterial = new StandardMaterial('water-ground-material', scene)
   groundMaterial.diffuseColor = Color3.FromHexString('#8bc7a5')
   ground.material = groundMaterial
+  applyGroundTexture(scene, ground, '#8bc7a5', 'water')
+  addWorldLife(scene, { namePrefix: 'water', reducedMotion: comfort.reducedMotion })
 
   const tankMaterial = new StandardMaterial('water-tank-material', scene)
   tankMaterial.diffuseColor = Color3.FromHexString('#4b9fbd')

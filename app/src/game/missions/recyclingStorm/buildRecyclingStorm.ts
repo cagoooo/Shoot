@@ -14,7 +14,7 @@ import {
 } from '../../../domain/settings/accessibility'
 import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
-import { applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
+import { addWorldLife, applyGroundTexture, applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
 import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
 import { createIntroOrbit } from '../introCinematic'
 import {
@@ -113,6 +113,8 @@ export function buildRecyclingStormScene(
   const groundMaterial = new StandardMaterial('mission-ground-material', scene)
   groundMaterial.diffuseColor = Color3.FromHexString('#7eaa7c')
   ground.material = groundMaterial
+  applyGroundTexture(scene, ground, '#7eaa7c', 'recycling')
+  addWorldLife(scene, { namePrefix: 'recycling', reducedMotion: comfort.reducedMotion })
 
   for (const zoneId of recyclingStormZones) {
     const zone = zonePositions[zoneId]

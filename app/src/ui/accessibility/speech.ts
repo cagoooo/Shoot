@@ -1,4 +1,5 @@
 const SPEECH_EVENT = 'earth-guardian-speech'
+const SPEECH_PROGRESS_EVENT = 'earth-guardian-speech-progress'
 
 export function canSpeak(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window
@@ -20,6 +21,22 @@ export function subscribeSpeech(
   return () => window.removeEventListener(SPEECH_EVENT, handler)
 }
 
+/** 訂閱朗讀進度（已唸到的字元位置），做「唸到哪、亮到哪」的同步字幕。 */
+export function subscribeSpeechProgress(
+  listener: (charIndex: number) => void,
+): () => void {
+  const handler = (event: Event) => {
+    listener((event as CustomEvent<number>).detail)
+  }
+  window.addEventListener(SPEECH_PROGRESS_EVENT, handler)
+  return () => window.removeEventListener(SPEECH_PROGRESS_EVENT, handler)
+}
+
+function emitSpeechProgress(charIndex: number): void {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent(SPEECH_PROGRESS_EVENT, { detail: charIndex }))
+}
+
 export function speak(text: string): void {
   if (!canSpeak()) return
   window.speechSynthesis.cancel()
@@ -28,6 +45,8 @@ export function speak(text: string): void {
   utterance.rate = 0.9
   utterance.onend = () => emitSpeechText(null)
   utterance.onerror = () => emitSpeechText(null)
+  utterance.onboundary = (event) => emitSpeechProgress(event.charIndex)
+  emitSpeechProgress(0)
   emitSpeechText(text)
   window.speechSynthesis.speak(utterance)
 }

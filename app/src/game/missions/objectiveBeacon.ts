@@ -1,4 +1,6 @@
 import { Color3 } from '@babylonjs/core/Maths/math.color'
+import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight'
+import type { GroundMesh } from '@babylonjs/core/Meshes/groundMesh'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
@@ -75,6 +77,88 @@ export function createObjectiveBeacon(
       if (iconPlane) iconPlane.position.y = iconBaseY + Math.sin(elapsed * 1.6) * 0.22
     })
   }
+}
+
+/**
+ * 世界光影與生氣：低強度方向光讓物體各面亮度不同（不開陰影、平板友善），
+ * 加上幾朵慢慢漂的雲；開啟減少動態時雲朵靜止。
+ */
+export function addWorldLife(
+  scene: Scene,
+  options: { namePrefix: string; reducedMotion: boolean },
+): void {
+  const { namePrefix, reducedMotion } = options
+
+  const sun = new DirectionalLight(`${namePrefix}-sun`, new Vector3(-0.45, -1, 0.4), scene)
+  sun.intensity = 0.4
+  sun.diffuse = Color3.FromHexString('#fff2d8')
+
+  const cloudMaterial = new StandardMaterial(`${namePrefix}-cloud-material`, scene)
+  cloudMaterial.diffuseColor = Color3.White()
+  cloudMaterial.emissiveColor = Color3.FromHexString('#f4f8fa').scale(0.5)
+  cloudMaterial.alpha = 0.88
+  cloudMaterial.fogEnabled = false
+
+  const clouds = [
+    { x: -14, y: 15, z: 18, scale: 1.4, speed: 0.35 },
+    { x: 4, y: 17, z: 26, scale: 2, speed: 0.22 },
+    { x: 16, y: 14, z: 10, scale: 1.1, speed: 0.45 },
+  ].map((spot, index) => {
+    const cloud = MeshBuilder.CreateSphere(`${namePrefix}-cloud-${index}`, { diameterX: 6 * spot.scale, diameterY: 1.6 * spot.scale, diameterZ: 3 * spot.scale, segments: 8 }, scene)
+    cloud.position = new Vector3(spot.x, spot.y, spot.z)
+    cloud.material = cloudMaterial
+    cloud.isPickable = false
+    cloud.applyFog = false
+    return { cloud, speed: spot.speed }
+  })
+
+  if (!reducedMotion) {
+    scene.onBeforeRenderObservable.add(() => {
+      const deltaSeconds = scene.getEngine().getDeltaTime() / 1000
+      for (const { cloud, speed } of clouds) {
+        cloud.position.x += speed * deltaSeconds
+        if (cloud.position.x > 26) cloud.position.x = -26
+      }
+    })
+  }
+}
+
+/**
+ * 程序化地面質感：以底色加上深淺斑點的重複貼圖取代單色地板。
+ * NullEngine（測試環境）沒有 2D context 時自動跳過。
+ */
+export function applyGroundTexture(
+  scene: Scene,
+  ground: GroundMesh,
+  baseHex: string,
+  namePrefix: string,
+): void {
+  const texture = new DynamicTexture(`${namePrefix}-ground-texture`, { width: 128, height: 128 }, scene, true)
+  const context = texture.getContext()
+  if (!context || typeof context.fillRect !== 'function') {
+    texture.dispose()
+    return
+  }
+  const base = Color3.FromHexString(baseHex)
+  const shade = (factor: number) =>
+    `rgb(${Math.round(base.r * 255 * factor)}, ${Math.round(base.g * 255 * factor)}, ${Math.round(base.b * 255 * factor)})`
+  context.fillStyle = shade(1)
+  context.fillRect(0, 0, 128, 128)
+  for (let index = 0; index < 46; index += 1) {
+    context.fillStyle = shade(index % 2 === 0 ? 0.93 : 1.06)
+    const size = 3 + (index % 5) * 2
+    context.beginPath()
+    context.arc((index * 37) % 128, (index * 53) % 128, size, 0, Math.PI * 2)
+    context.fill()
+  }
+  texture.update(false)
+  texture.uScale = 6
+  texture.vScale = 7
+
+  const material = new StandardMaterial(`${namePrefix}-ground-textured-material`, scene)
+  material.diffuseTexture = texture
+  material.specularColor = Color3.Black()
+  ground.material = material
 }
 
 /**

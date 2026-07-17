@@ -10,7 +10,7 @@ import { normalizeComfortSettings, type ComfortSettings } from '../../../domain/
 import { InputManager } from '../../../input/InputManager'
 import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
-import { applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
+import { addWorldLife, applyGroundTexture, applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
 import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
 import { createIntroOrbit } from '../introCinematic'
 import type { StoryMissionConfig } from './storyMissionConfig'
@@ -39,6 +39,8 @@ export function buildStoryWorldScene(
   const groundMaterial = new StandardMaterial(`${mission.id}-ground-material`, scene)
   groundMaterial.diffuseColor = Color3.FromHexString(mission.color)
   ground.material = groundMaterial
+  applyGroundTexture(scene, ground, mission.color, mission.id)
+  addWorldLife(scene, { namePrefix: mission.id, reducedMotion: comfort.reducedMotion })
 
   const landmarkMaterial = new StandardMaterial(`${mission.id}-landmark-material`, scene)
   landmarkMaterial.diffuseColor = Color3.FromHexString('#f4efda')

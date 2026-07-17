@@ -9,6 +9,34 @@ describe('SubtitleBar', () => {
     vi.unstubAllGlobals()
   })
 
+  it('朗讀進度事件會讓已唸部分亮起', () => {
+    let capturedUtterance: { onboundary?: (event: { charIndex: number }) => void } | null = null
+    vi.stubGlobal('speechSynthesis', { speak: vi.fn(), cancel: vi.fn() })
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        text: string
+        lang = ''
+        rate = 1
+        onboundary?: (event: { charIndex: number }) => void
+        constructor(text: string) {
+          this.text = text
+          // eslint-disable-next-line @typescript-eslint/no-this-alias
+          capturedUtterance = this
+        }
+      },
+    )
+
+    const { container } = render(<SubtitleBar enabled />)
+    act(() => {
+      speak('先聽懂任務再出發')
+    })
+    act(() => {
+      capturedUtterance?.onboundary?.({ charIndex: 4 })
+    })
+    expect(container.querySelector('.subtitle-spoken')?.textContent).toBe('先聽懂任')
+  })
+
   it('朗讀時顯示字幕，結束後隱藏；關閉字幕時不顯示', () => {
     let capturedUtterance: { onend?: () => void } | null = null
     vi.stubGlobal('speechSynthesis', { speak: vi.fn(), cancel: vi.fn() })

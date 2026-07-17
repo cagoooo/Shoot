@@ -630,6 +630,8 @@ button:focus-visible {
   border-radius: 4px;
 }
 
+.subtitle-spoken { color: #ffe97a; }
+
 .subtitle-bar {
   position: fixed;
   left: 50%;

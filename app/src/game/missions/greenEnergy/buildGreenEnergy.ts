@@ -10,7 +10,7 @@ import { normalizeComfortSettings, type ComfortSettings } from '../../../domain/
 import { InputManager } from '../../../input/InputManager'
 import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
-import { applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
+import { addWorldLife, applyGroundTexture, applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
 import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
 import { createIntroOrbit } from '../introCinematic'
 
@@ -37,6 +37,8 @@ export function buildGreenEnergyScene(
   const groundMaterial = new StandardMaterial('green-energy-ground-material', scene)
   groundMaterial.diffuseColor = Color3.FromHexString('#86b987')
   ground.material = groundMaterial
+  applyGroundTexture(scene, ground, '#86b987', 'energy')
+  addWorldLife(scene, { namePrefix: 'energy', reducedMotion: comfort.reducedMotion })
 
   const solarMaterial = new StandardMaterial('solar-material', scene)
   solarMaterial.diffuseColor = Color3.FromHexString('#386f9a')
