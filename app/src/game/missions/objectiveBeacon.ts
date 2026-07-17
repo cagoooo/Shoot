@@ -78,11 +78,46 @@ export function createObjectiveBeacon(
 }
 
 /**
- * 世界氛圍：以世界主色調加入線性霧氣，讓遠近層次更明顯。
+ * 世界氛圍：以世界主色調加入線性霧氣，讓遠近層次更明顯；
+ * 若提供天空色，另建立漸層天空穹頂（上深下淺）取代單色背景。
  */
-export function applyWorldAmbience(scene: Scene, fogHex: string): void {
+export function applyWorldAmbience(
+  scene: Scene,
+  fogHex: string,
+  sky?: { top: string; bottom: string; namePrefix?: string },
+): void {
   scene.fogMode = Scene.FOGMODE_LINEAR
   scene.fogStart = 20
   scene.fogEnd = 62
   scene.fogColor = Color3.FromHexString(fogHex)
+
+  if (!sky) return
+  const namePrefix = sky.namePrefix ?? 'world'
+  const texture = new DynamicTexture(`${namePrefix}-sky-texture`, { width: 4, height: 256 }, scene, false)
+  const context = texture.getContext()
+  if (!context || typeof context.createLinearGradient !== 'function') {
+    // NullEngine（測試環境）沒有 2D 繪圖 context，跳過天空穹頂。
+    texture.dispose()
+    return
+  }
+  const gradient = context.createLinearGradient(0, 0, 0, 256)
+  gradient.addColorStop(0, sky.top)
+  gradient.addColorStop(1, sky.bottom)
+  context.fillStyle = gradient
+  context.fillRect(0, 0, 4, 256)
+  texture.update(false)
+
+  const skyMaterial = new StandardMaterial(`${namePrefix}-sky-material`, scene)
+  skyMaterial.emissiveTexture = texture
+  skyMaterial.diffuseColor = Color3.Black()
+  skyMaterial.specularColor = Color3.Black()
+  skyMaterial.disableLighting = true
+  skyMaterial.backFaceCulling = false
+  skyMaterial.fogEnabled = false
+
+  const skyDome = MeshBuilder.CreateSphere(`${namePrefix}-sky-dome`, { diameter: 160, segments: 12 }, scene)
+  skyDome.material = skyMaterial
+  skyDome.isPickable = false
+  skyDome.infiniteDistance = true
+  skyDome.applyFog = false
 }

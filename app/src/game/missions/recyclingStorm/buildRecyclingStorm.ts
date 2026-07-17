@@ -223,7 +223,7 @@ export function buildRecyclingStormScene(
   panelMaterial.diffuseColor = Color3.FromHexString('#48a878')
   protectedPanel.material = panelMaterial
 
-  applyWorldAmbience(scene, '#c6dfe6')
+  applyWorldAmbience(scene, '#c6dfe6', { top: '#7db8dc', bottom: '#eef6e6', namePrefix: 'recycling' })
   if (objectivePosition) {
     createObjectiveBeacon(scene, objectivePosition, {
       namePrefix: 'recycling-objective',

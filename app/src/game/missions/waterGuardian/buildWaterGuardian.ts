@@ -70,7 +70,7 @@ export function buildWaterGuardianScene(
   cleanTank.material = cleanMaterial
   cleanTank.metadata = { waterStation: 'distribute' }
 
-  applyWorldAmbience(scene, '#b8dde6')
+  applyWorldAmbience(scene, '#b8dde6', { top: '#5fb0d4', bottom: '#eaf7f0', namePrefix: 'water' })
   if (objectivePosition) {
     createObjectiveBeacon(scene, objectivePosition, {
       namePrefix: 'water-objective',

@@ -60,7 +60,7 @@ export function buildGreenEnergyScene(
   battery.position = new Vector3(5, 1.1, 11)
   battery.material = batteryMaterial
 
-  applyWorldAmbience(scene, '#c2dff5')
+  applyWorldAmbience(scene, '#c2dff5', { top: '#69aee9', bottom: '#fdf3d8', namePrefix: 'energy' })
   if (objectivePosition) {
     createObjectiveBeacon(scene, objectivePosition, {
       namePrefix: 'energy-objective',

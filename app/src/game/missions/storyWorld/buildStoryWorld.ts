@@ -57,7 +57,12 @@ export function buildStoryWorldScene(
   landmark.position = new Vector3(0, mission.landmark === 'ocean' ? 0.55 : 1.8, 7)
   landmark.material = landmarkMaterial
 
-  applyWorldAmbience(scene, '#cbe6d9')
+  const worldColor = Color3.FromHexString(mission.color)
+  applyWorldAmbience(scene, '#cbe6d9', {
+    top: Color3.Lerp(worldColor, Color3.FromHexString('#7db8dc'), 0.6).toHexString(),
+    bottom: Color3.Lerp(worldColor, Color3.White(), 0.78).toHexString(),
+    namePrefix: mission.id,
+  })
   if (objectivePosition) {
     createObjectiveBeacon(scene, objectivePosition, {
       namePrefix: `${mission.id}-objective`,
