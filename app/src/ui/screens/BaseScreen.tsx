@@ -22,6 +22,7 @@ const baseZones: Array<{
   { screen: 'workbench', title: '工具桌', description: '組裝你的能量工具', symbol: '◇' },
   { screen: 'range', title: '試玩區', description: '比較力量、省電和降溫', symbol: '△' },
   { screen: 'report', title: '我的行動紀錄', description: '查看結果和改良想法', symbol: '□' },
+  { screen: 'collection', title: '成就收藏冊', description: '九大世界完成與完美結局圖鑑', symbol: '☆' },
 ]
 
 export function BaseScreen({

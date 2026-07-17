@@ -15,6 +15,7 @@ export type GameScreen =
   | 'mission'
   | 'report'
   | 'campaign'
+  | 'collection'
 
 export type LearningMode = 'middle-assist' | 'upper-standard'
 export type MissionId = CampaignMissionId

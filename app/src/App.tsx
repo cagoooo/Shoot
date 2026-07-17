@@ -8,6 +8,8 @@ import { StartScreen } from './ui/screens/StartScreen'
 import { WorkbenchScreen } from './ui/screens/WorkbenchScreen'
 import { ReportScreen } from './ui/screens/ReportScreen'
 import { CampaignScreen } from './ui/screens/CampaignScreen'
+import { CollectionScreen } from './ui/screens/CollectionScreen'
+import type { LearningEvent } from './learning/events'
 import { getStoryMission } from './game/missions/storyWorld/storyMissionConfig'
 import { campaignMissions } from './content/missionCatalog'
 import { reduceLearningEvents } from './learning/reducer'
@@ -59,6 +61,7 @@ function AppContent() {
   } = useGameStore()
   const [parts, setParts] = useState<PartContent[]>([])
   const [completedMissions, setCompletedMissions] = useState<string[]>([])
+  const [missionEndings, setMissionEndings] = useState<Record<string, 'perfect' | 'learned'>>({})
   const [contentLoadFailed, setContentLoadFailed] = useState(false)
   const [audioMuted, setAudioMuted] = useState(() => loadAudioMuted())
   const saveRepository = useMemo(() => createBrowserSaveRepository(), [])
@@ -97,6 +100,7 @@ function AppContent() {
       base: 'base',
       workbench: 'base',
       campaign: 'base',
+      collection: 'base',
       range: 'exploration',
       mission: 'exploration',
       report: 'report',
@@ -116,8 +120,29 @@ function AppContent() {
     void saveRepository.load().then((save) => {
       setMode(save.mode)
       setCompletedMissions(save.completedMissions)
+      setMissionEndings(save.missionEndings)
     })
   }, [saveRepository, setMode])
+
+  const completeMission = (missionId: string, events: LearningEvent[]) => {
+    recordLearningEvents(events)
+    setCompletedMissions((missions) => Array.from(new Set([...missions, missionId])))
+    const ending = events.find(
+      (event): event is Extract<LearningEvent, { type: 'mission-ending' }> =>
+        event.type === 'mission-ending',
+    )
+    if (ending) setMissionEndings((current) => ({ ...current, [missionId]: ending.ending }))
+    void saveRepository.load().then((save) =>
+      saveRepository.save({
+        ...save,
+        completedMissions: Array.from(new Set([...save.completedMissions, missionId])),
+        missionEndings: ending
+          ? { ...save.missionEndings, [missionId]: ending.ending }
+          : save.missionEndings,
+      }),
+    )
+    setScreen('report')
+  }
 
   const saveMode = (nextMode: typeof mode) => {
     setMode(nextMode)
@@ -236,21 +261,7 @@ function AppContent() {
             onComfortSettingsChange={setComfortSettings}
             onBack={() => setScreen('base')}
             onAudioSceneChange={transitionAudio}
-            onMissionComplete={(events) => {
-              recordLearningEvents(events)
-              setCompletedMissions((missions) =>
-                Array.from(new Set([...missions, storyMission.id])),
-              )
-              void saveRepository.load().then((save) =>
-                saveRepository.save({
-                  ...save,
-                  completedMissions: Array.from(
-                    new Set([...save.completedMissions, storyMission.id]),
-                  ),
-                }),
-              )
-              setScreen('report')
-            }}
+            onMissionComplete={(events) => completeMission(storyMission.id, events)}
           />
         ) : activeMission === 'green-energy-community' ? (
           <GreenEnergyScreen
@@ -259,21 +270,7 @@ function AppContent() {
             onComfortSettingsChange={setComfortSettings}
             onBack={() => setScreen('base')}
             onAudioSceneChange={transitionAudio}
-            onMissionComplete={(events) => {
-              recordLearningEvents(events)
-              setCompletedMissions((missions) =>
-                Array.from(new Set([...missions, 'green-energy-community'])),
-              )
-              void saveRepository.load().then((save) =>
-                saveRepository.save({
-                  ...save,
-                  completedMissions: Array.from(
-                    new Set([...save.completedMissions, 'green-energy-community']),
-                  ),
-                }),
-              )
-              setScreen('report')
-            }}
+            onMissionComplete={(events) => completeMission('green-energy-community', events)}
           />
         ) : activeMission === 'water-guardian' ? (
           <WaterGuardianScreen
@@ -282,21 +279,7 @@ function AppContent() {
             onComfortSettingsChange={setComfortSettings}
             onBack={() => setScreen('base')}
             onAudioSceneChange={transitionAudio}
-            onMissionComplete={(events) => {
-              recordLearningEvents(events)
-              setCompletedMissions((missions) =>
-                Array.from(new Set([...missions, 'water-guardian'])),
-              )
-              void saveRepository.load().then((save) =>
-                saveRepository.save({
-                  ...save,
-                  completedMissions: Array.from(
-                    new Set([...save.completedMissions, 'water-guardian']),
-                  ),
-                }),
-              )
-              setScreen('report')
-            }}
+            onMissionComplete={(events) => completeMission('water-guardian', events)}
           />
         ) : (
         <MissionScreen
@@ -305,24 +288,20 @@ function AppContent() {
           onComfortSettingsChange={setComfortSettings}
           onBack={() => setScreen('base')}
           onAudioSceneChange={transitionAudio}
-          onMissionComplete={(events) => {
-            recordLearningEvents(events)
-            setCompletedMissions((missions) =>
-              Array.from(new Set([...missions, 'recycling-storm'])),
-            )
-            void saveRepository.load().then((save) =>
-              saveRepository.save({
-                ...save,
-                completedMissions: Array.from(
-                  new Set([...save.completedMissions, 'recycling-storm']),
-                ),
-              }),
-            )
-            setScreen('report')
-          }}
+          onMissionComplete={(events) => completeMission('recycling-storm', events)}
         />
         )}
       </Suspense>
+    )
+  }
+
+  if (screen === 'collection') {
+    return (
+      <CollectionScreen
+        completedMissions={completedMissions}
+        missionEndings={missionEndings}
+        onBack={() => setScreen('base')}
+      />
     )
   }
 

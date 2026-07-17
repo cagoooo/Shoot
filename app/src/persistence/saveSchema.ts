@@ -13,6 +13,9 @@ export const saveSchema = z.object({
       createdAt: z.string(),
     }),
   ),
+  missionEndings: z
+    .record(z.string(), z.enum(['perfect', 'learned']))
+    .default({}),
 })
 
 export type SaveV1 = z.infer<typeof saveSchema>
@@ -25,6 +28,7 @@ export function createEmptySave(): SaveV1 {
     unlockedParts: [],
     toolLoadout: {},
     reflections: [],
+    missionEndings: {},
   }
 }
 
