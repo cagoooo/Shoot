@@ -16,7 +16,14 @@ import { DataCompareCard } from '../components/DataCompareCard'
 import { SettingsScreen } from './SettingsScreen'
 import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/buildWaterGuardian'
 
-type WaterPhase = 'briefing' | 'collect' | 'filter' | 'distribute' | 'report'
+type WaterPhase = 'briefing' | 'route' | 'collect' | 'purify' | 'filter' | 'distribute' | 'report'
+type WaterRoute = 'rooftop' | 'ground'
+const waterRouteLabels: Record<WaterRoute, string> = { rooftop: '屋頂雨水管', ground: '地面集水溝' }
+const purifyFacts = [
+  '泥沙怪被泡泡帶走了！泥沙會讓水變濁，也會堵住過濾器。',
+  '又淨化一隻！水裡的落葉腐爛後，會讓水產生怪味。',
+  '太棒了！乾淨的水源能讓後面的過濾工作更輕鬆。',
+]
 type FilterPart = 'cloth' | 'sand' | 'charcoal'
 const filterOrder: FilterPart[] = ['cloth', 'sand', 'charcoal']
 const filterLabels: Record<FilterPart, string> = { cloth: '布', sand: '砂子', charcoal: '活性碳' }
@@ -35,7 +42,9 @@ interface WaterGuardianScreenProps {
 
 const phaseGuide: Record<WaterPhase, { icon: string; now: string; learn: string }> = {
   briefing: { icon: '💧', now: '雨水收集站需要你的幫忙。', learn: '水可以被收集、過濾和再次使用。' },
+  route: { icon: '🗺️', now: '比較兩條水源路線的資料，選一條收集雨水。', learn: '不同水源的水量和乾淨度都不一樣。' },
   collect: { icon: '🌧️', now: '收集 3 滴雨水，準備修復淨水站。', learn: '雨水是可以珍惜的自然資源。' },
+  purify: { icon: '🫧', now: '水裡有泥沙搗蛋怪！用溫和泡泡把它們淨化。', learn: '先清除大的髒污，過濾器才不會堵住。' },
   filter: { icon: '🧪', now: '選出能一起工作的過濾材料。', learn: '不同材料能擋住不同大小的雜質。' },
   distribute: { icon: '🚰', now: '把乾淨的水分配給需要的地方。', learn: '先想清楚用途，才能公平用水。' },
   report: { icon: '🌍', now: '看看你完成的淨水行動。', learn: 'SDG 6 從珍惜每一滴水開始。' },
@@ -54,6 +63,10 @@ export function WaterGuardianScreen({
   const inputManager = useMemo(() => new InputManager(), [])
   const [phase, setPhase] = useState<WaterPhase>('briefing')
   const [drops, setDrops] = useState(0)
+  const [waterRoute, setWaterRoute] = useState<WaterRoute | null>(null)
+  const [purified, setPurified] = useState(0)
+  const [purifyFeedback, setPurifyFeedback] = useState('點選泥沙搗蛋怪，發射溫和泡泡淨化它。')
+  const monsterCount = waterRoute === 'rooftop' ? 3 : 2
   const [filterParts, setFilterParts] = useState<FilterPart[]>([])
   const [filterFeedback, setFilterFeedback] = useState('先從最上層開始：選「布」。')
   const [uses, setUses] = useState<string[]>([])
@@ -62,11 +75,15 @@ export function WaterGuardianScreen({
   const nearObjective = objectiveTracking?.near ?? false
   const [objectiveObserved, setObjectiveObserved] = useState(false)
   const guide = phaseGuide[phase]
-  const objective = phase === 'collect'
-    ? { label: '雨水箱', position: { x: -4, z: 3, icon: '🌧️' } }
-    : phase === 'filter'
-      ? { label: '過濾站', position: { x: 4, z: 6, icon: '🧪' } }
-      : { label: '乾淨水箱', position: { x: 0, z: 14, icon: '🚰' } }
+  const objective = phase === 'route'
+    ? { label: '水源觀察台', position: { x: -4, z: 3, icon: '🗺️' } }
+    : phase === 'collect'
+      ? { label: '雨水箱', position: { x: -4, z: 3, icon: '🌧️' } }
+      : phase === 'purify'
+        ? { label: '雨水箱', position: { x: -4, z: 3, icon: '🫧' } }
+        : phase === 'filter'
+          ? { label: '過濾站', position: { x: 4, z: 6, icon: '🧪' } }
+          : { label: '乾淨水箱', position: { x: 0, z: 14, icon: '🚰' } }
   const canInteract = objectiveGate === 'unlocked' || Boolean(mapSlot) || objectiveObserved || (typeof navigator !== 'undefined' && navigator.webdriver)
   const sceneFactory = useCallback<SceneFactory>(
     (engine, runtimeInput, runtimeComfort) =>
@@ -85,9 +102,21 @@ export function WaterGuardianScreen({
       { type: 'machine-repaired', id: 'water-filter-station' },
       { type: 'protected-target', id: 'clean-water-tank' },
       { type: 'material-recycled', category: 'water', amount: drops },
+      { type: 'enemy-cleansed', amount: purified },
       { type: 'energy-used', amount: 24 },
       { type: 'part-selected', partId: 'water-filter-kit' },
     ])
+  }
+  const purifyMonster = () => {
+    setPurified((count) => {
+      const next = Math.min(monsterCount, count + 1)
+      setPurifyFeedback(
+        next >= monsterCount
+          ? '水質恢復乾淨了！泥沙搗蛋怪都變回了安全的小石子。'
+          : purifyFacts[(next - 1) % purifyFacts.length],
+      )
+      return next
+    })
   }
 
   const chooseFilter = (part: FilterPart) => {
@@ -155,22 +184,60 @@ export function WaterGuardianScreen({
           {phase !== 'briefing' && phase !== 'report' && !canInteract && <p className="objective-locked">先在左側靠近並觀察「{objective.label}」，這一步才會解鎖。</p>}
 
           {phase === 'briefing' && <>
-            <p className="eyebrow">任務 1／4</p>
+            <p className="eyebrow">任務 1／6</p>
             <h2>讓雨水重新流動</h2>
-            <p>社區的淨水站被落葉和泥沙堵住了。請收集雨水、組合過濾材料，再把乾淨的水分配出去。</p>
-            <button className="primary-button" type="button" onClick={() => setPhase('collect')}>我準備好了</button>
+            <p>社區的淨水站被落葉和泥沙堵住了。請選擇水源、收集雨水、淨化水質、組合過濾材料，再把乾淨的水分配出去。</p>
+            <button className="primary-button" type="button" onClick={() => setPhase('route')}>我準備好了</button>
+          </>}
+
+          {phase === 'route' && <>
+            <p className="eyebrow">任務 2／6</p>
+            <h2>選擇水源路線</h2>
+            <p>兩條路線都能收集到雨水，先看資料再決定。</p>
+            <DataCompareCard
+              title="每小時可收集的雨水量"
+              note="屋頂收得多但夾帶落葉和灰塵；地面集水溝收得少，但水比較乾淨。"
+              bars={[
+                { label: '屋頂', value: 5, unit: '公升' },
+                { label: '地面', value: 3, unit: '公升' },
+              ]}
+            />
+            <div className="route-options water-options">
+              <button type="button" disabled={!canInteract} aria-pressed={waterRoute === 'rooftop'} onClick={() => setWaterRoute('rooftop')}><strong>屋頂雨水管</strong><span>水量多，但會有較多泥沙搗蛋怪</span></button>
+              <button type="button" disabled={!canInteract} aria-pressed={waterRoute === 'ground'} onClick={() => setWaterRoute('ground')}><strong>地面集水溝</strong><span>水量較少，泥沙搗蛋怪也比較少</span></button>
+            </div>
+            {waterRoute && <button className="primary-button" type="button" onClick={() => setPhase('collect')}>沿著{waterRouteLabels[waterRoute]}出發</button>}
           </>}
 
           {phase === 'collect' && <>
-            <p className="eyebrow">任務 2／4</p>
+            <p className="eyebrow">任務 3／6</p>
             <h2>收集雨水</h2>
-            <p>目前收集：{drops}／3 滴。每按一次就觀察一滴雨水進入水箱。</p>
+            <p>目前收集：{drops}／3 滴。每按一次就觀察一滴雨水從{waterRoute ? waterRouteLabels[waterRoute] : '水源'}流進水箱。</p>
             <button className="primary-button" type="button" onClick={() => setDrops((value) => Math.min(3, value + 1))} disabled={drops >= 3 || !canInteract}>收集一滴雨水</button>
-            {drops >= 3 && <button className="primary-button" type="button" onClick={() => setPhase('filter')}>前往過濾站</button>}
+            {drops >= 3 && <button className="primary-button" type="button" onClick={() => setPhase('purify')}>檢查水質</button>}
+          </>}
+
+          {phase === 'purify' && <>
+            <p className="eyebrow">任務 4／6</p>
+            <h2>淨化水質搗蛋怪</h2>
+            <p>{waterRoute === 'rooftop' ? '屋頂的水夾帶了較多泥沙，' : '地面的水比較乾淨，'}水箱裡有 {monsterCount} 隻泥沙搗蛋怪。</p>
+            <div className={`sequence-feedback${purified >= monsterCount ? ' is-success' : ''}`} role="status">
+              <strong>已淨化：{purified}／{monsterCount}</strong>
+              <p>{purifyFeedback}</p>
+            </div>
+            <div className="route-options water-options">
+              {Array.from({ length: monsterCount }, (_, index) => (
+                <button key={index} type="button" disabled={index < purified || !canInteract} aria-pressed={index < purified} className={index < purified ? 'is-sequence-selected' : undefined} onClick={purifyMonster}>
+                  <strong>{index < purified ? '✨ 已淨化' : '🟤 泥沙搗蛋怪'}</strong>
+                  <span>{index < purified ? '變回安全的小石子' : '發射溫和泡泡淨化'}</span>
+                </button>
+              ))}
+            </div>
+            {purified >= monsterCount && <button className="primary-button" type="button" onClick={() => setPhase('filter')}>前往過濾站</button>}
           </>}
 
           {phase === 'filter' && <>
-            <p className="eyebrow">任務 3／4</p>
+            <p className="eyebrow">任務 5／6</p>
             <h2>組合過濾材料</h2>
             <p>選擇材料並比較用途：布先擋落葉，砂子擋小顆粒，活性碳改善味道。</p>
             <DataCompareCard
@@ -199,7 +266,7 @@ export function WaterGuardianScreen({
           </>}
 
           {phase === 'distribute' && <>
-            <p className="eyebrow">任務 4／4</p>
+            <p className="eyebrow">任務 6／6</p>
             <h2>分配乾淨的水</h2>
             <p>選擇至少兩個需要用水的地方，想想怎麼珍惜有限的水。</p>
             <MultiSelectFeedback selected={uses} required={2} noun="個用水地點" />
@@ -214,7 +281,7 @@ export function WaterGuardianScreen({
           {phase === 'report' && <>
             <p className="eyebrow">任務完成</p>
             <h2>水滴守護成功</h2>
-            <div className="boss-result" role="status"><span>收集雨水：{drops} 滴</span><span>過濾材料：{filterParts.length} 種</span><span>分配用途：{uses.length} 處</span><strong>SDG 6：珍惜每一滴水</strong></div>
+            <div className="boss-result" role="status"><span>水源路線：{waterRoute ? waterRouteLabels[waterRoute] : '—'}</span><span>收集雨水：{drops} 滴</span><span>淨化搗蛋怪：{purified} 隻</span><span>過濾材料：{filterParts.length} 種</span><span>分配用途：{uses.length} 處</span><strong>SDG 6：珍惜每一滴水</strong></div>
             <button className="primary-button" type="button" onClick={finish}>查看永續行動紀錄</button>
           </>}
         </section>

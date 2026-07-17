@@ -39,8 +39,14 @@ test('高年級學生可由準備、探索到撤離並查看永續紀錄', async
   await page.getByRole('button', { name: /前往下一關：水滴守護行動/ }).click()
   await expect(page.getByRole('heading', { name: '水滴守護行動' })).toBeVisible()
   await page.getByRole('button', { name: '我準備好了' }).click()
+  await page.getByRole('button', { name: /屋頂雨水管/ }).click()
+  await page.getByRole('button', { name: /沿著屋頂雨水管出發/ }).click()
   for (let drop = 0; drop < 3; drop += 1) {
     await page.getByRole('button', { name: '收集一滴雨水' }).click()
+  }
+  await page.getByRole('button', { name: '檢查水質' }).click()
+  for (let monster = 0; monster < 3; monster += 1) {
+    await page.getByRole('button', { name: /泥沙搗蛋怪/ }).first().click()
   }
   await page.getByRole('button', { name: '前往過濾站' }).click()
   for (const part of ['布', '砂子', '活性碳']) {
