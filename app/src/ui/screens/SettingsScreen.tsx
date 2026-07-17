@@ -175,6 +175,15 @@ export function SettingsScreen({
       <label className="check-setting">
         <input
           type="checkbox"
+          checked={settings.captions}
+          onChange={(event) => update({ captions: event.currentTarget.checked })}
+        />
+        <span>顯示語音字幕</span>
+      </label>
+
+      <label className="check-setting">
+        <input
+          type="checkbox"
           checked={settings.narrationAnnouncements}
           onChange={(event) =>
             update({ narrationAnnouncements: event.currentTarget.checked })

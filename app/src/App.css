@@ -623,6 +623,46 @@ button:focus-visible {
 .discovery-section { margin-top: 14px; display: grid; gap: 8px; }
 .discovery-section h3 { margin: 0; font-size: 1rem; color: #174f3c; }
 
+/* 鍵盤操作：所有可聚焦元素都有清楚一致的焦點外框 */
+:focus-visible {
+  outline: 3px solid #1c6b4f;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.subtitle-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 64px;
+  z-index: 45;
+  transform: translateX(-50%);
+  max-width: min(720px, calc(100% - 24px));
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: rgba(10, 30, 24, 0.88);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+  box-shadow: 0 8px 22px rgba(8, 47, 38, 0.3);
+}
+
+.teacher-entry { margin-top: 12px; font-size: 0.9rem; opacity: 0.85; }
+
+.teacher-screen { display: grid; gap: 18px; max-width: 1200px; margin: 0 auto; padding: 20px clamp(14px, 4vw, 34px) 40px; }
+.teacher-mission-picker { display: flex; align-items: center; gap: 10px; font-weight: 900; color: #174f3c; }
+.teacher-mission-picker select { padding: 8px 12px; border: 2px solid #8cbcaf; border-radius: 8px; background: #fffdf5; font: inherit; font-size: 1.05rem; }
+.teacher-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.teacher-panel { display: grid; gap: 10px; align-content: start; padding: 18px 20px; border: 2px solid #8cbcaf; border-radius: 6px 20px 6px 20px; background: #fffdf5; }
+.teacher-panel h2 { margin: 0; font-size: 1.35rem; color: #174f3c; }
+.teacher-sdgs { margin: 0; font-weight: 900; color: #4d685e; }
+.teacher-flow, .teacher-discussion { margin: 0; padding-left: 26px; display: grid; gap: 10px; font-size: 1.25rem; line-height: 1.55; font-weight: 700; }
+.teacher-discussion { font-size: 1.15rem; }
+.teacher-timer-display { margin: 0; font-size: clamp(3rem, 8vw, 4.6rem); font-weight: 900; text-align: center; color: #174f3c; font-variant-numeric: tabular-nums; }
+.teacher-timer-display.is-finished { color: #a3402f; }
+.teacher-timer-presets, .teacher-timer-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
 .network-banner {
   position: fixed;
   left: 50%;

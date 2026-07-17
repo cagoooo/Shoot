@@ -9,6 +9,7 @@ import { WorkbenchScreen } from './ui/screens/WorkbenchScreen'
 import { ReportScreen } from './ui/screens/ReportScreen'
 import { CampaignScreen } from './ui/screens/CampaignScreen'
 import { CollectionScreen } from './ui/screens/CollectionScreen'
+import { TeacherScreen } from './ui/screens/TeacherScreen'
 import type { LearningEvent } from './learning/events'
 import { getStoryMission } from './game/missions/storyWorld/storyMissionConfig'
 import { campaignMissions } from './content/missionCatalog'
@@ -19,6 +20,12 @@ import { AudioManager, type AudioScene } from './audio/AudioManager'
 import { BrowserAudioAdapter } from './audio/BrowserAudioAdapter'
 import { registerServiceWorker, type ApplyUpdate } from './pwa/serviceWorker'
 import { NetworkStatusBanner } from './ui/components/NetworkStatusBanner'
+import { SubtitleBar } from './ui/components/SubtitleBar'
+
+function GlobalSubtitleBar() {
+  const captions = useGameStore((state) => state.comfortSettings.captions)
+  return <SubtitleBar enabled={captions} />
+}
 import { loadAudioMuted, saveAudioMuted } from './domain/settings/settingsStorage'
 import './App.css'
 
@@ -102,6 +109,7 @@ function AppContent() {
       workbench: 'base',
       campaign: 'base',
       collection: 'base',
+      teacher: 'base',
       range: 'exploration',
       mission: 'exploration',
       report: 'report',
@@ -190,8 +198,13 @@ function AppContent() {
           void audio.unlockFromUserGesture()
           setScreen('base')
         }}
+        onTeacherMode={() => setScreen('teacher')}
       />
     )
+  }
+
+  if (screen === 'teacher') {
+    return <TeacherScreen onBack={() => setScreen('start')} />
   }
 
   if (screen === 'base') {
@@ -374,6 +387,7 @@ function App() {
         <AppContent />
       </ErrorBoundary>
       <NetworkStatusBanner />
+      <GlobalSubtitleBar />
       {applyUpdate && (
         <aside className="update-banner" role="status" aria-live="polite">
           <span>新版本已準備好，重新整理後就能使用。</span>

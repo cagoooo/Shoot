@@ -16,6 +16,7 @@ export interface ComfortSettings {
   musicVolume: number
   colorAssist: boolean
   qualityMode: QualityMode
+  captions: boolean
 }
 
 export const DEFAULT_COMFORT_SETTINGS: ComfortSettings = {
@@ -33,6 +34,7 @@ export const DEFAULT_COMFORT_SETTINGS: ComfortSettings = {
   musicVolume: 0.7,
   colorAssist: false,
   qualityMode: 'standard',
+  captions: true,
 }
 
 function clamp(value: number, minimum: number, maximum: number) {
