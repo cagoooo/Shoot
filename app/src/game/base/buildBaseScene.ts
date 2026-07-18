@@ -42,8 +42,8 @@ export function buildBaseScene(
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.62, 0.79, 0.86, 1)
 
-  const camera = new UniversalCamera('base-camera', new Vector3(0, 4.2, -13.5), scene)
-  camera.setTarget(new Vector3(0, 2, 4))
+  const camera = new UniversalCamera('base-camera', new Vector3(0, 5.6, -17.5), scene)
+  camera.setTarget(new Vector3(0, 2.4, 4))
   scene.activeCamera = camera
   // 明確接上場景輸入，確保 onPointerObservable 能收到點擊。
   scene.attachControl()
@@ -79,10 +79,10 @@ export function buildBaseScene(
 
     const roofMaterial = new StandardMaterial(`base-roof-${building.id}`, scene)
     roofMaterial.diffuseColor = Color3.FromHexString(building.hex).scale(0.66)
-    const roof = MeshBuilder.CreateCylinder(`base-roof-${building.id}`, { height: building.width * 0.9, diameter: building.width * 1.05, tessellation: 4 }, scene)
-    roof.rotation.z = Math.PI / 2
+    const roofHeight = building.width * 0.6
+    const roof = MeshBuilder.CreateCylinder(`base-roof-${building.id}`, { height: roofHeight, diameterTop: 0, diameterBottom: building.width * 1.5, tessellation: 4 }, scene)
     roof.rotation.y = Math.PI / 4
-    roof.position = new Vector3(building.x, building.height + 0.55, building.z)
+    roof.position = new Vector3(building.x, building.height + roofHeight / 2, building.z)
     roof.material = roofMaterial
     roof.metadata = { baseZone: building.id }
 
@@ -97,8 +97,8 @@ export function buildBaseScene(
       signMaterial.emissiveColor = Color3.White()
       signMaterial.disableLighting = true
       signMaterial.backFaceCulling = false
-      const sign = MeshBuilder.CreatePlane(`base-sign-${building.id}`, { width: 3.4, height: 1.7 }, scene)
-      sign.position = new Vector3(building.x, building.height + 1.9, building.z)
+      const sign = MeshBuilder.CreatePlane(`base-sign-${building.id}`, { width: 3.6, height: 1.8 }, scene)
+      sign.position = new Vector3(building.x, building.height + building.width * 0.6 + 1.3, building.z)
       sign.billboardMode = Mesh.BILLBOARDMODE_ALL
       sign.material = signMaterial
       sign.isPickable = false
