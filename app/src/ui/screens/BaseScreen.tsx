@@ -1,9 +1,16 @@
+import { useCallback, useEffect, useMemo } from 'react'
+import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
 import type { GameScreen, LearningMode, MissionId } from '../../app/gameStore'
+import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
+import { buildBaseScene } from '../../game/base/buildBaseScene'
+import { canRenderTitle3D } from '../../game/title/buildTitleScene'
+import { subscribeSceneInteraction } from '../../game/missions/sceneInteraction'
 import { ProgressControls } from '../components/ProgressControls'
 import { InstallPrompt } from '../components/InstallPrompt'
 
 interface BaseScreenProps {
   mode: LearningMode
+  reducedMotion?: boolean
   audioMuted: boolean
   onAudioMutedChange: (muted: boolean) => void
   onNavigate: (screen: GameScreen) => void
@@ -35,9 +42,30 @@ export function BaseScreen({
   onMissionSelect = () => undefined,
   onExportProgress,
   onImportProgress,
+  reducedMotion = false,
 }: BaseScreenProps) {
+  const show3D = useMemo(() => canRenderTitle3D(), [])
+  const sceneFactory = useCallback<SceneFactory>(
+    (engine) => buildBaseScene(engine as AbstractEngine, { reducedMotion }),
+    [reducedMotion],
+  )
+
+  // 點 3D 建築直接前往該區（DOM 卡片保留為鍵盤與無障礙路徑）。
+  useEffect(
+    () =>
+      subscribeSceneInteraction((interaction) => {
+        if (interaction.kind === 'base-zone') onNavigate(interaction.id as GameScreen)
+      }),
+    [onNavigate],
+  )
+
   return (
-    <main className="base-screen">
+    <main className={`base-screen${show3D ? ' has-3d' : ''}`}>
+      {show3D && (
+        <div className="base-3d-backdrop" aria-hidden="true">
+          <GameCanvas sceneFactory={sceneFactory} />
+        </div>
+      )}
       <header className="base-header">
         <div>
           <p className="eyebrow">地球守護隊基地</p>
@@ -56,6 +84,7 @@ export function BaseScreen({
         </button>
       </header>
 
+      {show3D && <p className="base-hint">👆 點基地裡的建築，也可以直接前往！</p>}
       <section className="base-map" aria-label="基地區域">
         {baseZones.map((zone, index) => zone.screen === 'mission' ? (
           <div className="base-zone zone-1 mission-zone-group" key={zone.screen}>

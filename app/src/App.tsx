@@ -212,6 +212,7 @@ function AppContent() {
     return (
       <BaseScreen
         mode={mode}
+        reducedMotion={comfortSettings.reducedMotion}
         audioMuted={audioMuted}
         onAudioMutedChange={setAudioMuted}
         onNavigate={setScreen}

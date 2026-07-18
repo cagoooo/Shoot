@@ -653,6 +653,50 @@ button:focus-visible {
 
 .teacher-entry { margin-top: 12px; font-size: 0.9rem; opacity: 0.85; }
 
+/* 3D 基地村落：場景鋪滿背景，面板改為毛玻璃並讓出中間給可點擊的建築 */
+.base-screen.has-3d {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+.base-screen.has-3d > * { position: relative; z-index: 1; }
+.base-screen.has-3d .base-3d-backdrop { position: absolute; inset: 0; z-index: 0; }
+.base-3d-backdrop canvas { width: 100%; height: 100%; display: block; }
+.base-screen.has-3d .base-header {
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255, 253, 245, 0.85);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 26px rgba(8, 47, 38, 0.18);
+}
+.base-screen.has-3d .base-map { margin-top: auto; gap: 10px; grid-auto-rows: auto; }
+.base-screen.has-3d .base-zone {
+  min-height: 0;
+  padding: 12px 16px;
+  background: rgba(255, 253, 245, 0.85);
+  backdrop-filter: blur(5px);
+}
+.base-screen.has-3d .base-zone > .zone-symbol { display: none; }
+.base-screen.has-3d .base-zone small { font-size: 0.8rem; }
+.base-screen.has-3d .progress-controls,
+.base-screen.has-3d .install-hint {
+  border-radius: 14px;
+  background: rgba(255, 253, 245, 0.85);
+  backdrop-filter: blur(5px);
+}
+.base-screen.has-3d .base-hint {
+  align-self: center;
+  margin: 8px 0 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(10, 42, 33, 0.72);
+  color: #eaf7ee;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
 /* 3D 迎賓主畫面：場景鋪滿背景，標題卡半透明疊在上面 */
 .start-screen.has-3d { position: relative; overflow: hidden; }
 .start-3d-backdrop { position: absolute; inset: 0; z-index: 0; }
