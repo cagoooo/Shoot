@@ -45,6 +45,8 @@ export function buildBaseScene(
   const camera = new UniversalCamera('base-camera', new Vector3(0, 4.2, -13.5), scene)
   camera.setTarget(new Vector3(0, 2, 4))
   scene.activeCamera = camera
+  // 明確接上場景輸入，確保 onPointerObservable 能收到點擊。
+  scene.attachControl()
 
   new HemisphericLight('base-light', new Vector3(0.2, 1, 0.1), scene).intensity = 0.95
   applyWorldAmbience(scene, '#c2dde6', { top: '#6aa8d8', bottom: '#f0f6e4', namePrefix: 'base' })
@@ -112,7 +114,11 @@ export function buildBaseScene(
     if (zone) emitSceneInteraction({ kind: 'base-zone', id: zone })
   })
 
-  if (!options.reducedMotion) {
+  // 自動化測試（webdriver）也停用鏡頭橫移，讓 3D 點擊座標可重現。
+  const still =
+    options.reducedMotion ||
+    (typeof navigator !== 'undefined' && navigator.webdriver === true)
+  if (!still) {
     let elapsed = 0
     scene.onBeforeRenderObservable.add(() => {
       const deltaSeconds = Math.min(engine.getDeltaTime() / 1000, 0.05)

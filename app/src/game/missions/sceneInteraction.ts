@@ -1,3 +1,7 @@
+// 點擊拾取（scene.pick / pointerInfo.pickInfo）在模組化 Babylon 需要 Ray 支援，
+// 少了這行 side-effect import，pickInfo 永遠是空的、所有 3D 點擊都靜默失效。
+import '@babylonjs/core/Culling/ray'
+
 /**
  * 3D 場景與 React 畫面之間的輕量互動橋樑：
  * - 場景端在玩家點擊可互動物件時發出 interaction 事件（例如點到泥沙怪、回收桶）。

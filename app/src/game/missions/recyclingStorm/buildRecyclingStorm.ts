@@ -101,6 +101,7 @@ export function buildRecyclingStormScene(
 
   const canvas = engine.getRenderingCanvas()
   if (canvas) camera.attachControl(canvas, true)
+  scene.attachControl()
 
   const light = new HemisphericLight(
     'mission-daylight',

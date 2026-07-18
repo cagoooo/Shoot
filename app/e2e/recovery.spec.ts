@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { openBaseMissionList } from './helpers'
 
 test('工具資料載入失敗時可安全回基地', async ({ page }) => {
   await page.route('**/content/parts.zh-TW.json', (route) =>
@@ -26,6 +27,7 @@ test('重新開啟任務時可從安全檢查點繼續', async ({ page }) => {
   })
   await page.goto('./')
   await page.getByRole('button', { name: '開始任務' }).click()
+  await openBaseMissionList(page)
   await page.getByRole('button', { name: /今天任務/ }).click()
 
   await expect(page.getByRole('button', { name: '淨化搗蛋核心' })).toBeVisible()
@@ -37,6 +39,7 @@ test('學生可匯出並載入版本化進度檔', async ({ page }) => {
   await page.getByRole('radio', { name: /高年級標準/ }).check()
   await page.getByRole('button', { name: '開始任務' }).click()
 
+  await openBaseMissionList(page)
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: '匯出我的進度' }).click()
   const download = await downloadPromise

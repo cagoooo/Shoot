@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { openBaseMissionList } from './helpers'
 
 test('高年級學生可由準備、探索到撤離並查看永續紀錄', async ({ page }) => {
   const pageErrors: Error[] = []
@@ -14,6 +15,7 @@ test('高年級學生可由準備、探索到撤離並查看永續紀錄', async
   await page.getByRole('button', { name: /工具桌/ }).click()
   await expect(page.getByRole('heading', { name: '組裝小光能量槍' })).toBeVisible()
   await page.getByRole('button', { name: /回基地/ }).click()
+  await openBaseMissionList(page)
   await page.getByRole('button', { name: /今天任務/ }).click()
 
   await page.getByRole('button', { name: '我看懂任務了' }).click()

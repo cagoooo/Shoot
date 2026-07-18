@@ -19,6 +19,20 @@ test('啟動頁可在瀏覽器顯示', async ({ page }) => {
   await expect(page.getByRole('button', { name: '開始任務' })).toBeVisible()
 })
 
+test('3D 基地可直接點建築前往任務', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('button', { name: '開始任務' }).click()
+  await expect(page.getByRole('button', { name: /今天任務清單/ })).toBeVisible()
+
+  const canvas = page.locator('.base-3d-backdrop canvas')
+  await expect(canvas).toBeVisible()
+  // 等第一批影格渲染完成，讓網格的世界矩陣就緒後再點擊任務塔。
+  await page.waitForTimeout(800)
+  await canvas.click({ position: { x: 640, y: 357 }, force: true })
+
+  await expect(page.getByRole('heading', { name: '垃圾風暴救援行動' })).toBeVisible()
+})
+
 test('可從基地進入工具桌並載入正式零件', async ({ page }) => {
   await page.goto('./')
   await page.getByRole('button', { name: '開始任務' }).click()

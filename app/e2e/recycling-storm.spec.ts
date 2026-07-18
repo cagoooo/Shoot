@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { openBaseMissionList } from './helpers'
 
 async function finishRecyclingStorm(
   page: Page,
@@ -7,6 +8,7 @@ async function finishRecyclingStorm(
 ) {
   await page.goto('./')
   await page.getByRole('button', { name: '開始任務' }).click()
+  await openBaseMissionList(page)
   await page.getByRole('button', { name: /今天任務/ }).click()
 
   await expect(

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { openBaseMissionList } from './helpers'
 
 test.use({
   viewport: { width: 1024, height: 768 },
@@ -55,6 +56,7 @@ test('手機可閱讀九大世界地圖且沒有水平溢出', async ({ page }) 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('./')
   await page.getByRole('button', { name: '開始任務' }).click()
+  await openBaseMissionList(page)
   await page.getByRole('button', { name: '查看九大世界任務地圖 →' }).click()
 
   await expect(page.getByRole('heading', { name: '地球行動地圖' })).toBeVisible()
@@ -69,6 +71,7 @@ test('平板直向可打開任務與操作閱讀設定', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 })
   await page.goto('./')
   await page.getByRole('button', { name: '開始任務' }).click()
+  await openBaseMissionList(page)
   await page.getByRole('button', { name: /今天任務/ }).click()
 
   await expect(page.getByRole('button', { name: '操作與閱讀設定' })).toBeVisible()

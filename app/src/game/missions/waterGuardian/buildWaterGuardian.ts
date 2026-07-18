@@ -41,6 +41,7 @@ export function buildWaterGuardianScene(
   scene.activeCamera = camera
   const canvas = engine.getRenderingCanvas()
   if (canvas) camera.attachControl(canvas, true)
+  scene.attachControl()
 
   const light = new HemisphericLight('water-daylight', new Vector3(0.2, 1, 0.1), scene)
   light.intensity = 1

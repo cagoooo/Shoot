@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
 import type { GameScreen, LearningMode, MissionId } from '../../app/gameStore'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
@@ -45,6 +45,9 @@ export function BaseScreen({
   reducedMotion = false,
 }: BaseScreenProps) {
   const show3D = useMemo(() => canRenderTitle3D(), [])
+  // 3D 模式預設收合面板，讓村落完整露出可點；展開後回到完整選單。
+  const [menuOpen, setMenuOpen] = useState(false)
+  const showFullPanels = !show3D || menuOpen
   const sceneFactory = useCallback<SceneFactory>(
     (engine) => buildBaseScene(engine as AbstractEngine, { reducedMotion }),
     [reducedMotion],
@@ -84,7 +87,25 @@ export function BaseScreen({
         </button>
       </header>
 
-      {show3D && <p className="base-hint">👆 點基地裡的建築，也可以直接前往！</p>}
+      {show3D && !menuOpen && (
+        <>
+          <p className="base-hint">👆 直接點村落裡的建築就能前往！</p>
+          <nav className="base-chip-bar" aria-label="基地快速選單">
+            <button type="button" onClick={() => setMenuOpen(true)}>🗺️ 今天任務清單</button>
+            <button type="button" onClick={() => onNavigate('workbench')}>🔧 工具桌</button>
+            <button type="button" onClick={() => onNavigate('range')}>🎯 試玩區</button>
+            <button type="button" onClick={() => onNavigate('report')}>📒 行動紀錄</button>
+            <button type="button" onClick={() => onNavigate('collection')}>⭐ 收藏冊</button>
+          </nav>
+        </>
+      )}
+      {showFullPanels && (
+      <>
+      {show3D && (
+        <button className="secondary-button base-collapse-button" type="button" onClick={() => setMenuOpen(false)}>
+          👀 收合選單，看看 3D 基地
+        </button>
+      )}
       <section className="base-map" aria-label="基地區域">
         {baseZones.map((zone, index) => zone.screen === 'mission' ? (
           <div className="base-zone zone-1 mission-zone-group" key={zone.screen}>
@@ -128,6 +149,8 @@ export function BaseScreen({
         onImport={onImportProgress}
       />
       <InstallPrompt />
+      </>
+      )}
     </main>
   )
 }

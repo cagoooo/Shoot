@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { openBaseMissionList } from './helpers'
 
 test('accessibility 鍵盤可啟動並操作主要導覽', async ({ page }) => {
   await page.goto('./')
@@ -14,6 +15,7 @@ test('accessibility 可放大文字並遵守減少動態偏好', async ({ page }
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('./')
   await page.getByRole('button', { name: '開始任務' }).click()
+  await openBaseMissionList(page)
   await page.getByRole('button', { name: /今天任務/ }).click()
   await page.getByRole('button', { name: '操作與閱讀設定' }).click()
   await page.getByLabel('放大介面文字').check()
@@ -32,6 +34,7 @@ test('accessibility 桌機版善用寬度且沒有水平溢出', async ({ page }
   await page.setViewportSize({ width: 1366, height: 768 })
   await page.goto('./')
   await page.getByRole('button', { name: '開始任務' }).click()
+  await openBaseMissionList(page)
 
   const layout = await page.locator('.base-map').boundingBox()
   expect(layout?.width).toBeGreaterThan(1200)
