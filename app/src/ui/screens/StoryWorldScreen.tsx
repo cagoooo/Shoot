@@ -137,7 +137,7 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
               <div>
                 <strong>{mission.guide.name}</strong>
                 <p>{step.dialogue}</p>
-                <SpeakButton text={`${mission.guide.name}說：${step.dialogue}`} label="聽角色說" />
+                <SpeakButton text={`${mission.guide.name}說：${step.dialogue}`} label="聽角色說" voice={mission.guide.voice} />
               </div>
             </div>
           )}
@@ -164,7 +164,7 @@ export function StoryWorldScreen({ mission, learningMode, comfortSettings, onCom
             <div>
               <strong>{mission.guide.name}</strong>
               <p>{missteps === 0 ? mission.endings.perfect : mission.endings.learned}</p>
-              <SpeakButton text={`${mission.guide.name}說：${missteps === 0 ? mission.endings.perfect : mission.endings.learned}`} label="聽角色說" />
+              <SpeakButton text={`${mission.guide.name}說：${missteps === 0 ? mission.endings.perfect : mission.endings.learned}`} label="聽角色說" voice={mission.guide.voice} />
             </div>
           </div>
           <div className="boss-result" role="status"><span>完成三個守護任務</span><span>收集世界資料</span><span>保護關鍵目標</span><strong>{mission.sdgs} 的行動已寫入地球地圖</strong></div>

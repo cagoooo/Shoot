@@ -37,12 +37,20 @@ function emitSpeechProgress(charIndex: number): void {
   window.dispatchEvent(new CustomEvent(SPEECH_PROGRESS_EVENT, { detail: charIndex }))
 }
 
-export function speak(text: string): void {
+export interface VoiceProfile {
+  /** 音高（0.5–2，預設 1）——角色聲線用。 */
+  pitch?: number
+  /** 語速（預設 0.9）。 */
+  rate?: number
+}
+
+export function speak(text: string, voice: VoiceProfile = {}): void {
   if (!canSpeak()) return
   window.speechSynthesis.cancel()
   const utterance = new SpeechSynthesisUtterance(text)
   utterance.lang = 'zh-TW'
-  utterance.rate = 0.9
+  utterance.pitch = voice.pitch ?? 1
+  utterance.rate = voice.rate ?? 0.9
   utterance.onend = () => emitSpeechText(null)
   utterance.onerror = () => emitSpeechText(null)
   utterance.onboundary = (event) => emitSpeechProgress(event.charIndex)
