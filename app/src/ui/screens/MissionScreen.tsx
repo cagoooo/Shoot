@@ -22,6 +22,7 @@ import { TouchControls } from '../components/TouchControls'
 import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
 import { ControlsHintOverlay } from '../components/ControlsHintOverlay'
 import type { ObjectiveTracking } from '../../game/missions/objectiveTracking'
+import { emitSceneState, subscribeSceneInteraction } from '../../game/missions/sceneInteraction'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { MissionGuide } from '../components/MissionGuide'
 import type { LearningMode } from '../../app/gameStore'
@@ -82,7 +83,7 @@ const evacuationChoices: Array<{
   { id: 'heavy-scrap', name: '沉重廢鐵', description: '很重，而且可以稍後再回收' },
 ]
 
-function MissionMap({ comfortSettings, objective, tracking, observed, onTrackingChange, onObserve }: { comfortSettings: ComfortSettings; objective: { label: string; position: { x: number; z: number; icon?: string } }; tracking: ObjectiveTracking | null; observed: boolean; onTrackingChange: (tracking: ObjectiveTracking) => void; onObserve: () => void }) {
+function MissionMap({ comfortSettings, objective, tracking, observed, onTrackingChange, onObserve, interactiveBins = false }: { comfortSettings: ComfortSettings; objective: { label: string; position: { x: number; z: number; icon?: string } }; tracking: ObjectiveTracking | null; observed: boolean; onTrackingChange: (tracking: ObjectiveTracking) => void; onObserve: () => void; interactiveBins?: boolean }) {
   const inputManager = useMemo(() => new InputManager(), [])
   const sceneFactory = useCallback<SceneFactory>(
     (engine, runtimeInput, runtimeComfort) =>
@@ -93,8 +94,9 @@ function MissionMap({ comfortSettings, objective, tracking, observed, onTracking
         runtimeComfort,
         objective.position,
         onTrackingChange,
+        interactiveBins,
       ),
-    [inputManager, objective.position, onTrackingChange],
+    [inputManager, objective.position, onTrackingChange, interactiveBins],
   )
 
   return (
@@ -222,8 +224,20 @@ export function MissionScreen({
     setBoss((current) =>
       sortStormItem(current, { item: item.correctBin, bin }),
     )
-    if (result.correct) setSortingIndex((index) => index + 1)
+    if (result.correct) {
+      setSortingIndex((index) => index + 1)
+      emitSceneState({ key: 'sort-celebrate', value: sortingIndex + 1, id: bin })
+    }
   }
+
+  // 3D 場景點擊回收桶也能分類（與面板按鈕同一套規則）。
+  useEffect(() => {
+    if (mission.phase !== 'sorting-hall') return
+    return subscribeSceneInteraction((interaction) => {
+      if (interaction.kind === 'sort-bin') sortInto(interaction.id as WasteBin)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mission.phase, sortingIndex, challenge])
 
   const cleanCore = () => setBoss((current) => cleanStormCore(current))
 
@@ -304,7 +318,7 @@ export function MissionScreen({
 
       <div className="mission-layout">
         {mission.phase !== 'report' &&
-          (mapSlot ?? (objective && <MissionMap comfortSettings={comfortSettings} objective={objective} tracking={objectiveTracking} observed={objectiveObserved} onTrackingChange={setObjectiveTracking} onObserve={() => setObjectiveObserved(true)} />))}
+          (mapSlot ?? (objective && <MissionMap comfortSettings={comfortSettings} objective={objective} tracking={objectiveTracking} observed={objectiveObserved} onTrackingChange={setObjectiveTracking} onObserve={() => setObjectiveObserved(true)} interactiveBins={mission.phase === 'sorting-hall'} />))}
 
         <section className="mission-task-card" aria-live="polite" onClickCapture={(event) => { if (!canInteract) { event.preventDefault(); event.stopPropagation() } }} onChangeCapture={(event) => { if (!canInteract) { event.preventDefault(); event.stopPropagation() } }}>
           <MissionGuide phase={mission.phase} learningMode={learningMode} />

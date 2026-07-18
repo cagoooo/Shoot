@@ -15,6 +15,7 @@ import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { DataCompareCard } from '../components/DataCompareCard'
 import { SettingsScreen } from './SettingsScreen'
 import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/buildWaterGuardian'
+import { emitSceneState, subscribeSceneInteraction } from '../../game/missions/sceneInteraction'
 
 type WaterPhase = 'briefing' | 'route' | 'collect' | 'purify' | 'filter' | 'distribute' | 'report'
 type WaterRoute = 'rooftop' | 'ground'
@@ -93,8 +94,9 @@ export function WaterGuardianScreen({
         runtimeComfort,
         objective.position,
         setObjectiveTracking,
+        phase === 'purify' ? { count: monsterCount } : undefined,
       ),
-    [inputManager, phase],
+    [inputManager, phase, monsterCount],
   )
 
   const finish = () => {
@@ -149,6 +151,20 @@ export function WaterGuardianScreen({
     setObjectiveTracking(null)
     setObjectiveObserved(false)
   }, [phase])
+
+  // 3D 場景點擊泥沙搗蛋怪 → 淨化；畫面把淨化數量同步回場景（怪消失＋泡泡粒子）。
+  useEffect(() => {
+    if (phase !== 'purify') return
+    return subscribeSceneInteraction((interaction) => {
+      if (interaction.kind === 'sludge') purifyMonster()
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, monsterCount])
+
+  useEffect(() => {
+    if (phase !== 'purify') return
+    emitSceneState({ key: 'water-purified', value: purified })
+  }, [phase, purified])
 
   return (
     <main className={`mission-screen${comfortSettings.largeText ? ' large-text' : ''}`}>

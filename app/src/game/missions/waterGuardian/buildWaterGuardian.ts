@@ -10,9 +10,11 @@ import { normalizeComfortSettings, type ComfortSettings } from '../../../domain/
 import { InputManager } from '../../../input/InputManager'
 import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
-import { addWorldLife, applyGroundTexture, applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
+import { addWorldLife, applyGroundTexture, applyWorldAmbience, burstParticles, createObjectiveBeacon } from '../objectiveBeacon'
 import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
 import { createIntroOrbit } from '../introCinematic'
+import { emitSceneInteraction, subscribeSceneState } from '../sceneInteraction'
+import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 
 export function buildWaterGuardianScene(
   engine: AbstractEngine,
@@ -20,6 +22,7 @@ export function buildWaterGuardianScene(
   comfortInput: Partial<ComfortSettings> = {},
   objectivePosition?: { x: number; z: number; icon?: string },
   onObjectiveTracking?: (tracking: ObjectiveTracking) => void,
+  sludge?: { count: number },
 ): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.72, 0.9, 0.95, 1)
@@ -81,6 +84,59 @@ export function buildWaterGuardianScene(
       icon: objectivePosition.icon,
     })
   }
+  if (sludge && sludge.count > 0) {
+    const sludgeMaterial = new StandardMaterial('sludge-material', scene)
+    sludgeMaterial.diffuseColor = Color3.FromHexString('#8a6a45')
+    sludgeMaterial.emissiveColor = Color3.FromHexString('#3d2c15')
+    const spots = [
+      { x: -5.6, z: 2.2 },
+      { x: -2.6, z: 3.8 },
+      { x: -4.2, z: 4.9 },
+    ]
+    const monsters = Array.from({ length: Math.min(sludge.count, spots.length) }, (_, index) => {
+      const monster = MeshBuilder.CreateSphere(`sludge-monster-${index}`, { diameterX: 1.2, diameterY: 0.9, diameterZ: 1.2, segments: 10 }, scene)
+      monster.position = new Vector3(spots[index].x, 0.5, spots[index].z)
+      monster.material = sludgeMaterial
+      monster.metadata = { sludgeIndex: index }
+      const eyeMaterial = new StandardMaterial(`sludge-eye-material-${index}`, scene)
+      eyeMaterial.diffuseColor = Color3.White()
+      eyeMaterial.emissiveColor = Color3.FromHexString('#dddddd')
+      for (const offset of [-0.22, 0.22]) {
+        const eye = MeshBuilder.CreateSphere(`sludge-eye-${index}-${offset}`, { diameter: 0.2, segments: 6 }, scene)
+        eye.position = new Vector3(spots[index].x + offset, 0.85, spots[index].z - 0.45)
+        eye.material = eyeMaterial
+        eye.isPickable = false
+        eye.parent = monster.parent
+        monster.onDisposeObservable.add(() => eye.dispose())
+      }
+      return monster
+    })
+
+    scene.onPointerObservable.add((pointerInfo) => {
+      if (pointerInfo.type !== PointerEventTypes.POINTERDOWN) return
+      const picked = pointerInfo.pickInfo?.pickedMesh
+      const index = (picked?.metadata as { sludgeIndex?: number } | null)?.sludgeIndex
+      if (typeof index === 'number' && !picked!.isDisposed()) {
+        emitSceneInteraction({ kind: 'sludge', id: String(index) })
+      }
+    })
+
+    // 畫面端回報已淨化數量（不論從 3D 點擊或按鈕），場景同步讓怪消失並噴泡泡。
+    let hidden = 0
+    const unsubscribe = subscribeSceneState((update) => {
+      if (update.key !== 'water-purified') return
+      while (hidden < update.value && hidden < monsters.length) {
+        const monster = monsters[hidden]
+        if (!monster.isDisposed()) {
+          burstParticles(scene, { x: monster.position.x, y: monster.position.y + 0.4, z: monster.position.z }, '#7fd4e8', { reducedMotion: comfort.reducedMotion })
+          monster.dispose()
+        }
+        hidden += 1
+      }
+    })
+    scene.onDisposeObservable.add(() => unsubscribe())
+  }
+
   const emitTracking = createTrackingEmitter(onObjectiveTracking)
   const intro = createIntroOrbit({
     key: 'water-guardian',

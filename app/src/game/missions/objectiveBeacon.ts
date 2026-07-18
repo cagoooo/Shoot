@@ -6,6 +6,8 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { MeshBuilder } from '@babylonjs/core/Meshes/meshBuilder'
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture'
+import { ParticleSystem } from '@babylonjs/core/Particles/particleSystem'
+import { Color4 } from '@babylonjs/core/Maths/math.color'
 // DynamicTexture 需要引擎端擴充；WebGL 與 WebGPU 兩條路徑都要載入，缺一個就會在執行期丟
 // 「engine.createDynamicTexture is not a function」。
 import '@babylonjs/core/Engines/Extensions/engine.dynamicTexture'
@@ -77,6 +79,52 @@ export function createObjectiveBeacon(
       if (iconPlane) iconPlane.position.y = iconBaseY + Math.sin(elapsed * 1.6) * 0.22
     })
   }
+}
+
+/**
+ * 成功回饋粒子：在指定位置噴出一小陣彩色亮點後自動清除。
+ * 減少動態或測試環境（無 2D context）時不播放。
+ */
+export function burstParticles(
+  scene: Scene,
+  position: { x: number; y: number; z: number },
+  colorHex: string,
+  options: { reducedMotion: boolean },
+): void {
+  if (options.reducedMotion) return
+  const texture = new DynamicTexture('burst-particle-texture', { width: 16, height: 16 }, scene, false)
+  const context = texture.getContext()
+  if (!context || typeof context.arc !== 'function') {
+    texture.dispose()
+    return
+  }
+  context.fillStyle = '#ffffff'
+  context.beginPath()
+  context.arc(8, 8, 7, 0, Math.PI * 2)
+  context.fill()
+  texture.update(false)
+  texture.hasAlpha = true
+
+  const color = Color3.FromHexString(colorHex)
+  const particles = new ParticleSystem('burst-particles', 50, scene)
+  particles.particleTexture = texture
+  particles.emitter = new Vector3(position.x, position.y, position.z)
+  particles.minEmitBox = new Vector3(-0.3, 0, -0.3)
+  particles.maxEmitBox = new Vector3(0.3, 0.4, 0.3)
+  particles.color1 = new Color4(color.r, color.g, color.b, 1)
+  particles.color2 = new Color4(1, 1, 0.75, 1)
+  particles.colorDead = new Color4(color.r, color.g, color.b, 0)
+  particles.minSize = 0.12
+  particles.maxSize = 0.3
+  particles.minLifeTime = 0.35
+  particles.maxLifeTime = 0.8
+  particles.emitRate = 140
+  particles.direction1 = new Vector3(-1.4, 2.4, -1.4)
+  particles.direction2 = new Vector3(1.4, 3.6, 1.4)
+  particles.gravity = new Vector3(0, -5, 0)
+  particles.targetStopDuration = 0.3
+  particles.disposeOnStop = true
+  particles.start()
 }
 
 /**

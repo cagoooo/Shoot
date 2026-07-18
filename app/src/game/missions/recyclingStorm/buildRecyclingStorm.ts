@@ -14,9 +14,13 @@ import {
 } from '../../../domain/settings/accessibility'
 import { integrateMovement } from '../../player/PlayerController'
 import { applyTouchLook } from '../../player/applyTouchLook'
-import { addWorldLife, applyGroundTexture, applyWorldAmbience, createObjectiveBeacon } from '../objectiveBeacon'
+import { addWorldLife, applyGroundTexture, applyWorldAmbience, burstParticles, createObjectiveBeacon } from '../objectiveBeacon'
 import { computeObjectiveTracking, createTrackingEmitter, type ObjectiveTracking } from '../objectiveTracking'
 import { createIntroOrbit } from '../introCinematic'
+import { emitSceneInteraction, subscribeSceneState } from '../sceneInteraction'
+import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
+import { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture'
+import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import {
   recyclingStormZones,
   zoneConnections,
@@ -71,6 +75,7 @@ export function buildRecyclingStormScene(
   comfortInput: Partial<ComfortSettings> = DEFAULT_COMFORT_SETTINGS,
   objectivePosition?: { x: number; z: number; icon?: string },
   onObjectiveTracking?: (tracking: ObjectiveTracking) => void,
+  interactiveBins?: boolean,
 ): Scene {
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.78, 0.9, 0.94, 1)
@@ -234,6 +239,57 @@ export function buildRecyclingStormScene(
       icon: objectivePosition.icon,
     })
   }
+  if (interactiveBins) {
+    const bins: Array<{ id: string; label: string; hex: string; x: number }> = [
+      { id: 'paper', label: '📄', hex: '#5b8fd4', x: -9.5 },
+      { id: 'plastic', label: '🧴', hex: '#d4a24f', x: -7.2 },
+      { id: 'metal', label: '🥫', hex: '#8f9aa6', x: -4.9 },
+      { id: 'general', label: '🗑️', hex: '#6f7d6f', x: -2.6 },
+    ]
+    const binMeshes = bins.map((bin) => {
+      const material = new StandardMaterial(`sort-bin-material-${bin.id}`, scene)
+      material.diffuseColor = Color3.FromHexString(bin.hex)
+      const mesh = MeshBuilder.CreateCylinder(`sort-bin-${bin.id}`, { height: 1.4, diameter: 1.2, tessellation: 14 }, scene)
+      mesh.position = new Vector3(bin.x, 0.7, 4.2)
+      mesh.material = material
+      mesh.metadata = { sortBin: bin.id }
+      try {
+        const texture = new DynamicTexture(`sort-bin-icon-${bin.id}`, { width: 128, height: 128 }, scene, false)
+        texture.hasAlpha = true
+        texture.drawText(bin.label, null, 92, 'bold 84px sans-serif', '#ffffff', 'transparent', true)
+        const iconMaterial = new StandardMaterial(`sort-bin-icon-material-${bin.id}`, scene)
+        iconMaterial.diffuseTexture = texture
+        iconMaterial.useAlphaFromDiffuseTexture = true
+        iconMaterial.emissiveColor = Color3.White()
+        iconMaterial.disableLighting = true
+        iconMaterial.backFaceCulling = false
+        const icon = MeshBuilder.CreatePlane(`sort-bin-sign-${bin.id}`, { size: 1 }, scene)
+        icon.position = new Vector3(bin.x, 2, 4.2)
+        icon.billboardMode = Mesh.BILLBOARDMODE_ALL
+        icon.material = iconMaterial
+        icon.isPickable = false
+      } catch {
+        // 測試環境沒有 2D context 時略過圖示，桶身仍可互動。
+      }
+      return { ...bin, mesh }
+    })
+
+    scene.onPointerObservable.add((pointerInfo) => {
+      if (pointerInfo.type !== PointerEventTypes.POINTERDOWN) return
+      const binId = (pointerInfo.pickInfo?.pickedMesh?.metadata as { sortBin?: string } | null)?.sortBin
+      if (binId) emitSceneInteraction({ kind: 'sort-bin', id: binId })
+    })
+
+    const unsubscribe = subscribeSceneState((update) => {
+      if (update.key !== 'sort-celebrate' || !update.id) return
+      const bin = binMeshes.find((candidate) => candidate.id === update.id)
+      if (bin) {
+        burstParticles(scene, { x: bin.mesh.position.x, y: 1.8, z: bin.mesh.position.z }, bin.hex, { reducedMotion: comfort.reducedMotion })
+      }
+    })
+    scene.onDisposeObservable.add(() => unsubscribe())
+  }
+
   const emitTracking = createTrackingEmitter(onObjectiveTracking)
   const intro = createIntroOrbit({
     key: 'recycling-storm',
