@@ -693,7 +693,7 @@ button:focus-visible {
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
-  margin-top: auto;
+  margin-top: 10px;
   padding: 12px 14px;
   border-radius: 18px;
   background: rgba(255, 253, 245, 0.88);
@@ -715,7 +715,7 @@ button:focus-visible {
 .base-collapse-button { align-self: center; }
 .base-screen.has-3d .base-hint {
   align-self: center;
-  margin: 8px 0 0;
+  margin: auto 0 0;
   padding: 6px 14px;
   border-radius: 999px;
   background: rgba(10, 42, 33, 0.72);

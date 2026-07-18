@@ -43,7 +43,7 @@ export function buildBaseScene(
   scene.clearColor = new Color4(0.62, 0.79, 0.86, 1)
 
   const camera = new UniversalCamera('base-camera', new Vector3(0, 5.6, -17.5), scene)
-  camera.setTarget(new Vector3(0, 2.4, 4))
+  camera.setTarget(new Vector3(0, 3, 4))
   scene.activeCamera = camera
   // 明確接上場景輸入，確保 onPointerObservable 能收到點擊。
   scene.attachControl()
@@ -98,7 +98,7 @@ export function buildBaseScene(
       signMaterial.disableLighting = true
       signMaterial.backFaceCulling = false
       const sign = MeshBuilder.CreatePlane(`base-sign-${building.id}`, { width: 3.6, height: 1.8 }, scene)
-      sign.position = new Vector3(building.x, building.height + building.width * 0.6 + 1.3, building.z)
+      sign.position = new Vector3(building.x, building.height + building.width * 0.6 + 0.8, building.z)
       sign.billboardMode = Mesh.BILLBOARDMODE_ALL
       sign.material = signMaterial
       sign.isPickable = false
