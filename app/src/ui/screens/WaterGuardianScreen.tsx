@@ -187,6 +187,7 @@ export function WaterGuardianScreen({
             <p className="eyebrow">任務 1／6</p>
             <h2>讓雨水重新流動</h2>
             <p>社區的淨水站被落葉和泥沙堵住了。請選擇水源、收集雨水、淨化水質、組合過濾材料，再把乾淨的水分配出去。</p>
+            <p className="equipment-tip">🧰 推薦裝備：工具桌的「淨水泡泡器」發射溫和泡泡，最適合這次的淨水任務！</p>
             <button className="primary-button" type="button" onClick={() => setPhase('route')}>我準備好了</button>
           </>}
 

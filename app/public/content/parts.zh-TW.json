@@ -151,5 +151,32 @@
     "stats": { "power": 2, "saving": 3, "range": 4, "aim": 3, "cooling": 3, "lightness": 3, "earthCare": 5 },
     "sdgs": [11, 12],
     "why": "把散落的材料集中，回收才會又快又完整"
+  },
+  {
+    "id": "seed-launcher",
+    "name": "種子發射器",
+    "shortDescription": "溫柔地把種子送到需要綠化的地方",
+    "slot": "emitter",
+    "stats": { "power": 2, "saving": 4, "range": 4, "aim": 4, "cooling": 4, "lightness": 4, "earthCare": 5 },
+    "sdgs": [13, 15],
+    "why": "低速發射不傷土壤，種子落點也更準確"
+  },
+  {
+    "id": "shield-module",
+    "name": "護盾模組",
+    "shortDescription": "在保護目標旁展開安全防護罩",
+    "slot": "grip",
+    "stats": { "power": 2, "saving": 3, "range": 2, "aim": 3, "cooling": 4, "lightness": 2, "earthCare": 5 },
+    "sdgs": [11, 15],
+    "why": "防護罩能保護生物和設備，但會增加一些重量"
+  },
+  {
+    "id": "wind-turbine-box",
+    "name": "風力渦輪盒",
+    "shortDescription": "有風時邊走邊充電，無風時休息",
+    "slot": "energy",
+    "stats": { "power": 3, "saving": 5, "range": 3, "aim": 3, "cooling": 4, "lightness": 3, "earthCare": 5 },
+    "sdgs": [7, 13],
+    "why": "移動時的風也能發電，但要看天氣臉色"
   }
 ]
