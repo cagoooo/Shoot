@@ -1,15 +1,31 @@
+import { useCallback, useMemo } from 'react'
+import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
 import type { LearningMode } from '../../app/gameStore'
+import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
+import { buildTitleScene, canRenderTitle3D } from '../../game/title/buildTitleScene'
 
 interface StartScreenProps {
   mode: LearningMode
   onModeChange: (mode: LearningMode) => void
   onStart: () => void
   onTeacherMode?: () => void
+  reducedMotion?: boolean
 }
 
-export function StartScreen({ mode, onModeChange, onStart, onTeacherMode }: StartScreenProps) {
+export function StartScreen({ mode, onModeChange, onStart, onTeacherMode, reducedMotion = false }: StartScreenProps) {
+  const show3D = useMemo(() => canRenderTitle3D(), [])
+  const sceneFactory = useCallback<SceneFactory>(
+    (engine) => buildTitleScene(engine as AbstractEngine, { reducedMotion }),
+    [reducedMotion],
+  )
+
   return (
-    <main className="start-screen">
+    <main className={`start-screen${show3D ? ' has-3d' : ''}`}>
+      {show3D && (
+        <div className="start-3d-backdrop" aria-hidden="true">
+          <GameCanvas sceneFactory={sceneFactory} />
+        </div>
+      )}
       <section className="start-card" aria-labelledby="game-title">
         <p className="eyebrow">SDGs 永續行動遊戲</p>
         <h1 id="game-title">地球守護隊：能量大作戰</h1>

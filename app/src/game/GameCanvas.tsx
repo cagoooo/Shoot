@@ -86,10 +86,16 @@ export function GameCanvas({
 
     const handleResize = () => engine?.resize()
 
-    const enginePromise = engineCache.get(canvas) ?? engineFactory(canvas)
-    engineCache.set(canvas, enginePromise)
+    const enginePromise = (engineCache.get(canvas) ?? engineFactory(canvas)).catch(
+      (error) => {
+        console.error('3D 引擎啟動失敗，改用靜態畫面', error)
+        return null
+      },
+    ) as Promise<RuntimeEngine | null>
+    engineCache.set(canvas, enginePromise as Promise<RuntimeEngine>)
 
     void enginePromise.then((sharedEngine) => {
+      if (!sharedEngine) return
       if (cancelled) return
       engine = sharedEngine
       try {
@@ -124,6 +130,7 @@ export function GameCanvas({
       void enginePromise.then((sharedEngine) => {
         window.removeEventListener('resize', handleResize)
         unbindInput?.()
+        if (!sharedEngine) return
         sharedEngine.stopRenderLoop()
         scene?.dispose()
         // 等一個 tick：StrictMode 重掛載與階段切換時 canvas 仍在畫面上，

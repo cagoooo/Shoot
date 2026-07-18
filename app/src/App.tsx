@@ -199,6 +199,7 @@ function AppContent() {
           setScreen('base')
         }}
         onTeacherMode={() => setScreen('teacher')}
+        reducedMotion={comfortSettings.reducedMotion}
       />
     )
   }
