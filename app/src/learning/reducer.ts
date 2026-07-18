@@ -15,6 +15,7 @@ export function createEmptyLearningReport(): LearningReport {
     energyModes: [],
     routes: [],
     endings: [],
+    perfectEndings: 0,
   }
 }
 
@@ -69,7 +70,11 @@ export function reduceLearningEvents(
           ? report
           : { ...report, routes: [...report.routes, event.route] }
       case 'mission-ending':
-        return { ...report, endings: addUnique(report.endings, event.summary) }
+        return {
+          ...report,
+          endings: addUnique(report.endings, event.summary),
+          perfectEndings: report.perfectEndings + (event.ending === 'perfect' ? 1 : 0),
+        }
     }
   }, createEmptyLearningReport())
 }

@@ -21,4 +21,6 @@ export interface LearningReport {
   energyModes: Array<'fast-full' | 'slow-saving' | 'zoned'>
   routes: Array<'main-route' | 'maintenance-route'>
   endings: string[]
+  /** 本次紀錄中拿到完美結局的次數（金卡判定用）。 */
+  perfectEndings: number
 }

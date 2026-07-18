@@ -21,11 +21,22 @@ export function createActionCardSvg(
     (sum, amount) => sum + amount,
     0,
   )
+  const golden = report.perfectEndings > 0
+  const frameColor = golden ? '#c8940f' : '#174f3c'
+  const backgroundColor = golden ? '#fdf6e0' : '#eef7ef'
+  const title = golden ? '⭐ 完美永續行動卡 ⭐' : '我的永續行動卡'
+  const stars = golden
+    ? `<text x="1040" y="130" font-size="44">🌟</text>
+  <text x="980" y="112" font-size="30">✨</text>
+  <text x="1096" y="168" font-size="28">✨</text>`
+    : ''
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#eef7ef"/>
-  <rect x="44" y="44" width="1112" height="542" rx="34" fill="#fffdf5" stroke="#174f3c" stroke-width="8"/>
-  <text x="90" y="130" font-size="48" font-weight="800" fill="#174f3c">我的永續行動卡</text>
+  <rect width="1200" height="630" fill="${backgroundColor}"/>
+  <rect x="44" y="44" width="1112" height="542" rx="34" fill="#fffdf5" stroke="${frameColor}" stroke-width="${golden ? 12 : 8}"/>
+  ${golden ? '<rect x="60" y="60" width="1080" height="510" rx="26" fill="none" stroke="#e8c766" stroke-width="3"/>' : ''}
+  ${stars}
+  <text x="90" y="130" font-size="48" font-weight="800" fill="${golden ? '#8a5b00' : '#174f3c'}">${title}</text>
   <text x="90" y="205" font-size="30" fill="#253c34">能源使用：${report.energyUsed}</text>
   <text x="90" y="255" font-size="30" fill="#253c34">整理回收物：${recycled} 件</text>
   <text x="90" y="305" font-size="30" fill="#253c34">修好設備：${report.repairedMachines.length} 項</text>
