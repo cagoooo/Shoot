@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { ErrorBoundary } from './app/ErrorBoundary'
-import { useGameStore } from './app/gameStore'
+import { useGameStore, type GameScreen } from './app/gameStore'
 import { loadContent } from './content/loadContent'
 import type { PartContent } from './content/schema'
 import { BaseScreen } from './ui/screens/BaseScreen'
@@ -23,10 +23,18 @@ import { evaluateChallenge, formatChallengeLine, type ChallengeResult } from './
 import { registerServiceWorker, type ApplyUpdate } from './pwa/serviceWorker'
 import { NetworkStatusBanner } from './ui/components/NetworkStatusBanner'
 import { SubtitleBar } from './ui/components/SubtitleBar'
+import { DiveTransition } from './ui/components/DiveTransition'
 
 function GlobalSubtitleBar() {
   const captions = useGameStore((state) => state.comfortSettings.captions)
   return <SubtitleBar enabled={captions} />
+}
+
+function GlobalDiveTransition() {
+  const diveNonce = useGameStore((state) => state.diveNonce)
+  const reducedMotion = useGameStore((state) => state.comfortSettings.reducedMotion)
+  if (diveNonce === 0) return null
+  return <DiveTransition triggerKey={diveNonce} reducedMotion={reducedMotion} />
 }
 import { loadAudioMuted, saveAudioMuted } from './domain/settings/settingsStorage'
 import './App.css'
@@ -66,9 +74,11 @@ function AppContent() {
     setMode,
     setActiveMission,
     setScreen,
+    triggerDive,
     recordLearningEvents,
     setComfortSettings,
   } = useGameStore()
+  const previousScreenRef = useRef<GameScreen>(screen)
   const [parts, setParts] = useState<PartContent[]>([])
   const [completedMissions, setCompletedMissions] = useState<string[]>([])
   const [missionEndings, setMissionEndings] = useState<Record<string, 'perfect' | 'learned'>>({})
@@ -140,14 +150,17 @@ function AppContent() {
     })
   }, [saveRepository, setMode])
 
-  // 進入任務畫面時開始計時，做「比上次快幾秒」的自我挑戰。
+  // 進入任務畫面時開始計時（自我挑戰）並播放俯衝進世界轉場。
   useEffect(() => {
+    const enteredMission = screen === 'mission' && previousScreenRef.current !== 'mission'
     if (screen === 'mission') {
       if (missionStartRef.current === null) missionStartRef.current = Date.now()
+      if (enteredMission) triggerDive()
     } else if (screen !== 'report') {
       missionStartRef.current = null
     }
-  }, [screen])
+    previousScreenRef.current = screen
+  }, [screen, triggerDive])
 
   const completeMission = (missionId: string, events: LearningEvent[]) => {
     recordLearningEvents(events)
@@ -431,6 +444,7 @@ function App() {
       </ErrorBoundary>
       <NetworkStatusBanner />
       <GlobalSubtitleBar />
+      <GlobalDiveTransition />
       {applyUpdate && (
         <aside className="update-banner" role="status" aria-live="polite">
           <span>新版本已準備好，重新整理後就能使用。</span>

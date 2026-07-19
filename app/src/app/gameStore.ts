@@ -27,9 +27,12 @@ interface GameStore {
   activeMission: MissionId
   learningEvents: LearningEvent[]
   comfortSettings: ComfortSettings
+  /** 每次「進入任務」遞增，觸發俯衝進世界轉場。 */
+  diveNonce: number
   setScreen: (screen: GameScreen) => void
   setMode: (mode: LearningMode) => void
   setActiveMission: (mission: MissionId) => void
+  triggerDive: () => void
   recordLearningEvents: (events: LearningEvent[]) => void
   clearLearningEvents: () => void
   setComfortSettings: (settings: ComfortSettings) => void
@@ -41,9 +44,11 @@ export const useGameStore = create<GameStore>((set) => ({
   activeMission: 'recycling-storm',
   learningEvents: [],
   comfortSettings: loadComfortSettings(),
+  diveNonce: 0,
   setScreen: (screen) => set({ screen }),
   setMode: (mode) => set({ mode }),
   setActiveMission: (activeMission) => set({ activeMission }),
+  triggerDive: () => set((state) => ({ diveNonce: state.diveNonce + 1 })),
   recordLearningEvents: (events) =>
     set((state) => ({ learningEvents: [...state.learningEvents, ...events] })),
   clearLearningEvents: () => set({ learningEvents: [] }),

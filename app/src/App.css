@@ -620,6 +620,21 @@ button:focus-visible {
 
 .ending-note { padding: 8px 10px; border-radius: 4px 12px 4px 12px; background: #fdf3d8; color: #6b4e00; font-weight: 800; line-height: 1.5; }
 .challenge-note { padding: 8px 10px; border-radius: 4px 12px 4px 12px; background: #e6f0fb; color: #1c4a7a; font-weight: 800; line-height: 1.5; }
+
+/* 從世界地圖俯衝進關的轉場：藍色圓形遮罩由小放大、再淡出 */
+.dive-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: radial-gradient(circle at center, #3f86c8 0%, #3f86c8 40%, transparent 72%);
+  animation: dive-zoom 0.75s ease-out forwards;
+}
+@keyframes dive-zoom {
+  0% { opacity: 0; transform: scale(0.1); }
+  35% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(2.4); }
+}
 .equipment-tip { margin: 10px 0; padding: 9px 12px; border-left: 5px solid #4f8f6f; border-radius: 4px 12px 4px 12px; background: #e6f4e9; color: #1d5138; font-weight: 800; line-height: 1.5; }
 
 .discovery-section { margin-top: 14px; display: grid; gap: 8px; }
