@@ -792,6 +792,20 @@ button:focus-visible {
 .collection-actions-log h2 { margin: 0; font-size: 1.1rem; color: #174f3c; }
 .collection-actions-log ul { margin: 0; padding-left: 20px; display: grid; gap: 5px; line-height: 1.5; }
 
+/* 3D 成就殿堂：場景鋪滿背景，收藏冊面板改為毛玻璃疊層 */
+.collection-screen.has-3d { position: relative; overflow: hidden; min-height: 100svh; }
+.collection-screen.has-3d > * { position: relative; z-index: 1; }
+.collection-3d-backdrop { position: absolute; inset: 0; z-index: 0; }
+.collection-3d-backdrop canvas { width: 100%; height: 100%; display: block; }
+.collection-screen.has-3d .mission-header,
+.collection-screen.has-3d .collection-stats div,
+.collection-screen.has-3d .collection-card,
+.collection-screen.has-3d .collection-actions-log {
+  background: rgba(255, 253, 245, 0.86);
+  backdrop-filter: blur(6px);
+}
+.collection-screen.has-3d .collection-card.is-collected { background: rgba(255, 253, 245, 0.92); }
+
 .quality-fieldset { display: grid; gap: 6px; margin: 0; padding: 10px 12px; border: 2px solid #b9d3c8; border-radius: 6px 16px 6px 16px; }
 .quality-fieldset legend { padding: 0 6px; font-weight: 900; color: #174f3c; }
 .quality-hint { display: block; font-size: 0.8rem; font-weight: 500; color: #4d685e; }

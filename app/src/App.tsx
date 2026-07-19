@@ -323,6 +323,7 @@ function AppContent() {
         completedMissions={completedMissions}
         missionEndings={missionEndings}
         onBack={() => setScreen('base')}
+        reducedMotion={comfortSettings.reducedMotion}
       />
     )
   }

@@ -1,9 +1,18 @@
+import { useCallback, useMemo } from 'react'
+import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
 import { campaignMissions } from '../../content/missionCatalog'
+import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
+import {
+  buildCollectionScene,
+  collectionWorldColors,
+} from '../../game/collection/buildCollectionScene'
+import { canRenderTitle3D } from '../../game/title/buildTitleScene'
 
 interface CollectionScreenProps {
   completedMissions: readonly string[]
   missionEndings: Record<string, 'perfect' | 'learned'>
   onBack: () => void
+  reducedMotion?: boolean
 }
 
 const actionLineByMission: Record<string, string> = {
@@ -22,7 +31,9 @@ export function CollectionScreen({
   completedMissions,
   missionEndings,
   onBack,
+  reducedMotion = false,
 }: CollectionScreenProps) {
+  const show3D = useMemo(() => canRenderTitle3D(), [])
   const completedCount = campaignMissions.filter((mission) =>
     completedMissions.includes(mission.id),
   ).length
@@ -30,8 +41,29 @@ export function CollectionScreen({
     (mission) => missionEndings[mission.id] === 'perfect',
   ).length
 
+  const worlds = useMemo(
+    () =>
+      campaignMissions.map((mission) => ({
+        id: mission.id,
+        icon: mission.icon,
+        color: collectionWorldColors[mission.id] ?? '#5eb987',
+        completed: completedMissions.includes(mission.id),
+        perfect: missionEndings[mission.id] === 'perfect',
+      })),
+    [completedMissions, missionEndings],
+  )
+  const sceneFactory = useCallback<SceneFactory>(
+    (engine) => buildCollectionScene(engine as AbstractEngine, { worlds, reducedMotion }),
+    [worlds, reducedMotion],
+  )
+
   return (
-    <main className="collection-screen">
+    <main className={`collection-screen${show3D ? ' has-3d' : ''}`}>
+      {show3D && (
+        <div className="collection-3d-backdrop" aria-hidden="true">
+          <GameCanvas sceneFactory={sceneFactory} />
+        </div>
+      )}
       <header className="mission-header">
         <button className="text-button" type="button" onClick={onBack}>← 回基地</button>
         <div>
