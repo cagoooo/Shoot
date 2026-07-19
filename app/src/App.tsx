@@ -233,6 +233,7 @@ function AppContent() {
           setActiveMission(mission)
           setScreen('mission')
         }}
+        reducedMotion={comfortSettings.reducedMotion}
       />
     )
   }
