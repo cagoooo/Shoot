@@ -9,7 +9,9 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { Scene } from '@babylonjs/core/scene'
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture'
+import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents'
 import { addWorldLife, applyWorldAmbience } from '../missions/objectiveBeacon'
+import { emitSceneInteraction } from '../missions/sceneInteraction'
 
 export interface CollectionWorldStatus {
   id: string
@@ -95,6 +97,9 @@ export function buildCollectionScene(
     const pedestal = MeshBuilder.CreateCylinder(`collection-pedestal-mesh-${world.id}`, { height: 1.4, diameter: 1.7, tessellation: 18 }, scene)
     pedestal.position = new Vector3(x, 0.7, z)
     pedestal.material = pedestalMaterial
+    // 完成的世界基座可點，聽該世界的回顧。
+    pedestal.isPickable = world.completed
+    pedestal.metadata = { collectionWorld: world.id }
 
     if (world.completed) {
       const orbHolder = new TransformNode(`collection-orb-${world.id}`, scene)
@@ -105,6 +110,8 @@ export function buildCollectionScene(
       orbMaterial.emissiveColor = Color3.FromHexString(world.color).scale(0.45)
       orb.material = orbMaterial
       orb.parent = orbHolder
+      orb.isPickable = true
+      orb.metadata = { collectionWorld: world.id }
       const sign = iconSign(scene, `collection-icon-${world.id}`, world.icon)
       if (sign) sign.position = new Vector3(x, 2.35, z)
       orbs.push({ node: orbHolder, phase: index })
@@ -120,6 +127,12 @@ export function buildCollectionScene(
       const question = iconSign(scene, `collection-question-${world.id}`, '❓')
       if (question) question.position = new Vector3(x, 2.3, z)
     }
+  })
+
+  scene.onPointerObservable.add((pointerInfo) => {
+    if (pointerInfo.type !== PointerEventTypes.POINTERDOWN) return
+    const id = (pointerInfo.pickInfo?.pickedMesh?.metadata as { collectionWorld?: string } | null)?.collectionWorld
+    if (id) emitSceneInteraction({ kind: 'collection-world', id })
   })
 
   const still =

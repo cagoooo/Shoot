@@ -20,6 +20,7 @@ export function buildDiscoverySentences(report: LearningReport): string[] {
 
 interface ReportScreenProps {
   report: LearningReport
+  challengeLine?: string
   onBack: () => void
   onReplay?: () => void
   onNextMission?: () => void
@@ -38,6 +39,7 @@ const reflectionChoices = [
 
 export function ReportScreen({
   report,
+  challengeLine,
   onBack,
   onReplay,
   onNextMission,
@@ -109,6 +111,7 @@ export function ReportScreen({
           <span className="card-number">02</span>
           <h2>發生了什麼</h2>
           <p>這次使用了 {report.energyUsed} 單位能源。</p>
+          {challengeLine && <p className="challenge-note">{challengeLine}</p>}
           {report.endings.map((ending) => (
             <p className="ending-note" key={ending}>🌟 {ending}</p>
           ))}

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { ErrorBoundary } from './app/ErrorBoundary'
 import { useGameStore } from './app/gameStore'
 import { loadContent } from './content/loadContent'
@@ -19,6 +19,7 @@ import { deserializeSave, serializeSave } from './persistence/exportSave'
 import { AudioManager, type AudioScene } from './audio/AudioManager'
 import { BrowserAudioAdapter } from './audio/BrowserAudioAdapter'
 import { setSfxMuted } from './audio/soundEffects'
+import { evaluateChallenge, formatChallengeLine, type ChallengeResult } from './domain/challenge/selfChallenge'
 import { registerServiceWorker, type ApplyUpdate } from './pwa/serviceWorker'
 import { NetworkStatusBanner } from './ui/components/NetworkStatusBanner'
 import { SubtitleBar } from './ui/components/SubtitleBar'
@@ -71,6 +72,9 @@ function AppContent() {
   const [parts, setParts] = useState<PartContent[]>([])
   const [completedMissions, setCompletedMissions] = useState<string[]>([])
   const [missionEndings, setMissionEndings] = useState<Record<string, 'perfect' | 'learned'>>({})
+  const [bestTimes, setBestTimes] = useState<Record<string, number>>({})
+  const [challengeResult, setChallengeResult] = useState<ChallengeResult | null>(null)
+  const missionStartRef = useRef<number | null>(null)
   const [contentLoadFailed, setContentLoadFailed] = useState(false)
   const [audioMuted, setAudioMuted] = useState(() => loadAudioMuted())
   const saveRepository = useMemo(() => createBrowserSaveRepository(), [])
@@ -132,8 +136,18 @@ function AppContent() {
       setMode(save.mode)
       setCompletedMissions(save.completedMissions)
       setMissionEndings(save.missionEndings)
+      setBestTimes(save.bestTimes)
     })
   }, [saveRepository, setMode])
+
+  // 進入任務畫面時開始計時，做「比上次快幾秒」的自我挑戰。
+  useEffect(() => {
+    if (screen === 'mission') {
+      if (missionStartRef.current === null) missionStartRef.current = Date.now()
+    } else if (screen !== 'report') {
+      missionStartRef.current = null
+    }
+  }, [screen])
 
   const completeMission = (missionId: string, events: LearningEvent[]) => {
     recordLearningEvents(events)
@@ -143,6 +157,21 @@ function AppContent() {
         event.type === 'mission-ending',
     )
     if (ending) setMissionEndings((current) => ({ ...current, [missionId]: ending.ending }))
+
+    let nextBestTimes = bestTimes
+    if (missionStartRef.current !== null) {
+      const seconds = (Date.now() - missionStartRef.current) / 1000
+      const challenge = evaluateChallenge(missionId, seconds, bestTimes[missionId])
+      setChallengeResult(challenge)
+      if (challenge.isNewRecord) {
+        nextBestTimes = { ...bestTimes, [missionId]: Math.round(seconds) }
+        setBestTimes(nextBestTimes)
+      }
+    } else {
+      setChallengeResult(null)
+    }
+    missionStartRef.current = null
+
     void saveRepository.load().then((save) =>
       saveRepository.save({
         ...save,
@@ -150,6 +179,7 @@ function AppContent() {
         missionEndings: ending
           ? { ...save.missionEndings, [missionId]: ending.ending }
           : save.missionEndings,
+        bestTimes: { ...save.bestTimes, ...nextBestTimes },
       }),
     )
     setScreen('report')
@@ -335,6 +365,7 @@ function AppContent() {
     return (
       <ReportScreen
         report={reduceLearningEvents(learningEvents)}
+        challengeLine={challengeResult ? formatChallengeLine(challengeResult) : undefined}
         onBack={() => setScreen('base')}
         onReplay={() => setScreen('mission')}
         nextMissionAvailable={Boolean(nextMission && completedMissions.includes(activeMission))}

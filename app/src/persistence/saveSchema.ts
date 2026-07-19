@@ -16,6 +16,7 @@ export const saveSchema = z.object({
   missionEndings: z
     .record(z.string(), z.enum(['perfect', 'learned']))
     .default({}),
+  bestTimes: z.record(z.string(), z.number()).default({}),
 })
 
 export type SaveV1 = z.infer<typeof saveSchema>
@@ -29,6 +30,7 @@ export function createEmptySave(): SaveV1 {
     toolLoadout: {},
     reflections: [],
     missionEndings: {},
+    bestTimes: {},
   }
 }
 

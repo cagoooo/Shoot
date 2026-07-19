@@ -6,6 +6,7 @@ import { buildBaseScene } from '../../game/base/buildBaseScene'
 import { canRenderTitle3D } from '../../game/title/buildTitleScene'
 import { subscribeSceneInteraction } from '../../game/missions/sceneInteraction'
 import { playSfx } from '../../audio/soundEffects'
+import { getWeeklyQuest } from '../../domain/weekly/weeklyQuest'
 import { ProgressControls } from '../components/ProgressControls'
 import { InstallPrompt } from '../components/InstallPrompt'
 
@@ -46,6 +47,7 @@ export function BaseScreen({
   reducedMotion = false,
 }: BaseScreenProps) {
   const show3D = useMemo(() => canRenderTitle3D(), [])
+  const weeklyQuest = useMemo(() => getWeeklyQuest(), [])
   // 3D 模式預設收合面板，讓村落完整露出可點；展開後回到完整選單。
   const [menuOpen, setMenuOpen] = useState(false)
   const showFullPanels = !show3D || menuOpen
@@ -90,6 +92,19 @@ export function BaseScreen({
           {audioMuted ? '開啟背景音樂' : '關閉背景音樂'}
         </button>
       </header>
+
+      <aside className="weekly-quest" aria-label="本週守護任務">
+        <div className="weekly-quest-world">
+          <span aria-hidden="true">{weeklyQuest.missionIcon}</span>
+          <div>
+            <strong>本週重點世界：{weeklyQuest.missionTitle}</strong>
+            <p>🌱 生活挑戰：{weeklyQuest.action}</p>
+          </div>
+        </div>
+        <button className="secondary-button" type="button" onClick={() => onNavigate('campaign')}>
+          看看這個世界 →
+        </button>
+      </aside>
 
       {show3D && !menuOpen && (
         <>

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
 import { campaignMissions } from '../../content/missionCatalog'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
@@ -7,6 +7,9 @@ import {
   collectionWorldColors,
 } from '../../game/collection/buildCollectionScene'
 import { canRenderTitle3D } from '../../game/title/buildTitleScene'
+import { subscribeSceneInteraction } from '../../game/missions/sceneInteraction'
+import { speak } from '../accessibility/speech'
+import { playSfx } from '../../audio/soundEffects'
 
 interface CollectionScreenProps {
   completedMissions: readonly string[]
@@ -57,6 +60,19 @@ export function CollectionScreen({
     [worlds, reducedMotion],
   )
 
+  // 點 3D 殿堂上完成的獎盃 → 播亮晶晶音效並用語音說出該世界回顧。
+  useEffect(
+    () =>
+      subscribeSceneInteraction((interaction) => {
+        if (interaction.kind !== 'collection-world') return
+        const line = actionLineByMission[interaction.id]
+        if (!line) return
+        playSfx('sparkle')
+        speak(line)
+      }),
+    [],
+  )
+
   return (
     <main className={`collection-screen${show3D ? ' has-3d' : ''}`}>
       {show3D && (
@@ -71,6 +87,10 @@ export function CollectionScreen({
           <h1>成就收藏冊</h1>
         </div>
       </header>
+
+      {show3D && completedCount > 0 && (
+        <p className="collection-hint">👆 點殿堂上發光的獎盃，聽聽你在那個世界做了什麼！</p>
+      )}
 
       <section className="collection-stats" aria-label="收藏統計">
         <div><strong>{completedCount}／9</strong><span>完成世界</span></div>

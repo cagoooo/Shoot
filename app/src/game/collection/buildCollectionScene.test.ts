@@ -32,6 +32,13 @@ describe('buildCollectionScene', () => {
     expect(scene.meshes.some((mesh) => mesh.name === 'collection-orb-mesh-recycling-storm')).toBe(true)
     expect(scene.meshes.some((mesh) => mesh.name === 'collection-orb-mesh-green-energy-community')).toBe(false)
 
+    // 完成的世界基座可點、未完成的不可點。
+    const done = scene.meshes.find((mesh) => mesh.name === 'collection-pedestal-mesh-recycling-storm')
+    const notDone = scene.meshes.find((mesh) => mesh.name === 'collection-pedestal-mesh-green-energy-community')
+    expect(done?.isPickable).toBe(true)
+    expect(notDone?.isPickable).toBe(false)
+    expect(done?.metadata).toEqual({ collectionWorld: 'recycling-storm' })
+
     scene.render()
     scene.dispose()
     expect(scene.isDisposed).toBe(true)
