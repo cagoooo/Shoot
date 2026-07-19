@@ -23,6 +23,7 @@ import { SceneObjectivePrompt } from '../components/SceneObjectivePrompt'
 import { ControlsHintOverlay } from '../components/ControlsHintOverlay'
 import type { ObjectiveTracking } from '../../game/missions/objectiveTracking'
 import { emitSceneState, subscribeSceneInteraction } from '../../game/missions/sceneInteraction'
+import { playSfx } from '../../audio/soundEffects'
 import { MultiSelectFeedback } from '../components/MultiSelectFeedback'
 import { MissionGuide } from '../components/MissionGuide'
 import type { LearningMode } from '../../app/gameStore'
@@ -227,6 +228,9 @@ export function MissionScreen({
     if (result.correct) {
       setSortingIndex((index) => index + 1)
       emitSceneState({ key: 'sort-celebrate', value: sortingIndex + 1, id: bin })
+      playSfx('sort')
+    } else {
+      playSfx('click')
     }
   }
 

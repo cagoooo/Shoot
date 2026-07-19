@@ -18,6 +18,7 @@ import { createBrowserSaveRepository } from './persistence/saveRepository'
 import { deserializeSave, serializeSave } from './persistence/exportSave'
 import { AudioManager, type AudioScene } from './audio/AudioManager'
 import { BrowserAudioAdapter } from './audio/BrowserAudioAdapter'
+import { setSfxMuted } from './audio/soundEffects'
 import { registerServiceWorker, type ApplyUpdate } from './pwa/serviceWorker'
 import { NetworkStatusBanner } from './ui/components/NetworkStatusBanner'
 import { SubtitleBar } from './ui/components/SubtitleBar'
@@ -92,6 +93,7 @@ function AppContent() {
   useEffect(() => {
     audio.setMuted(audioMuted)
     saveAudioMuted(audioMuted)
+    setSfxMuted(audioMuted)
   }, [audio, audioMuted])
 
   useEffect(() => {

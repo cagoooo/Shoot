@@ -5,6 +5,7 @@ import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { buildBaseScene } from '../../game/base/buildBaseScene'
 import { canRenderTitle3D } from '../../game/title/buildTitleScene'
 import { subscribeSceneInteraction } from '../../game/missions/sceneInteraction'
+import { playSfx } from '../../audio/soundEffects'
 import { ProgressControls } from '../components/ProgressControls'
 import { InstallPrompt } from '../components/InstallPrompt'
 
@@ -57,7 +58,10 @@ export function BaseScreen({
   useEffect(
     () =>
       subscribeSceneInteraction((interaction) => {
-        if (interaction.kind === 'base-zone') onNavigate(interaction.id as GameScreen)
+        if (interaction.kind === 'base-zone') {
+          playSfx('select')
+          onNavigate(interaction.id as GameScreen)
+        }
       }),
     [onNavigate],
   )

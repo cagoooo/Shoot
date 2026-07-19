@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { badgeDetails, calculateBadges } from '../../learning/badges'
 import { createActionCardSvg } from '../../learning/exportActionCard'
 import type { LearningReport } from '../../learning/events'
 import { DataCompareCard } from '../components/DataCompareCard'
+import { playSfx } from '../../audio/soundEffects'
 
 export function buildDiscoverySentences(report: LearningReport): string[] {
   const recycledTotal = Object.values(report.recycledByCategory).reduce(
@@ -53,6 +54,10 @@ export function ReportScreen({
   )
   const discoverySentences = buildDiscoverySentences(report)
   const [discovery, setDiscovery] = useState<string | null>(null)
+
+  useEffect(() => {
+    playSfx(report.perfectEndings > 0 ? 'sparkle' : 'complete')
+  }, [report.perfectEndings])
 
   const exportCard = () => {
     if (onExport) {

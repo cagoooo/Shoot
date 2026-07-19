@@ -7,6 +7,7 @@ import { buildCampaignScene } from '../../game/campaign/buildCampaignScene'
 import { collectionWorldColors } from '../../game/collection/buildCollectionScene'
 import { canRenderTitle3D } from '../../game/title/buildTitleScene'
 import { subscribeSceneInteraction } from '../../game/missions/sceneInteraction'
+import { playSfx } from '../../audio/soundEffects'
 
 interface CampaignScreenProps {
   completedMissions: string[]
@@ -51,7 +52,10 @@ export function CampaignScreen({
       subscribeSceneInteraction((interaction) => {
         if (interaction.kind !== 'campaign-world') return
         const world = worlds.find((candidate) => candidate.id === interaction.id)
-        if (world?.playable) onMissionSelect(world.id as MissionId)
+        if (world?.playable) {
+          playSfx('select')
+          onMissionSelect(world.id as MissionId)
+        }
       }),
     [worlds, onMissionSelect],
   )

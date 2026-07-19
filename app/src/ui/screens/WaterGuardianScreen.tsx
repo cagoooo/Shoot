@@ -16,6 +16,7 @@ import { DataCompareCard } from '../components/DataCompareCard'
 import { SettingsScreen } from './SettingsScreen'
 import { buildWaterGuardianScene } from '../../game/missions/waterGuardian/buildWaterGuardian'
 import { emitSceneState, subscribeSceneInteraction } from '../../game/missions/sceneInteraction'
+import { playSfx } from '../../audio/soundEffects'
 
 type WaterPhase = 'briefing' | 'route' | 'collect' | 'purify' | 'filter' | 'distribute' | 'report'
 type WaterRoute = 'rooftop' | 'ground'
@@ -111,12 +112,14 @@ export function WaterGuardianScreen({
   }
   const purifyMonster = () => {
     setPurified((count) => {
-      const next = Math.min(monsterCount, count + 1)
+      if (count >= monsterCount) return count
+      const next = count + 1
       setPurifyFeedback(
         next >= monsterCount
           ? '水質恢復乾淨了！泥沙搗蛋怪都變回了安全的小石子。'
           : purifyFacts[(next - 1) % purifyFacts.length],
       )
+      playSfx(next >= monsterCount ? 'complete' : 'purify')
       return next
     })
   }
