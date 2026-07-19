@@ -1,13 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
 import type { PartContent } from '../../content/schema'
 import { calculateTool } from '../../domain/tools/calculateTool'
 import type { ToolPart, ToolSlot } from '../../domain/tools/types'
 import { PartCard } from '../components/PartCard'
 import { StatDots } from '../components/StatDots'
+import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
+import { buildToolPreviewScene } from '../../game/workbench/buildToolPreviewScene'
+import { canRenderTitle3D } from '../../game/title/buildTitleScene'
 
 interface WorkbenchScreenProps {
   parts: PartContent[]
   onBack: () => void
+  reducedMotion?: boolean
 }
 
 const statLabels = [
@@ -24,7 +29,8 @@ function toToolPart(part: PartContent): ToolPart {
   return { id: part.id, slot: part.slot as ToolSlot, stats: part.stats }
 }
 
-export function WorkbenchScreen({ parts, onBack }: WorkbenchScreenProps) {
+export function WorkbenchScreen({ parts, onBack, reducedMotion = false }: WorkbenchScreenProps) {
+  const show3D = useMemo(() => canRenderTitle3D(), [])
   const [selectedBySlot, setSelectedBySlot] = useState<Record<string, string>>(
     () =>
       Object.fromEntries(
@@ -41,9 +47,12 @@ export function WorkbenchScreen({ parts, onBack }: WorkbenchScreenProps) {
         .filter((part): part is PartContent => Boolean(part)),
     [parts, selectedBySlot],
   )
-  const result = selectedParts.length
-    ? calculateTool(selectedParts.map(toToolPart))
-    : null
+  const toolParts = useMemo(() => selectedParts.map(toToolPart), [selectedParts])
+  const result = selectedParts.length ? calculateTool(toolParts) : null
+  const sceneFactory = useCallback<SceneFactory>(
+    (engine) => buildToolPreviewScene(engine as AbstractEngine, { parts: toolParts, reducedMotion }),
+    [toolParts, reducedMotion],
+  )
 
   const selectPart = (part: PartContent) => {
     setSelectedBySlot((current) => ({ ...current, [part.slot]: part.id }))
@@ -77,11 +86,17 @@ export function WorkbenchScreen({ parts, onBack }: WorkbenchScreenProps) {
         </section>
 
         <section className="tool-board" aria-labelledby="tool-title">
-          <div className="tool-silhouette" aria-hidden="true">
-            <span className="tool-core">⚡</span>
-            <span className="tool-body" />
-            <span className="tool-grip" />
-          </div>
+          {show3D ? (
+            <div className="tool-preview-3d" aria-hidden="true">
+              <GameCanvas sceneFactory={sceneFactory} />
+            </div>
+          ) : (
+            <div className="tool-silhouette" aria-hidden="true">
+              <span className="tool-core">⚡</span>
+              <span className="tool-body" />
+              <span className="tool-grip" />
+            </div>
+          )}
 
           <h2 id="tool-title">現在的能力</h2>
           <div className="stats-grid">

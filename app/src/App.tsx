@@ -251,7 +251,13 @@ function AppContent() {
     if (parts.length === 0) {
       return <main className="loading-screen" aria-live="polite">正在準備工具桌…</main>
     }
-    return <WorkbenchScreen parts={parts} onBack={() => setScreen('base')} />
+    return (
+      <WorkbenchScreen
+        parts={parts}
+        onBack={() => setScreen('base')}
+        reducedMotion={comfortSettings.reducedMotion}
+      />
+    )
   }
 
   if (screen === 'range') {
