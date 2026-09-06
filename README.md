@@ -60,7 +60,7 @@ npm --prefix app run preview -- --host 127.0.0.1 --port 5180
 - Repository：`cagoooo/Shoot`
 - 可見性：公開
 - 主要技術：TypeScript
-- 線上入口：未在 GitHub repository metadata 設定
+- 線上入口：<https://cagoooo.github.io/Shoot/>
 
 ### 可以怎麼應用
 
