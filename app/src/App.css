@@ -2111,3 +2111,45 @@ body[data-color-assist='true'] .heat-progress { outline: 2px dashed #8a4a12; out
     flex-basis: 100%;
   }
 }
+
+/* 開始畫面作者署名（2026-11-17）：只在開始畫面，遊戲進行中不顯示 */
+.start-credit {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 2px dashed var(--c-line);
+  color: #476159;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.start-credit p { margin: 0; }
+.start-credit__game { font-weight: 800; color: var(--c-brand-deep); }
+.start-credit__version {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 10px;
+  border: 1px solid var(--c-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.start-credit__line { margin-top: 6px !important; }
+.start-credit__heart { display: inline-block; margin: 0 2px; filter: saturate(1.1); }
+.start-credit__author {
+  display: inline-block;
+  padding: 4px 0 1px;
+  color: var(--c-brand-deep);
+  font-weight: 800;
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+}
+.start-credit__author:hover,
+.start-credit__author:focus-visible { border-bottom-style: solid; }
+@media (max-width: 560px) {
+  .start-credit__school { display: block; }
+  .start-credit__dot { display: none; }
+}
+@media print {
+  .start-credit { display: none; }
+}

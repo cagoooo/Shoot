@@ -20,5 +20,8 @@ describe('StartScreen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '開始任務' }))
     expect(onStart).toHaveBeenCalledOnce()
+
+    // 開始畫面底部有作者署名，連到阿凱老師教育科技創新專區。
+    expect(screen.getByRole('link', { name: '阿凱老師' })).toHaveAttribute('href', 'https://cagoooo.github.io/Akai/')
   })
 })

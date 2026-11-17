@@ -3,6 +3,7 @@ import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine'
 import type { LearningMode } from '../../app/gameStore'
 import { GameCanvas, type SceneFactory } from '../../game/GameCanvas'
 import { buildTitleScene, canRenderTitle3D } from '../../game/title/buildTitleScene'
+import { APP_VERSION } from '../../app/appVersion'
 
 interface StartScreenProps {
   mode: LearningMode
@@ -69,6 +70,27 @@ export function StartScreen({ mode, onModeChange, onStart, onTeacherMode, reduce
             🍎 我是老師：開啟課堂投影模式
           </button>
         )}
+
+        <footer className="start-credit">
+          <p className="start-credit__game">
+            地球守護隊：能量大作戰<span className="start-credit__version">v{APP_VERSION}</span>
+          </p>
+          <p className="start-credit__line">
+            Made with <span className="start-credit__heart" aria-label="愛心">❤️</span> by{' '}
+            <a
+              href="https://cagoooo.github.io/Akai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="阿凱老師教育科技創新專區"
+              className="start-credit__author"
+            >
+              阿凱老師
+            </a>
+            <span className="start-credit__school">
+              <span className="start-credit__dot" aria-hidden="true">・</span>桃園市龍潭區石門國民小學
+            </span>
+          </p>
+        </footer>
       </section>
     </main>
   )
